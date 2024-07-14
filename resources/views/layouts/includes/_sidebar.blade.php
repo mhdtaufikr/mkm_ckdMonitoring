@@ -9,13 +9,9 @@
                     <div style="margin-left: -2px" class="nav-link-icon"><i class="fas fa-home"></i></div>
                     Home
                 </a>
-                <a class="nav-link" href="{{url('/hp/list')}}">
-                    <div class="nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
-                    Historical Problem
-                </a>
-                <a class="nav-link" href="{{url('/pm/list')}}">
-                    <div class="nav-link-icon"><i class="fas fa-clipboard-list"></i></div>
-                    Preventive Maintenance
+                <a class="nav-link" href="{{url('/inventory')}}">
+                    <div class="nav-link-icon"><i class="fas fa-warehouse"></i></div>
+                    Inventory
                 </a>
                 @if(\Auth::user()->role === 'Super Admin' || \Auth::user()->role === 'IT')
                  <!-- Sidenav Menu Heading (Master)-->

@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DropdownController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RulesController;
+use App\Http\Controllers\InventoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,9 +56,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/access/{user}', [UserController::class, 'access'])->middleware(['checkRole:IT']);
 
 
-    Route::get('/history', [HistoricalProblemController::class, 'index']);
-    Route::get('/get-categories/{plant}', [HistoricalProblemController::class, 'getCategories']);
-    Route::get('/get-ops/{plant}/{category}', [HistoricalProblemController::class, 'getOps']);
-    Route::get('/get-location/{plant}/{category}/{op_no}', [HistoricalProblemController::class, 'getLocation']);
-
+    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');;
+    Route::get('/inventory/{id}/details', [InventoryController::class, 'show'])->name('inventory.details');
+    Route::post('/inventory/planned/upload', [InventoryController::class, 'uploadPlanned'])->name('inventory.planned.upload');
+    Route::get('/download/excel/format/planned', [InventoryController::class, 'downloadPlannedTemplate'])->name('inventory.planned.template');
 });

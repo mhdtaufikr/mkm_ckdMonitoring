@@ -53,9 +53,6 @@
         <!-- Include Chosen CSS -->
         <link href="{{asset('chosen/chosen.min.css')}}" rel="stylesheet" />
 
-         <!-- Include Chart CSS -->
-         <script src="{{asset('canvasjs.min.js')}}"></script>
-
         <!-- Include Chosen JS -->
         <script src="{{asset('chosen/chosen.jquery.min.js')}}"></script>
 
@@ -74,34 +71,6 @@
             </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src={{asset('assets/js/scripts.js')}} ></script>
-        <script src="{{ asset('/sw.js') }}"></script>
-        <script>
-        if ("serviceWorker" in navigator) {
-            // Register a service worker hosted at the root of the
-            // site using the default scope.
-            navigator.serviceWorker.register("/sw.js").then(
-            (registration) => {
-                console.log("Service worker registration succeeded:", registration);
-            },
-            (error) => {
-                console.error(`Service worker registration failed: ${error}`);
-            },
-            );
-        } else {
-            console.error("Service workers are not supported.");
-        }
-        </script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const oneClickButton = document.getElementById('oneClickButton');
-                const loginForm = oneClickButton.closest('form');
-
-                loginForm.addEventListener('submit', function(event) {
-                    oneClickButton.disabled = true;
-                    oneClickButton.textContent = 'Loading...'; // Optional: change button text to indicate loading
-                });
-            });
-            </script>
 
     </body>
 </html>

@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Pallet;
-use App\Models\Commoninformation;
+use App\Models\InventoryComparison;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        return view('home.index');
+        $comparisons = InventoryComparison::all();
 
+        // Group by item_code
+        $itemCodes = $comparisons->groupBy('item_code');
+
+        return view('home.index', compact('itemCodes'));
     }
 }
