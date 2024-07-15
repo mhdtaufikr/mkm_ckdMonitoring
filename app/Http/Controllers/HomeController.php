@@ -40,13 +40,14 @@ class HomeController extends Controller
             ->get()
             ->groupBy('vendor_name');
 
-        // Fetch item code quantities from the inventories table
+            // Fetch item code quantities from the inventories table
         $itemCodeQuantities = DB::table('inventories')
-            ->select('code', 'qty')
-            ->get()
-            ->groupBy(function ($item, $key) {
-                return floor($key / 10); // Split the item codes into groups of 10 for the carousel
-            });
+        ->select('code', 'qty')
+        ->get()
+        ->chunk(10)
+        ->mapWithKeys(function ($items, $index) {
+            return [$index => $items];
+        });
 
         // Calculate averages
         $averageInventoryMonitoring = $this->calculateAverageInventoryMonitoring($comparisons);
