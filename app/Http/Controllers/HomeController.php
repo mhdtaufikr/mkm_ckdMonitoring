@@ -44,9 +44,13 @@ class HomeController extends Controller
         $itemCodeQuantities = DB::table('inventories')
         ->select('code', 'qty')
         ->get()
-        ->chunk(10)
-        ->mapWithKeys(function ($items, $index) {
-            return [$index => $items];
+        ->groupBy(function ($item) {
+            static $groupIndex = 0;
+            static $itemCount = 0;
+            if ($itemCount++ % 10 == 0) {
+                $groupIndex++;
+            }
+            return $groupIndex;
         });
 
         // Calculate averages
