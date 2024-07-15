@@ -101,10 +101,9 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                    <span class="signal green px-2">G</span> ≥ 95%
-                                                    <span class="signal yellow">Y</span> ≥ 85%
-                                                    <span class="signal red">R</span> < 85%
-                                                </div>
+                                                <span class="signal green px-2">G</span> ≥ 95%
+                                                <span class="signal yellow">Y</span> ≥ 85%
+                                                <span class="signal red">R</span> < 85%
                                             </td>
                                         </tr>
                                     </table>
@@ -127,7 +126,6 @@
                                     </table>
                                 </div>
                             </div>
-
 
                             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-indicators">
@@ -165,7 +163,7 @@
                             <h4>OTDC</h4>
                         </div>
                         <div class="card-body">
-                           <div class="row">
+                            <div class="row">
                                 <div class="col-md-8">
                                     <table style="margin-top: -20px" class="indicator-table mb-4">
                                         <tr>
@@ -173,10 +171,9 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                    <span class="signal green px-2">G</span> ≥ 95%
-                                                    <span class="signal yellow">Y</span> ≥ 85%
-                                                    <span class="signal red">R</span> < 85%
-                                                </div>
+                                                <span class="signal green px-2">G</span> ≥ 95%
+                                                <span class="signal yellow">Y</span> ≥ 85%
+                                                <span class="signal red">R</span> < 85%
                                             </td>
                                         </tr>
                                     </table>
@@ -310,408 +307,443 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOM fully loaded and parsed');
+        console.log('DOM fully loaded and parsed');
 
-    const groupedComparisons = @json($itemCodes);
-    const groupedStockLevels = @json($stockLevels);
-    const vendorData = @json($vendorData);
-    const itemCodeQuantities = @json($itemCodeQuantities);
-    const month = new Date().toLocaleString('default', { month: 'long' });
+        const groupedComparisons = @json($itemCodes);
+        const groupedStockLevels = @json($stockLevels);
+        const vendorData = @json($vendorData);
+        const itemCodeQuantities = @json($itemCodeQuantities);
+        const month = new Date().toLocaleString('default', { month: 'long' });
 
-    console.log('Grouped Comparisons:', groupedComparisons);
-    console.log('Grouped Stock Levels:', groupedStockLevels);
-    console.log('Vendor Data:', vendorData);
-    console.log('Item Code Quantities:', itemCodeQuantities);
+        console.log('Grouped Comparisons:', groupedComparisons);
+        console.log('Grouped Stock Levels:', groupedStockLevels);
+        console.log('Vendor Data:', vendorData);
+        console.log('Item Code Quantities:', itemCodeQuantities);
 
-    const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+        const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-    if (typeof groupedComparisons === 'object') {
-        Object.keys(groupedComparisons).forEach((itemCode) => {
-            console.log('Processing item code:', itemCode);
+        const addDottedLinePlugin = {
+            id: 'dottedLinePlugin',
+            beforeDraw: (chart) => {
+                const ctx = chart.ctx;
+                const yScale = chart.scales['y-axis-2'];
+                const yValue = yScale.getPixelForValue(100);
 
-            const comparisons = groupedComparisons[itemCode];
-            const plannedData = Array(31).fill(null);
-            const actualData = Array(31).fill(null);
-            const percentageDifference = Array(31).fill(0); // Default value set to 0%
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(chart.chartArea.left, yValue);
+                ctx.lineTo(chart.chartArea.right, yValue);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'black';
+                ctx.stroke();
+                ctx.restore();
+            }
+        };
 
-            comparisons.forEach((comparison, index) => {
-                const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
-                const actualDay = new Date(comparison.receiving_date).getDate() - 1;
-                plannedData[plannedDay] = comparison.planned_qty;
-                actualData[actualDay] = comparison.received_qty;
-            });
+        if (typeof groupedComparisons === 'object') {
+            Object.keys(groupedComparisons).forEach((itemCode) => {
+                console.log('Processing item code:', itemCode);
 
-            console.log(`Planned Data for ${itemCode}:`, plannedData);
-            console.log(`Actual Data for ${itemCode}:`, actualData);
+                const comparisons = groupedComparisons[itemCode];
+                const plannedData = Array(31).fill(null);
+                const actualData = Array(31).fill(null);
+                const percentageDifference = Array(31).fill(0); // Default value set to 0%
 
-            plannedData.forEach((value, index) => {
-                if (value !== null && actualData[index] !== null) {
-                    const percentage = ((actualData[index] / value) * 100);
-                    percentageDifference[index] = percentage !== 0 ? percentage : 0; // Set to 0% if percentage is 0%
-                }
-            });
+                comparisons.forEach((comparison, index) => {
+                    const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
+                    const actualDay = new Date(comparison.receiving_date).getDate() - 1;
+                    plannedData[plannedDay] = comparison.planned_qty;
+                    actualData[actualDay] = comparison.received_qty;
+                });
 
-            console.log(`Percentage Difference for ${itemCode}:`, percentageDifference);
+                console.log(`Planned Data for ${itemCode}:`, plannedData);
+                console.log(`Actual Data for ${itemCode}:`, actualData);
 
-            const ctx = document.getElementById(`chart-${itemCode}`).getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: getDefaultLabels(),
-                    datasets: [{
-                        label: 'Planned Stock',
-                        data: plannedData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 1
-                    },
-                    {
-                        label: 'Actual Stock',
-                        data: actualData,
-                        backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 2
-                    },
-                    {
-                        label: 'Percentage Accuracy',
-                        data: percentageDifference,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        fill: false,
-                        type: 'line',
-                        yAxisID: 'y-axis-2',
-                        order: 0,
-                        borderWidth: 2 // Increase the line thickness here
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: false,
-                            categoryPercentage: 0.5,
-                            barPercentage: 0.5,
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0,
-                                callback: function(value, index, values) {
-                                    return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                                }
-                            }
+                plannedData.forEach((value, index) => {
+                    if (value !== null && actualData[index] !== null) {
+                        const percentage = ((actualData[index] / value) * 100);
+                        percentageDifference[index] = percentage !== 0 ? percentage : 0; // Set to 0% if percentage is 0%
+                    }
+                });
+
+                console.log(`Percentage Difference for ${itemCode}:`, percentageDifference);
+
+                const ctx = document.getElementById(`chart-${itemCode}`).getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: getDefaultLabels(),
+                        datasets: [{
+                            label: 'Planned Stock',
+                            data: plannedData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            type: 'bar',
+                            order: 1
                         },
-                        y: {
-                            stacked: false,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Stock Quantity'
-                            }
+                        {
+                            label: 'Actual Stock',
+                            data: actualData,
+                            backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1,
+                            type: 'bar',
+                            order: 2
                         },
-                        'y-axis-2': {
-                            stacked: false,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Percentage'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
+                        {
+                            label: 'Percentage Accuracy',
+                            data: percentageDifference,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: false,
+                            type: 'line',
+                            yAxisID: 'y-axis-2',
+                            order: 0,
+                            borderWidth: 2 // Increase the line thickness here
+                        }]
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    let title = tooltipItems[0].label || '';
-                                    title += ` ${month}`;
-                                    return title;
-                                },
-                                label: function(context) {
-                                    if (context.dataset.label === 'Percentage Accuracy') {
-                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: false,
+                                categoryPercentage: 0.5,
+                                barPercentage: 0.5,
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    minRotation: 0,
+                                    callback: function(value, index, values) {
+                                        return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
                                     }
-                                    return context.raw;
                                 }
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    }
-
-    if (typeof groupedStockLevels === 'object') {
-        Object.keys(groupedStockLevels).forEach((itemCode) => {
-            console.log('Processing stock level for item code:', itemCode);
-
-            const levels = groupedStockLevels[itemCode];
-            const stockData = Array(31).fill(null);
-
-            levels.forEach((level, index) => {
-                const day = new Date(level.date).getDate() - 1;
-                stockData[day] = level.stock_level;
-            });
-
-            console.log(`Stock Data for ${itemCode}:`, stockData);
-
-            const ctx = document.getElementById(`stock-level-${itemCode}`).getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: getDefaultLabels(),
-                    datasets: [{
-                        label: 'Stock Level',
-                        data: stockData,
-                        backgroundColor: 'rgba(75, 192, 192, 0.4)', // Increase opacity
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 3, // Increase line thickness
-                        fill: true,
-                        spanGaps: true // Ensure the line is continuous even with gaps
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            categoryPercentage: 0.5,
-                            barPercentage: 0.5,
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0,
-                                callback: function(value, index, values) {
-                                    return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                                }
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Stock Level'
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    let title = tooltipItems[0].label || '';
-                                    title += ` ${month}`;
-                                    return title;
-                                },
-                                label: function(context) {
-                                    return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        });
-    }
-
-    if (typeof vendorData === 'object') {
-        Object.keys(vendorData).forEach((vendorName) => {
-            console.log('Processing vendor:', vendorName);
-
-            const data = vendorData[vendorName];
-            const plannedData = Array(31).fill(null);
-            const actualData = Array(31).fill(null);
-            const percentageAccuracy = Array(31).fill(0); // Default value set to 0%
-
-            data.forEach((entry) => {
-                const day = new Date(entry.date).getDate() - 1;
-                plannedData[day] = entry.total_planned_qty;
-                actualData[day] = entry.total_actual_qty;
-                if (plannedData[day] !== null && actualData[day] !== null) {
-                    const percentage = ((actualData[day] / plannedData[day]) * 100);
-                    percentageAccuracy[day] = isNaN(percentage) ? 0 : percentage;
-                }
-            });
-
-            console.log(`Planned Data for ${vendorName}:`, plannedData);
-            console.log(`Actual Data for ${vendorName}:`, actualData);
-            console.log(`Percentage Accuracy for ${vendorName}:`, percentageAccuracy);
-
-            const ctx = document.getElementById(`otdc-chart-${vendorName}`).getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: getDefaultLabels(),
-                    datasets: [{
-                        label: 'Planned Qty',
-                        data: plannedData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 1
-                    },
-                    {
-                        label: 'Actual Qty',
-                        data: actualData,
-                        backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 2
-                    },
-                    {
-                        label: 'Percentage Accuracy',
-                        data: percentageAccuracy,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        fill: false,
-                        type: 'line',
-                        yAxisID: 'y-axis-2',
-                        order: 0,
-                        borderWidth: 2 // Increase the line thickness here
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: false,
-                            categoryPercentage: 0.5,
-                            barPercentage: 0.5,
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0,
-                                callback: function(value, index, values) {
-                                    return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                                }
-                            }
-                        },
-                        y: {
-                            stacked: false,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Quantity'
-                            }
-                        },
-                        'y-axis-2': {
-                            stacked: false,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Percentage'
                             },
-                            grid: {
-                                drawOnChartArea: false
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
+                            y: {
+                                stacked: false,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Stock Quantity'
                                 }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    let title = tooltipItems[0].label || '';
-                                    title += ` ${month}`;
-                                    return title;
+                            },
+                            'y-axis-2': {
+                                stacked: false,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Percentage'
                                 },
-                                label: function(context) {
-                                    if (context.dataset.label === 'Percentage Accuracy') {
-                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
                                     }
-                                    return context.raw;
                                 }
                             }
-                        }
-                    }
-                }
-            });
-        });
-    }
-
-    if (typeof itemCodeQuantities === 'object') {
-        Object.keys(itemCodeQuantities).forEach((groupIndex) => {
-            console.log('Processing item code group:', groupIndex);
-
-            const group = itemCodeQuantities[groupIndex];
-            const itemCodes = group.map(item => item.code);
-            const quantities = group.map(item => item.qty);
-
-            console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
-            console.log(`Quantities for Group ${groupIndex}:`, quantities);
-
-            const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: itemCodes,
-                    datasets: [{
-                        label: 'Quantity',
-                        data: quantities,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: false,
-                            categoryPercentage: 0.5,
-                            barPercentage: 0.5,
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0
-                            }
                         },
-                        y: {
-                            stacked: false,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Quantity'
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        let title = tooltipItems[0].label || '';
+                                        title += ` ${month}`;
+                                        return title;
+                                    },
+                                    label: function(context) {
+                                        if (context.dataset.label === 'Percentage Accuracy') {
+                                            return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                                        }
+                                        return context.raw;
+                                    }
+                                }
+                            },
+                            legend: {
+                                labels: {
+                                    filter: function(item, chart) {
+                                        return item.text !== 'Percentage Accuracy';
+                                    }
+                                }
                             }
                         }
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    let title = tooltipItems[0].label || '';
-                                    title += ` ${month}`;
-                                    return title;
+                    plugins: [addDottedLinePlugin]
+                });
+            });
+        }
+
+        if (typeof vendorData === 'object') {
+            Object.keys(vendorData).forEach((vendorName) => {
+                console.log('Processing vendor:', vendorName);
+
+                const data = vendorData[vendorName];
+                const plannedData = Array(31).fill(null);
+                const actualData = Array(31).fill(null);
+                const percentageAccuracy = Array(31).fill(0); // Default value set to 0%
+
+                data.forEach((entry) => {
+                    const day = new Date(entry.date).getDate() - 1;
+                    plannedData[day] = entry.total_planned_qty;
+                    actualData[day] = entry.total_actual_qty;
+                    if (plannedData[day] !== null && actualData[day] !== null) {
+                        const percentage = ((actualData[day] / plannedData[day]) * 100);
+                        percentageAccuracy[day] = isNaN(percentage) ? 0 : percentage;
+                    }
+                });
+
+                console.log(`Planned Data for ${vendorName}:`, plannedData);
+                console.log(`Actual Data for ${vendorName}:`, actualData);
+                console.log(`Percentage Accuracy for ${vendorName}:`, percentageAccuracy);
+
+                const ctx = document.getElementById(`otdc-chart-${vendorName}`).getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: getDefaultLabels(),
+                        datasets: [{
+                            label: 'Planned Qty',
+                            data: plannedData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            type: 'bar',
+                            order: 1
+                        },
+                        {
+                            label: 'Actual Qty',
+                            data: actualData,
+                            backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1,
+                            type: 'bar',
+                            order: 2
+                        },
+                        {
+                            label: 'Percentage Accuracy',
+                            data: percentageAccuracy,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            fill: false,
+                            type: 'line',
+                            yAxisID: 'y-axis-2',
+                            order: 0,
+                            borderWidth: 2 // Increase the line thickness here
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: false,
+                                categoryPercentage: 0.5,
+                                barPercentage: 0.5,
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    minRotation: 0,
+                                    callback: function(value, index, values) {
+                                        return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
+                                    }
+                                }
+                            },
+                            y: {
+                                stacked: false,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Quantity'
+                                }
+                            },
+                            'y-axis-2': {
+                                stacked: false,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: 'Percentage'
                                 },
-                                label: function(context) {
-                                    return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
+                                grid: {
+                                    drawOnChartArea: false
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        let title = tooltipItems[0].label || '';
+                                        title += ` ${month}`;
+                                        return title;
+                                    },
+                                    label: function(context) {
+                                        if (context.dataset.label === 'Percentage Accuracy') {
+                                            return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                                        }
+                                        return context.raw;
+                                    }
+                                }
+                            },
+                            legend: {
+                                labels: {
+                                    filter: function(item, chart) {
+                                        return item.text !== 'Percentage Accuracy';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [addDottedLinePlugin]
+                });
+            });
+        }
+
+        if (typeof groupedStockLevels === 'object') {
+            Object.keys(groupedStockLevels).forEach((itemCode) => {
+                console.log('Processing stock level for item code:', itemCode);
+
+                const levels = groupedStockLevels[itemCode];
+                const stockData = Array(31).fill(null);
+
+                levels.forEach((level, index) => {
+                    const day = new Date(level.date).getDate() - 1;
+                    stockData[day] = level.stock_level;
+                });
+
+                console.log(`Stock Data for ${itemCode}:`, stockData);
+
+                const ctx = document.getElementById(`stock-level-${itemCode}`).getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: getDefaultLabels(),
+                        datasets: [{
+                            label: 'Stock Level',
+                            data: stockData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.4)', // Increase opacity
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 3, // Increase line thickness
+                            fill: true,
+                            spanGaps: true // Ensure the line is continuous even with gaps
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                categoryPercentage: 0.5,
+                                barPercentage: 0.5,
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    minRotation: 0,
+                                    callback: function(value, index, values) {
+                                        return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Stock Level'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        let title = tooltipItems[0].label || '';
+                                        title += ` ${month}`;
+                                        return title;
+                                    },
+                                    label: function(context) {
+                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
+                                    }
                                 }
                             }
                         }
                     }
-                }
+                });
             });
-        });
-    }
-});
+        }
+
+        if (typeof itemCodeQuantities === 'object') {
+            Object.keys(itemCodeQuantities).forEach((groupIndex) => {
+                console.log('Processing item code group:', groupIndex);
+
+                const group = itemCodeQuantities[groupIndex];
+                const itemCodes = group.map(item => item.code);
+                const quantities = group.map(item => item.qty);
+
+                console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
+                console.log(`Quantities for Group ${groupIndex}:`, quantities);
+
+                const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: itemCodes,
+                        datasets: [{
+                            label: 'Quantity',
+                            data: quantities,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: false,
+                                categoryPercentage: 0.5,
+                                barPercentage: 0.5,
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    minRotation: 0
+                                }
+                            },
+                            y: {
+                                stacked: false,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'Quantity'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        let title = tooltipItems[0].label || '';
+                                        title += ` ${month}`;
+                                        return title;
+                                    },
+                                    label: function(context) {
+                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    });
 </script>
 @endsection
