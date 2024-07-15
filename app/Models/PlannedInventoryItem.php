@@ -13,7 +13,7 @@ class PlannedInventoryItem extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        '_id', 'inventory_id', 'planned_receiving_date', 'planned_qty', 'status'
+        '_id', 'inventory_id', 'planned_receiving_date', 'planned_qty', 'status','vendor_name'
     ];
 
     public function inventory()

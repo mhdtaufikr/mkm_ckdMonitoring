@@ -53,6 +53,7 @@
                                                         <th>No.</th>
                                                         <th>Planned Receiving Date</th>
                                                         <th>Planned Quantity</th>
+                                                        <th>Vendor</th>
                                                         <th>Status</th>
                                                     </tr>
                                                 </thead>
@@ -65,6 +66,7 @@
                                                             <td>{{ $no++ }}</td>
                                                             <td>{{ $plannedItem->planned_receiving_date }}</td>
                                                             <td>{{ $plannedItem->planned_qty }}</td>
+                                                            <td>{{ $plannedItem->vendor_name }}</td>
                                                             <td>{{ $plannedItem->status }}</td>
                                                         </tr>
                                                     @endforeach
@@ -84,6 +86,7 @@
                                                         <th>Rack Type</th>
                                                         <th>Quantity</th>
                                                         <th>Status</th>
+                                                        <th>Vendor</th>
                                                         <th>Receiving Date</th>
                                                     </tr>
                                                 </thead>
@@ -99,6 +102,7 @@
                                                             <td>{{ $receivedItem->rack_type }}</td>
                                                             <td>{{ $receivedItem->qty }}</td>
                                                             <td>{{ $receivedItem->status }}</td>
+                                                            <td>{{ $receivedItem->vendor_name }}</td>
                                                             <td>{{ $receivedItem->receiving_date }}</td>
                                                         </tr>
                                                     @endforeach

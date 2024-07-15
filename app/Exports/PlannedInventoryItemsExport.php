@@ -21,7 +21,8 @@ class PlannedInventoryItemsExport implements FromArray, WithHeadings, WithEvents
         return [
             'Product Code',
             'Planned Receiving Date',
-            'Planned Quantity'
+            'Planned Quantity',
+            'Vendor Name'
         ];
     }
 

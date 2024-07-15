@@ -20,8 +20,14 @@ class PlannedInventoryItemsImport implements ToModel, WithHeadingRow
                 'inventory_id' => $inventory->_id,
                 'planned_receiving_date' => \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($row['planned_receiving_date'])->format('Y-m-d'), // Convert Excel date to PHP date
                 'planned_qty' => $row['planned_quantity'],
-                'status' => 'planned' // Assuming a default status of 'planned' since it is not in the file
+                'status' => 'planned', // Assuming a default status of 'planned' since it is not in the file
+                'vendor_name' => $row['vendor_name'] // Get vendor name from Excel file
             ]);
         }
+    }
+
+    public function headingRow(): int
+    {
+        return 1;
     }
 }

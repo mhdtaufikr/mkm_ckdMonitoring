@@ -40,6 +40,9 @@ class FetchInventoryItemData extends Command
                     // Extract rack_type from the first word of rack
                     $rackType = explode(' ', $item['rack'])[0];
 
+                    // Get the vendor name from the custom_field_product
+                    $vendorName = $item['cutting_center'] ?? null;
+
                     InventoryItem::updateOrCreate(
                         ['_id' => $item['_id']],
                         [
@@ -52,6 +55,7 @@ class FetchInventoryItemData extends Command
                             'receiving_date' => $item['receive_date'] ?? null,
                             'refNumber' => $item['refNumber'] ?? null,
                             'is_out' => $item['is_out'] ?? false,
+                            'vendor_name' => $vendorName,
                             'updated_at' => $item['updated_at'] ?? null,
                             'created_at' => $item['created_at'] ?? null
                         ]
@@ -65,4 +69,3 @@ class FetchInventoryItemData extends Command
         $this->info('Inventory item data fetched and stored successfully.');
     }
 }
-
