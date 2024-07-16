@@ -23,9 +23,7 @@
     </header>
     <!-- Main page content-->
     <div class="container-fluid px-4 mt-n10">
-        <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-            <!-- Content Header (Page header) -->
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row ">
@@ -33,7 +31,7 @@
                             <h1></h1>
                         </div>
                     </div>
-                </div><!-- /.container-fluid -->
+                </div>
             </section>
             <section class="content">
                 <div class="container-fluid">
@@ -103,6 +101,7 @@
                                                             </td>
                                                             <td>
                                                                 <a href="{{ route('inventory.details', $data->_id) }}" class="btn btn-primary btn-sm">Details</a>
+                                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editPlannedReceiveModal" data-id="{{ $data->_id }}">Edit Planned Receive</button>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -112,33 +111,47 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- Modal -->
-                            <div class="modal fade" id="uploadPlannedModal" tabindex="-1" aria-labelledby="modal-add-label" aria-hidden="true">
-                                <div class="modal-dialog">
+                            <!-- Modal for Editing Planned Receive -->
+                            <div class="modal fade" id="editPlannedReceiveModal" tabindex="-1" aria-labelledby="editPlannedReceiveLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="modal-add-label">Upload Planned Received Items</h5>
+                                            <h5 class="modal-title" id="editPlannedReceiveLabel">Edit Planned Receive</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <form action="{{ url('/inventory/planned/upload') }}" method="POST" enctype="multipart/form-data">
+                                        <form action="{{ url('/inventory/planned/update') }}" method="POST">
                                             @csrf
                                             <div class="modal-body">
+                                                <input type="hidden" id="inventoryId" name="inventory_id">
                                                 <div class="mb-3">
-                                                    <input type="file" class="form-control" id="csvFile" name="excel-file" accept=".csv, .xlsx">
-                                                    <p class="text-danger">*file must be .xlsx or .csv</p>
+                                                    <label for="inventoryCode" class="form-label">Inventory Code</label>
+                                                    <select class="form-select" id="inventoryCode" name="inventory_code" required>
+                                                        @foreach ($items as $item)
+                                                            <option value="{{ $item->code }}">{{ $item->code }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
-                                                @error('excel-file')
-                                                    <div class="alert alert-danger" role="alert">
-                                                        {{ $message }}
-                                                    </div>
-                                                @enderror
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Planned Quantity</th>
+                                                            <th>Vendor</th>
+                                                            <th>Status</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="plannedReceiveList">
+                                                        <!-- Rows will be dynamically added here using JavaScript -->
+                                                    </tbody>
+                                                </table>
+                                                <div class="mb-3">
+                                                    <button type="button" class="btn btn-success" id="addPlannedReceive">Add New Planned Receive</button>
+                                                </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <a href="{{ route('inventory.planned.template') }}" class="btn btn-link">
-                                                    Download Excel Format
-                                                </a>
                                                 <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                <button type="submit" class="btn btn-primary">Save changes</button>
                                             </div>
                                         </form>
                                     </div>
@@ -159,7 +172,49 @@
             "responsive": true,
             "lengthChange": false,
             "autoWidth": false,
-            // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+        });
+
+        $('#editPlannedReceiveModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var modal = $(this);
+
+            // Fetch the planned receive data for the selected inventory item
+            var plannedItems = @json($plannedItems).filter(item => item.inventory_id === id);
+            var plannedReceiveList = modal.find('#plannedReceiveList');
+
+            plannedReceiveList.empty(); // Clear existing rows
+
+            plannedItems.forEach(function(item) {
+                plannedReceiveList.append(`
+                    <tr>
+                        <td><input type="date" class="form-control" name="planned_dates[]" value="${item.planned_receiving_date.split(' ')[0]}" required></td>
+                        <td><input type="number" class="form-control" name="planned_qtys[]" value="${item.planned_qty}" required></td>
+                        <td>${item.vendor_name}</td>
+                        <td>${item.status}</td>
+                        <td><button type="button" class="btn btn-danger remove-planned-receive">Remove</button></td>
+                    </tr>
+                `);
+            });
+
+            $('#inventoryId').val(id);
+            $('#inventoryCode').val(button.closest('tr').find('td:eq(1)').text());
+        });
+
+        $('#addPlannedReceive').on('click', function() {
+            $('#plannedReceiveList').append(`
+                <tr>
+                    <td><input type="date" class="form-control" name="planned_dates[]" required></td>
+                    <td><input type="number" class="form-control" name="planned_qtys[]" required></td>
+                    <td><input type="text" class="form-control" name="vendor_name[]" required></td>
+                    <td><input type="text" class="form-control" name="status[]" required></td>
+                    <td><button type="button" class="btn btn-danger remove-planned-receive">Remove</button></td>
+                </tr>
+            `);
+        });
+
+        $(document).on('click', '.remove-planned-receive', function() {
+            $(this).closest('tr').remove();
         });
     });
 </script>

@@ -20,8 +20,7 @@ class Kernel extends ConsoleKernel
 
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('fetch:inventory')->hourly();
-        $schedule->command('fetch:inventory-item')->hourly();
+        $schedule->command('fetch:inventory')->everyTenMinutes();
+        $schedule->command('fetch:inventory-item')->everyTenMinutes();
     }
-
 }
