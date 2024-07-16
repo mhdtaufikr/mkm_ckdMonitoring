@@ -36,7 +36,6 @@ class HomeController extends Controller
         $vendorData = DB::table('vendor_comparison')
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
-            ->whereDate('date', '<=', $today)
             ->whereIn('vendor_name', ['MOSSI', 'SCI', 'USC', 'AAP'])
             ->get()
             ->groupBy('vendor_name');
