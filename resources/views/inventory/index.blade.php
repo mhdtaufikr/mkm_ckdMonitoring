@@ -197,8 +197,8 @@
                     <tr>
                         <td><input type="date" class="form-control" name="planned_dates[]" value="${item.planned_receiving_date.split(' ')[0]}" required></td>
                         <td><input type="number" class="form-control" name="planned_qtys[]" value="${item.planned_qty}" required></td>
-                        <td>${item.vendor_name}</td>
-                        <td>${item.status}</td>
+                        <td><input type="text" class="form-control" name="vendor_name[]" value="${item.vendor_name}" required></td>
+                        <td><input type="text" class="form-control" name="status[]" value="${item.status}" required></td>
                         <td><button type="button" class="btn btn-danger remove-planned-receive">Remove</button></td>
                     </tr>
                 `);
