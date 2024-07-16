@@ -76,6 +76,7 @@
                                                         <th>Product Code</th>
                                                         <th>Name</th>
                                                         <th>Quantity</th>
+                                                        <th>Vendor Name</th>
                                                         <th>Status</th>
                                                         <th>Action</th>
                                                     </tr>
@@ -90,6 +91,12 @@
                                                             <td>{{ $data->code }}</td>
                                                             <td>{{ $data->name }}</td>
                                                             <td>{{ $data->qty }}</td>
+                                                            <td>
+                                                                @php
+                                                                    $vendorNames = $data->plannedInventoryItems->unique('vendor_name')->pluck('vendor_name')->implode(', ');
+                                                                @endphp
+                                                                {{ $vendorNames }}
+                                                            </td>
                                                             <td>
                                                                 @if ($data->qty > 999)
                                                                     <span class="badge bg-danger"><i class="fas fa-exclamation"></i></span>
@@ -125,7 +132,7 @@
                                                 <input type="hidden" id="inventoryId" name="inventory_id">
                                                 <div class="mb-3">
                                                     <label for="inventoryCode" class="form-label">Inventory Code</label>
-                                                    <select class="form-select" id="inventoryCode" name="inventory_code" required>
+                                                    <select disabled class="form-select" id="inventoryCode" name="inventory_code" required>
                                                         @foreach ($items as $item)
                                                             <option value="{{ $item->code }}">{{ $item->code }}</option>
                                                         @endforeach

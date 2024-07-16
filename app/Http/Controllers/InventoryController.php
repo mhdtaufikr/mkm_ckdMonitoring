@@ -15,9 +15,9 @@ class InventoryController extends Controller
 {
     public function index()
     {
-        $items = Inventory::with('plannedInventoryItems')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $items = Inventory::with(['plannedInventoryItems' => function($query) {
+            $query->orderBy('created_at', 'desc');
+        }])->orderBy('created_at', 'desc')->get();
 
         $inventoryCodes = Inventory::select('code')->distinct()->get();
         $plannedItems = PlannedInventoryItem::all();
