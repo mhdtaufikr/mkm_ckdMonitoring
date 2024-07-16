@@ -70,23 +70,34 @@ class InventoryController extends Controller
     $vendorNames = $request->input('vendor_name');
     $statuses = $request->input('status');
 
+    // Fetch existing planned receive items for this inventory
+    $existingPlannedItems = PlannedInventoryItem::where('inventory_id', $inventoryId)->get();
+
+    // Create a mapping of existing planned receive items by date
+    $existingItemsMap = $existingPlannedItems->keyBy(function($item) {
+        return Carbon::parse($item->planned_receiving_date)->format('Y-m-d');
+    });
+
     // Delete existing planned receive items for this inventory
     PlannedInventoryItem::where('inventory_id', $inventoryId)->delete();
 
     // Insert new planned receive items
     foreach ($plannedDates as $index => $date) {
+        $existingItem = $existingItemsMap->get($date);
+
         PlannedInventoryItem::create([
             '_id' => uniqid(),
             'inventory_id' => $inventoryId,
             'planned_receiving_date' => $date,
             'planned_qty' => $plannedQtys[$index],
-            'vendor_name' => $vendorNames[$index],
-            'status' => $statuses[$index],
+            'vendor_name' => $vendorNames[$index] ?? ($existingItem ? $existingItem->vendor_name : null),
+            'status' => $statuses[$index] ?? ($existingItem ? $existingItem->status : 'Pending'), // Set a default status if not available
         ]);
     }
 
     return redirect()->route('inventory.index')->with('status', 'Planned receive updated successfully.');
 }
+
 
 
 
