@@ -226,15 +226,37 @@
                     </div>
                 </div>
 
-                <!-- Vendor Monthly Summary Chart -->
+                <!-- Stock Level Carousel -->
                 <div class="col-md-6 mb-2">
                     <div style="height: 375px" class="card card-custom">
                         <div class="card-header">
-                            <h4>Vendor Monthly Summary</h4>
+                            <h4>Stock Level</h4>
                         </div>
                         <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="vendorSummaryChart"></canvas>
+                            <div id="stockLevelCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    @foreach ($stockLevels as $itemCode => $levels)
+                                        <button type="button" data-bs-target="#stockLevelCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+                                    @endforeach
+                                </div>
+                                <div style="margin-top: -20px" class="carousel-inner">
+                                    @foreach ($stockLevels as $itemCode => $levels)
+                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                                            <p class="text-center">{{ $itemCode }}</p>
+                                            <div class="chart-container">
+                                                <canvas id="stock-level-{{ $itemCode }}" class="chart-custom"></canvas>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#stockLevelCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#stockLevelCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -288,19 +310,15 @@
         console.log('DOM fully loaded and parsed');
 
         const groupedComparisons = @json($itemCodes);
+        const groupedStockLevels = @json($stockLevels);
         const vendorData = @json($vendorData);
         const itemCodeQuantities = @json($itemCodeQuantities);
-        const vendors = @json($vendors);
-        const totalPlanned = @json($totalPlanned);
-        const totalActual = @json($totalActual);
         const month = new Date().toLocaleString('default', { month: 'long' });
 
         console.log('Grouped Comparisons:', groupedComparisons);
+        console.log('Grouped Stock Levels:', groupedStockLevels);
         console.log('Vendor Data:', vendorData);
         console.log('Item Code Quantities:', itemCodeQuantities);
-        console.log('Vendors:', vendors);
-        console.log('Total Planned:', totalPlanned);
-        console.log('Total Actual:', totalActual);
 
         const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
@@ -588,6 +606,79 @@
             });
         }
 
+        if (typeof groupedStockLevels === 'object') {
+            Object.keys(groupedStockLevels).forEach((itemCode) => {
+                console.log('Processing stock level for item code:', itemCode);
+
+                const levels = groupedStockLevels[itemCode];
+                const stockData = Array(31).fill(null);
+
+                levels.forEach((level, index) => {
+                    const day = new Date(level.date).getDate() - 1;
+                    stockData[day] = level.stock_level;
+                });
+
+                console.log(`Stock Data for ${itemCode}:`, stockData);
+
+                const ctx = document.getElementById(`stock-level-${itemCode}`).getContext('2d');
+                const myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: getDefaultLabels(),
+                        datasets: [{
+                            label: 'Stock Level',
+                            data: stockData,
+                            backgroundColor: 'rgba(75, 192, 192, 0.4)', // Increase opacity
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 3, // Increase line thickness
+                            fill: true,
+                            spanGaps: true // Ensure the line is continuous even with gaps
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                categoryPercentage: 0.5,
+                                barPercentage: 0.5,
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    minRotation: 0,
+                                    callback: function(value, index, values) {
+                                        return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Stock Level'
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        let title = tooltipItems[0].label || '';
+                                        title += ` ${month}`;
+                                        return title;
+                                    },
+                                    label: function(context) {
+                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
         if (typeof itemCodeQuantities === 'object') {
             Object.keys(itemCodeQuantities).forEach((groupIndex) => {
                 console.log('Processing item code group:', groupIndex);
@@ -653,64 +744,6 @@
                 });
             });
         }
-
-        // Vendor Monthly Summary Chart
-        const vendorSummaryCtx = document.getElementById('vendorSummaryChart').getContext('2d');
-        const vendorSummaryChart = new Chart(vendorSummaryCtx, {
-            type: 'bar',
-            data: {
-                labels: vendors,
-                datasets: [{
-                    label: 'Total Planned Quantity',
-                    data: totalPlanned,
-                    backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    type: 'bar'
-                },
-                {
-                    label: 'Total Actual Quantity',
-                    data: totalActual,
-                    backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
-                    borderColor: 'rgba(255, 159, 64, 1)',
-                    borderWidth: 1,
-                    type: 'bar'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        stacked: false,
-                        categoryPercentage: 0.5,
-                        barPercentage: 0.5
-                    },
-                    y: {
-                        stacked: false,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Quantity'
-                        }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            title: function(tooltipItems) {
-                                let title = tooltipItems[0].label || '';
-                                title += ` ${month}`;
-                                return title;
-                            },
-                            label: function(context) {
-                                return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
-                            }
-                        }
-                    }
-                }
-            }
-        });
     });
 </script>
 @endsection

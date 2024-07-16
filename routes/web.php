@@ -35,6 +35,9 @@ Route::middleware(['auth'])->group(function () {
     //Home Controller
     Route::get('/home', [HomeController::class, 'index'])->name('checksheet');
 
+    Route::get('/home/ckd', [HomeController::class, 'indexCkd'])->name('checksheet.CKD');
+    Route::get('/home/ckd/nouba', [HomeController::class, 'indexCkdNouba'])->name('checksheet.CKDNouba');
+
     //Dropdown Controller
     Route::get('/dropdown', [DropdownController::class, 'index'])->middleware(['checkRole:IT']);
     Route::post('/dropdown/store', [DropdownController::class, 'store'])->middleware(['checkRole:IT']);

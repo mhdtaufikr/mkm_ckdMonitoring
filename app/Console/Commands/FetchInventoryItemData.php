@@ -15,55 +15,70 @@ class FetchInventoryItemData extends Command
 
     public function handle()
     {
-        $response = Http::withHeaders([
-            'x-api-key' => '315f9f6eb55fd6db9f87c0c0862007e0615ea467'
-        ])->get('https://api.mile.app/public/v1/warehouse/inventory-item', [
-            'location_id' => '5f335f29a2ef087afa109156',
-            'limit' => -1,
-            'page' => 1,
-            'serial_number' => '',
-            'rack' => '',
-            'rack_type' => '',
-            'start_date' => '',
-            'end_date' => ''
-        ]);
+        $apiKey = '315f9f6eb55fd6db9f87c0c0862007e0615ea467'; // Replace with your actual API key
+        $locationIds = [
+            '5f335f29a2ef087afa109156',
+            '65a72c7fad782dc26a0626f6',
+            '617bd0ad83ef510374337d84'
+        ];
 
-        if ($response->successful()) {
-            $data = $response->json();
-            $items = $data['data'];
+        foreach ($locationIds as $locationId) {
+            $response = Http::withHeaders([
+                'x-api-key' => $apiKey
+            ])->get('https://api.mile.app/public/v1/warehouse/inventory-item', [
+                'location_id' => $locationId,
+                'limit' => -1,
+                'page' => 1,
+                'serial_number' => '',
+                'rack' => '',
+                'rack_type' => '',
+                'start_date' => '',
+                'end_date' => ''
+            ]);
 
-            foreach ($items as $item) {
-                // Find the corresponding inventory by code
-                $inventory = Inventory::where('code', $item['code'])->first();
+            if ($response->successful()) {
+                $data = $response->json();
+                $items = $data['data'];
 
-                if ($inventory) {
-                    // Extract rack_type from the first word of rack
-                    $rackType = explode(' ', $item['rack'])[0];
+                foreach ($items as $item) {
+                    // Find the corresponding inventory by code
+                    $inventory = Inventory::where('code', $item['code'])->first();
 
-                    // Get the vendor name from the custom_field_product
-                    $vendorName = $item['cutting_center'] ?? null;
+                    if ($inventory) {
+                        // Extract rack_type from the first word of rack
+                        $rackType = explode(' ', $item['rack'])[0];
 
-                    InventoryItem::updateOrCreate(
-                        ['_id' => $item['_id']],
-                        [
-                            'inventory_id' => $inventory->_id,
-                            'serial_number' => $item['serial_number'] ?? null,
-                            'rack' => $item['rack'] ?? null,
-                            'rack_type' => $rackType ?? null,
-                            'qty' => $item['qty'] ?? 0,
-                            'status' => $item['status'] ?? null,
-                            'receiving_date' => $item['receive_date'] ?? null,
-                            'refNumber' => $item['refNumber'] ?? null,
-                            'is_out' => $item['is_out'] ?? false,
-                            'vendor_name' => $vendorName,
-                            'updated_at' => $item['updated_at'] ?? null,
-                            'created_at' => $item['created_at'] ?? null
-                        ]
-                    );
+                        // Get the vendor name from the custom_field_product or default to SENOPATI for specific location IDs
+                        $vendorName = $item['cutting_center'] ?? null;
+
+                        if (in_array($locationId, ['65a72c7fad782dc26a0626f6', '617bd0ad83ef510374337d84'])) {
+                            $vendorName = $vendorName ?? 'SENOPATI';
+                        }
+
+                        InventoryItem::updateOrCreate(
+                            ['_id' => $item['_id']],
+                            [
+                                'inventory_id' => $inventory->_id,
+                                'serial_number' => $item['serial_number'] ?? null,
+                                'rack' => $item['rack'] ?? null,
+                                'rack_type' => $rackType ?? null,
+                                'qty' => $item['qty'] ?? 0,
+                                'status' => $item['status'] ?? null,
+                                'receiving_date' => $item['receive_date'] ?? null,
+                                'refNumber' => $item['refNumber'] ?? null,
+                                'is_out' => $item['is_out'] ?? false,
+                                'vendor_name' => $vendorName,
+                                'updated_at' => $item['updated_at'] ?? null,
+                                'created_at' => $item['created_at'] ?? null
+                            ]
+                        );
+                    }
                 }
+            } else {
+                Log::error('Failed to fetch inventory item data for location ' . $locationId, [
+                    'response_body' => $response->body()
+                ]);
             }
-        } else {
-            Log::error('Failed to fetch inventory item data:', $response->body());
         }
 
         $this->info('Inventory item data fetched and stored successfully.');

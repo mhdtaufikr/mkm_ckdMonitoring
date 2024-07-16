@@ -7,7 +7,15 @@
                 <!-- Sidenav Link (Charts)-->
                 <a class="nav-link" href="{{url('/home')}}">
                     <div style="margin-left: -2px" class="nav-link-icon"><i class="fas fa-home"></i></div>
-                    Home
+                    Raw Material
+                </a>
+                <a class="nav-link" href="{{url('/home/ckd')}}">
+                    <div style="margin-left: -2px" class="nav-link-icon"><i class="fas fa-home"></i></div>
+                    CKD Stamping
+                </a>
+                <a class="nav-link" href="{{url('/home/ckd/nouba')}}">
+                    <div style="margin-left: -2px" class="nav-link-icon"><i class="fas fa-home"></i></div>
+                    CKD Nouba
                 </a>
                 <a class="nav-link" href="{{url('/inventory')}}">
                     <div class="nav-link-icon"><i class="fas fa-warehouse"></i></div>
