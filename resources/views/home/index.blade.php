@@ -680,18 +680,23 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                indexAxis: 'y', // Swapping the axes
                 scales: {
                     x: {
                         stacked: false,
                         categoryPercentage: 0.5,
-                        barPercentage: 0.5
+                        barPercentage: 0.5,
+                        title: {
+                            display: true,
+                            text: 'Quantity'
+                        }
                     },
                     y: {
                         stacked: false,
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'Quantity'
+                            text: 'Vendor'
                         }
                     }
                 },
