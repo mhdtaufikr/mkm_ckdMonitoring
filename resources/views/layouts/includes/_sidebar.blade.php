@@ -2,25 +2,21 @@
     <nav class="sidenav shadow-right sidenav-light">
         <div class="sidenav-menu">
             <div class="nav accordion" id="accordionSidenav">
-                <!-- Sidenav Menu Heading (Core)-->
-                <div class="sidenav-menu-heading">Core</div>
-                <!-- Sidenav Link (Charts)-->
-                <a class="nav-link" href="{{url('/home')}}">
-                    <div style="margin-left: -2px" class="nav-link-icon"><i class="fas fa-home"></i></div>
-                    Raw Material
+               <!-- Sidenav Menu Heading (Home)-->
+                <div class="sidenav-menu-heading">Home</div>
+                <!-- Sidenav Accordion (Home)-->
+                <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseHome" aria-expanded="false" aria-controls="collapseHome">
+                    <div class="nav-link-icon"><i class="fas fa-home"></i></div>
+                    Home Sections
+                    <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                 </a>
-                <a class="nav-link" href="{{url('/home/ckd')}}">
-                    <div style="margin-left: -2px" class="nav-link-icon"><i class="fas fa-home"></i></div>
-                    CKD Stamping
-                </a>
-                <a class="nav-link" href="{{url('/home/ckd/nouba')}}">
-                    <div style="margin-left: -2px" class="nav-link-icon"><i class="fas fa-home"></i></div>
-                    CKD Nouba
-                </a>
-                <a class="nav-link" href="{{url('/inventory')}}">
-                    <div class="nav-link-icon"><i class="fas fa-warehouse"></i></div>
-                    Inventory
-                </a>
+                <div class="collapse" id="collapseHome" data-bs-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link" href="{{url('/home')}}">Raw Material</a>
+                        <a class="nav-link" href="{{url('/home/ckd')}}">CKD Stamping</a>
+                        <a class="nav-link" href="{{url('/home/ckd/nouba')}}">CKD Nouba</a>
+                    </nav>
+                </div>
                 @if(\Auth::user()->role === 'Super Admin' || \Auth::user()->role === 'IT')
                  <!-- Sidenav Menu Heading (Master)-->
                  <div class="sidenav-menu-heading">Master</div>
