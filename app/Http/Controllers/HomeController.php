@@ -252,7 +252,6 @@ class HomeController extends Controller
             ->groupBy('inventory_items.status')
             ->get();
 
-    dd($statusCounts);
 
         return view('home.ckd', compact('itemNotArrived','itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
