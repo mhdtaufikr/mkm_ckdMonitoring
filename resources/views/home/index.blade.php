@@ -93,39 +93,7 @@
                             <h4>Inventory Monitoring</h4>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <table style="margin-top: -20px" class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Signal Indicator</th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="signal green px-2">G</span> ≥ 95%
-                                                <span class="signal yellow">Y</span> ≥ 85%
-                                                <span class="signal red">R</span> < 85%
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-4">
-                                    <table style="margin-top: -20px" class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Average Inventory</th>
-                                            <th>Signal</th>
-                                        </tr>
-                                        <tr>
-                                            <td>{{ number_format($averageInventoryMonitoring, 2) }}%</td>
-                                            <td>
-                                                <span id="signal-inventory" class="signal
-                                                    {{ $averageInventoryMonitoring >= 95 ? 'green' : ($averageInventoryMonitoring >= 85 ? 'yellow' : 'red') }}">
-                                                    {{ $averageInventoryMonitoring >= 95 ? 'G' : ($averageInventoryMonitoring >= 85 ? 'Y' : 'R') }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+
 
                             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-indicators">
@@ -133,11 +101,57 @@
                                         <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
                                     @endforeach
                                 </div>
-                                <div style="margin-top: -20px" class="carousel-inner">
+                                <div class="carousel-inner">
                                     @foreach ($itemCodes as $itemCode => $comparisons)
+                                        @php
+                                            $totalPercentage = 0;
+                                            $count = 0;
+                                            foreach ($comparisons as $comparison) {
+                                                $planned = $comparison->planned_qty;
+                                                $actual = $comparison->received_qty;
+                                                if ($planned > 0) {
+                                                    $totalPercentage += ($actual / $planned) * 100;
+                                                    $count++;
+                                                }
+                                            }
+                                            $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                                        @endphp
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <p class="text-center">{{ $itemCode }}</p>
-                                            <div class="chart-container">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <table class="indicator-table mb-4">
+                                                        <tr>
+                                                            <th>Signal Indicator</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="signal green px-2">G</span> ≥ 95%
+                                                                <span class="signal yellow">Y</span> ≥ 85%
+                                                                <span class="signal red">R</span> < 85%
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <table class="indicator-table mb-4">
+                                                        <tr>
+                                                            <th>Average Inventory</th>
+                                                            <th>Signal</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                                            <td>
+                                                                <span id="signal-inventory" class="signal
+                                                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <p style="margin-top: -20px" class="text-center">{{ $itemCode }}</p>
+                                            <div style="margin-top: -20px" class="chart-container">
                                                 <canvas id="chart-{{ $itemCode }}" class="chart-custom"></canvas>
                                             </div>
                                         </div>
@@ -152,6 +166,7 @@
                                     <span class="visually-hidden">Next</span>
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -163,39 +178,7 @@
                             <h4>OTDC</h4>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <table style="margin-top: -20px" class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Signal Indicator</th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="signal green px-2">G</span> ≥ 95%
-                                                <span class="signal yellow">Y</span> ≥ 85%
-                                                <span class="signal red">R</span> < 85%
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-4">
-                                    <table style="margin-top: -20px" class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Average OTDC</th>
-                                            <th>Signal</th>
-                                        </tr>
-                                        <tr>
-                                            <td>{{ number_format($averageOTDC, 2) }}%</td>
-                                            <td>
-                                                <span id="signal-inventory" class="signal
-                                                    {{ $averageOTDC >= 95 ? 'green' : ($averageOTDC >= 85 ? 'yellow' : 'red') }}">
-                                                    {{ $averageOTDC >= 95 ? 'G' : ($averageOTDC >= 85 ? 'Y' : 'R') }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+
 
                             <div id="otdcCarousel" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-indicators">
@@ -203,11 +186,53 @@
                                         <button type="button" data-bs-target="#otdcCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
                                     @endforeach
                                 </div>
-                                <div style="margin-top: -20px" class="carousel-inner">
+                                <div class="carousel-inner">
                                     @foreach ($vendorData as $vendorName => $data)
+                                        @php
+                                            $totalPercentage = 0;
+                                            $count = 0;
+                                            foreach ($data as $entry) {
+                                                $totalPercentage += $entry->percentage;
+                                                $count++;
+                                            }
+                                            $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                                        @endphp
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <p class="text-center">{{ $vendorName }}</p>
-                                            <div class="chart-container">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <table class="indicator-table mb-4">
+                                                        <tr>
+                                                            <th>Signal Indicator</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <span class="signal green px-2">G</span> ≥ 95%
+                                                                <span class="signal yellow">Y</span> ≥ 85%
+                                                                <span class="signal red">R</span> < 85%
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <table class="indicator-table mb-4">
+                                                        <tr>
+                                                            <th>Average OTDC</th>
+                                                            <th>Signal</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                                            <td>
+                                                                <span id="signal-otdc" class="signal
+                                                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
+                                            <div style="margin-top: -20px" class="chart-container">
                                                 <canvas id="otdc-chart-{{ $vendorName }}" class="chart-custom"></canvas>
                                             </div>
                                         </div>
@@ -222,6 +247,7 @@
                                     <span class="visually-hidden">Next</span>
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 </div>
