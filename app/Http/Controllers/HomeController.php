@@ -61,7 +61,6 @@ class HomeController extends Controller
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
         $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
-
         // Fetch vendor monthly summary
         $itemNotArrived = DB::table('items_not_arrived')
         ->whereMonth('planned_receiving_date', now()->month)
@@ -242,6 +241,18 @@ class HomeController extends Controller
          ->where('location_id', $locationId)
          ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
          ->get();
+
+         // Fetch status counts
+            $statusCounts = DB::table('inventory_items')
+            ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories._id')
+            ->select('inventory_items.status', DB::raw('SUM(inventory_items.qty) as total_qty'))
+            ->where('inventories.location_id', $locationId)
+            ->whereMonth('inventory_items.receiving_date', $currentMonth)
+            ->whereYear('inventory_items.receiving_date', $currentYear)
+            ->groupBy('inventory_items.status')
+            ->get();
+
+    dd($statusCounts);
 
         return view('home.ckd', compact('itemNotArrived','itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }

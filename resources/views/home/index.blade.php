@@ -758,67 +758,93 @@
     }
 
     // Vendor Monthly Summary Chart
-    const vendorSummaryCtx = document.getElementById('vendorSummaryChart').getContext('2d');
-    const vendorSummaryChart = new Chart(vendorSummaryCtx, {
-        type: 'bar',
-        data: {
-            labels: vendors,
-            datasets: [{
-                label: 'Total Planned Quantity',
-                data: totalPlanned,
-                backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                type: 'bar'
-            },
-            {
-                label: 'Total Actual Quantity',
-                data: totalActual,
-                backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 1,
-                type: 'bar'
-            }]
+const vendorSummaryCtx = document.getElementById('vendorSummaryChart').getContext('2d');
+const vendorSummaryChart = new Chart(vendorSummaryCtx, {
+    type: 'bar',
+    data: {
+        labels: vendors,
+        datasets: [{
+            label: 'Planned',
+            data: totalPlanned,
+            backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+            type: 'bar'
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y', // Swapping the axes
-            scales: {
-                x: {
-                    stacked: false,
-                    categoryPercentage: 0.5,
-                    barPercentage: 0.5,
-                    title: {
-                        display: true,
-                        text: 'Quantity'
-                    }
-                },
-                y: {
-                    stacked: false,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Vendor'
-                    }
+        {
+            label: 'Actual',
+            data: totalActual,
+            backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 1,
+            type: 'bar'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        indexAxis: 'y', // Swapping the axes
+        scales: {
+            x: {
+                stacked: false,
+                categoryPercentage: 0.5,
+                barPercentage: 0.5,
+                title: {
+                    display: true,
+                    text: 'Quantity'
                 }
             },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        title: function(tooltipItems) {
-                            let title = tooltipItems[0].label || '';
-                            title += ` ${month}`;
-                            return title;
-                        },
-                        label: function(context) {
-                            return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
+            y: {
+                stacked: false,
+                position: 'left',
+                title: {
+                    display: true,
+                    text: 'Vendor'
+                }
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        let title = tooltipItems[0].label || '';
+                        title += ` ${month}`;
+                        console.log('Tooltip Title:', title); // Debugging
+                        return title;
+                    },
+                    label: function(context) {
+                        console.log('Context raw value:', context.raw); // Debugging
+                        let label = `${context.dataset.label || ''}: `;
+                        if (typeof context.raw === 'number') {
+                            label += context.raw.toFixed(0); // Show quantity with no decimal places
+                        } else {
+                            console.log('context.raw is not a number:', context.raw); // Debugging
                         }
+                        console.log('Tooltip Label:', label); // Debugging
+                        return label;
+                    },
+                    afterLabel: function(context) {
+                        const plannedIndex = context.datasetIndex === 0 ? context.dataIndex : null;
+                        const actualIndex = context.datasetIndex === 1 ? context.dataIndex : null;
+                        if (plannedIndex !== null) {
+                            const plannedValue = context.chart.data.datasets[0].data[plannedIndex];
+                            const actualValue = context.chart.data.datasets[1].data[plannedIndex];
+                            const difference = actualValue - plannedValue;
+                            return ` ${plannedValue}`;
+                        } else if (actualIndex !== null) {
+                            const plannedValue = context.chart.data.datasets[0].data[actualIndex];
+                            const actualValue = context.chart.data.datasets[1].data[actualIndex];
+                            const difference = actualValue - plannedValue;
+                            return ` ${actualValue}`;
+                        }
+                        return null;
                     }
                 }
             }
         }
-    });
+    }
+});
+
 });
 
 </script>
