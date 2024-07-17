@@ -86,7 +86,7 @@ class HomeController extends Controller
         $vendorData = DB::table('vendor_comparison')
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
-            ->whereIn('vendor_name', ['MOSSI', 'SCI', 'USC', 'AAP'])
+            ->whereIn('vendor_name', ['SENOPATI'])
             ->where('location_id', $locationId)
             ->get()
             ->groupBy('vendor_name');
@@ -107,7 +107,7 @@ class HomeController extends Controller
             ->groupBy(function ($item) {
                 static $groupIndex = 0;
                 static $itemCount = 0;
-                if ($itemCount++ % 10 == 0) {
+                if ($itemCount++ % 5 == 0) {
                     $groupIndex++;
                 }
                 return $groupIndex;
@@ -142,7 +142,7 @@ class HomeController extends Controller
         $vendorData = DB::table('vendor_comparison')
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
-            ->whereIn('vendor_name', ['MOSSI', 'SCI', 'USC', 'AAP'])
+            ->whereIn('vendor_name', ['SENOPATI'])
             ->where('location_id', $locationId)
             ->get()
             ->groupBy('vendor_name');
@@ -163,7 +163,7 @@ class HomeController extends Controller
             ->groupBy(function ($item) {
                 static $groupIndex = 0;
                 static $itemCount = 0;
-                if ($itemCount++ % 10 == 0) {
+                if ($itemCount++ % 5 == 0) {
                     $groupIndex++;
                 }
                 return $groupIndex;
