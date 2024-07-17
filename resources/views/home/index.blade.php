@@ -560,141 +560,150 @@
                     });
                 }
 
-    if (typeof vendorData === 'object') {
-        Object.keys(vendorData).forEach((vendorName) => {
-            console.log('Processing vendor:', vendorName);
+                if (typeof vendorData === 'object') {
+    Object.keys(vendorData).forEach((vendorName) => {
+        console.log(`Processing vendor: ${vendorName}`);
 
-            const data = vendorData[vendorName];
-            const plannedData = Array(31).fill(null);
-            const actualData = Array(31).fill(null);
-            const percentageAccuracy = Array(31).fill(0); // Default value set to 0%
+        const data = vendorData[vendorName];
+        const plannedData = Array(31).fill(null);
+        const actualData = Array(31).fill(null);
+        const percentageAccuracy = Array(31).fill(0); // Default value set to 0%
 
-            data.forEach((entry) => {
-                const day = new Date(entry.date).getDate() - 1;
-                if (day < today) { // Ensure calculations are done only up to today's date
-                    plannedData[day] = entry.total_planned_qty;
-                    actualData[day] = entry.total_actual_qty;
-                }
-            });
+        let totalPercentage = 0;
+        let count = 0;
 
-            console.log(`Planned Data for ${vendorName}:`, plannedData);
-            console.log(`Actual Data for ${vendorName}:`, actualData);
+        data.forEach((entry) => {
+            const day = new Date(entry.date).getDate() - 1;
+            plannedData[day] = entry.total_planned_qty;
+            actualData[day] = entry.total_actual_qty;
 
-            plannedData.forEach((value, index) => {
-                if (value !== null && actualData[index] !== null) {
-                    const percentage = Math.min((actualData[index] / value) * 100, 100); // Ensure percentage does not exceed 100%
-                    percentageAccuracy[index] = isNaN(percentage) ? 0 : percentage;
-                }
-            });
+            if (day < today) { // Ensure calculations are done only up to today's date
+                const percentage = Math.min((entry.total_actual_qty / entry.total_planned_qty) * 100, 100); // Ensure percentage does not exceed 100%
+                percentageAccuracy[day] = isNaN(percentage) ? 0 : percentage;
 
-            console.log(`Percentage Accuracy for ${vendorName}:`, percentageAccuracy);
+                totalPercentage += percentageAccuracy[day];
+                count++;
+            }
+        });
 
-            const ctx = document.getElementById(`otdc-chart-${vendorName}`).getContext('2d');
-            const myChart = new Chart(ctx, {
+        const averagePercentage = count > 0 ? totalPercentage / count : 0;
+
+        console.log(`Planned Data for ${vendorName}:`, plannedData);
+        console.log(`Actual Data for ${vendorName}:`, actualData);
+        console.log(`Percentage Accuracy for ${vendorName}:`, percentageAccuracy);
+        console.log(`Average OTDC for ${vendorName}: ${averagePercentage.toFixed(2)}%`);
+
+        createChart(vendorName, plannedData, actualData, percentageAccuracy);
+    });
+}
+
+function createChart(vendorName, plannedData, actualData, percentageAccuracy) {
+    const ctx = document.getElementById(`otdc-chart-${vendorName}`).getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: getDefaultLabels(),
+            datasets: [{
+                label: 'Planned Qty',
+                data: plannedData,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
                 type: 'bar',
-                data: {
-                    labels: getDefaultLabels(),
-                    datasets: [{
-                        label: 'Planned Qty',
-                        data: plannedData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 1
-                    },
-                    {
-                        label: 'Actual Qty',
-                        data: actualData,
-                        backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 2
-                    },
-                    {
-                        label: 'Percentage Accuracy',
-                        data: percentageAccuracy,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        fill: false,
-                        type: 'line',
-                        yAxisID: 'y-axis-2',
-                        order: 0,
-                        borderWidth: 2 // Increase the line thickness here
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: false,
-                            categoryPercentage: 0.5,
-                            barPercentage: 0.5,
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0,
-                                callback: function(value, index, values) {
-                                    return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                                }
-                            }
-                        },
-                        y: {
-                            stacked: false,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Quantity'
-                            }
-                        },
-                        'y-axis-2': {
-                            stacked: false,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Percentage'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    let title = tooltipItems[0].label || '';
-                                    title += ` ${month}`;
-                                    return title;
-                                },
-                                label: function(context) {
-                                    if (context.dataset.label === 'Percentage Accuracy') {
-                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
-                                    }
-                                    return context.raw;
-                                }
-                            }
-                        },
-                        legend: {
-                            labels: {
-                                filter: function(item, chart) {
-                                    return item.text !== 'Percentage Accuracy';
-                                }
-                            }
+                order: 1
+            },
+            {
+                label: 'Actual Qty',
+                data: actualData,
+                backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1,
+                type: 'bar',
+                order: 2
+            },
+            {
+                label: 'Percentage Accuracy',
+                data: percentageAccuracy,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false,
+                type: 'line',
+                yAxisID: 'y-axis-2',
+                order: 0,
+                borderWidth: 2 // Increase the line thickness here
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: false,
+                    categoryPercentage: 0.5,
+                    barPercentage: 0.5,
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 0,
+                        minRotation: 0,
+                        callback: function(value, index, values) {
+                            return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
                         }
                     }
                 },
-                plugins: [addDottedLinePlugin]
-            });
-        });
-    }
+                y: {
+                    stacked: false,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Quantity'
+                    }
+                },
+                'y-axis-2': {
+                    stacked: false,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Percentage'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            let title = tooltipItems[0].label || '';
+                            title += ` ${month}`;
+                            return title;
+                        },
+                        label: function(context) {
+                            if (context.dataset.label === 'Percentage Accuracy') {
+                                return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                            }
+                            return context.raw;
+                        }
+                    }
+                },
+                legend: {
+                    labels: {
+                        filter: function(item, chart) {
+                            return item.text !== 'Percentage Accuracy';
+                        }
+                    }
+                }
+            }
+        },
+        plugins: [addDottedLinePlugin]
+    });
+}
+
 
     if (typeof itemCodeQuantities === 'object') {
         Object.keys(itemCodeQuantities).forEach((groupIndex) => {
