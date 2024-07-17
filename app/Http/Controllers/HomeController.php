@@ -57,16 +57,12 @@ class HomeController extends Controller
                 return $groupIndex;
             });
 
-        // Calculate averages
-        $averageInventoryMonitoring = $this->calculateAverageInventoryMonitoring($comparisons);
-        $averageOTDC = $this->calculateAverageOTDC($vendorData);
-
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
         $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
 
-        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'averageInventoryMonitoring', 'averageOTDC', 'vendors', 'totalPlanned', 'totalActual'));
+        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual'));
     }
 
     public function indexCkd()
@@ -117,16 +113,12 @@ class HomeController extends Controller
                 return $groupIndex;
             });
 
-        // Calculate averages
-        $averageInventoryMonitoring = $this->calculateAverageInventoryMonitoring($comparisons);
-        $averageOTDC = $this->calculateAverageOTDC($vendorData);
-
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
         $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
 
-        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'averageInventoryMonitoring', 'averageOTDC', 'vendors', 'totalPlanned', 'totalActual'));
+        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual'));
     }
 
     public function indexCkdNouba()
@@ -177,16 +169,12 @@ class HomeController extends Controller
                 return $groupIndex;
             });
 
-        // Calculate averages
-        $averageInventoryMonitoring = $this->calculateAverageInventoryMonitoring($comparisons);
-        $averageOTDC = $this->calculateAverageOTDC($vendorData);
-
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
         $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
 
-        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'averageInventoryMonitoring', 'averageOTDC', 'vendors', 'totalPlanned', 'totalActual'));
+        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual'));
     }
 }
 
