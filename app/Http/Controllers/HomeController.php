@@ -124,13 +124,43 @@ class HomeController extends Controller
                 return $groupIndex;
             });
 
+        // Fetch variant code quantities from the inventories table
+        $variantCodeQuantities = DB::table('inventories')
+            ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
+            ->where('location_id', $locationId)
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->whereNotNull('variantCode') // Exclude null variantCode
+            ->groupBy('variantCode')
+            ->orderBy('variantCode')
+            ->get()
+            ->groupBy(function ($item) {
+                static $groupIndex = 0;
+                static $itemCount = 0;
+                if ($itemCount++ % 5 == 0) {
+                    $groupIndex++;
+                }
+                return $groupIndex;
+            });
+
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
         $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
 
-        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual'));
+         // Fetch vendor monthly summary
+         $itemNotArrived = DB::table('items_not_arrived')
+         ->whereMonth('planned_receiving_date', now()->month)
+         ->whereYear('planned_receiving_date', now()->year)
+         ->whereDate('planned_receiving_date', '<=', now()->toDateString())
+         ->where('location_id', $locationId)
+         ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
+         ->get();
+
+        return view('home.ckd', compact('itemNotArrived','itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
+
+
 
     public function indexCkdNouba()
     {
@@ -180,12 +210,40 @@ class HomeController extends Controller
                 return $groupIndex;
             });
 
+        // Fetch variant code quantities from the inventories table
+        $variantCodeQuantities = DB::table('inventories')
+            ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
+            ->where('location_id', $locationId)
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->whereNotNull('variantCode') // Exclude null variantCode
+            ->groupBy('variantCode')
+            ->orderBy('variantCode')
+            ->get()
+            ->groupBy(function ($item) {
+                static $groupIndex = 0;
+                static $itemCount = 0;
+                if ($itemCount++ % 5 == 0) {
+                    $groupIndex++;
+                }
+                return $groupIndex;
+            });
+
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
         $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
 
-        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual'));
+         // Fetch vendor monthly summary
+         $itemNotArrived = DB::table('items_not_arrived')
+         ->whereMonth('planned_receiving_date', now()->month)
+         ->whereYear('planned_receiving_date', now()->year)
+         ->whereDate('planned_receiving_date', '<=', now()->toDateString())
+         ->where('location_id', $locationId)
+         ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
+         ->get();
+
+        return view('home.ckd', compact('itemNotArrived','itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 }
 
