@@ -14,27 +14,30 @@ use Carbon\Carbon;
 class InventoryController extends Controller
 {
     public function index()
-{
-    $items = DB::table('inventories')
-        ->orderBy('created_at', 'desc')
-        ->get();
+    {
+        $items = DB::table('inventories')
+            ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
+            ->select('inventories.*', 'mst_locations.name as location_name')
+            ->orderBy('inventories.created_at', 'desc')
+            ->get();
 
-    $inventoryCodes = DB::table('inventories')
-        ->select('code')
-        ->distinct()
-        ->get();
+        $inventoryCodes = DB::table('inventories')
+            ->select('code')
+            ->distinct()
+            ->get();
 
-    // Fetch vendor names for each inventory item
-    $vendorNames = DB::table('inventory_items')
-        ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
-        ->groupBy('inventory_id')
-        ->get()
-        ->pluck('vendor_names', 'inventory_id'); // Pluck to get an associative array with inventory_id as key
+        // Fetch vendor names for each inventory item
+        $vendorNames = DB::table('inventory_items')
+            ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
+            ->groupBy('inventory_id')
+            ->get()
+            ->pluck('vendor_names', 'inventory_id'); // Pluck to get an associative array with inventory_id as key
 
-    $plannedItems = DB::table('planned_inventory_items')->get();
+        $plannedItems = DB::table('planned_inventory_items')->get();
 
-    return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
-}
+        return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
+    }
+
 
 
 

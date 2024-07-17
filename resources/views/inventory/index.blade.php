@@ -75,6 +75,7 @@
                                                         <th>No.</th>
                                                         <th>Product Code</th>
                                                         <th>Name</th>
+                                                        <th>Location</th>
                                                         <th>Quantity</th>
                                                         <th>Vendor Name</th>
                                                         <th>Status</th>
@@ -90,6 +91,7 @@
                                                         <td>{{ $no++ }}</td>
                                                         <td>{{ $data->code }}</td>
                                                         <td>{{ $data->name }}</td>
+                                                        <td>{{ $data->location_name }}</td>
                                                         <td>{{ $data->qty }}</td>
                                                         <td>
                                                             @php
