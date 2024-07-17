@@ -16,6 +16,23 @@ class HomeController extends Controller
         $currentYear = now()->year;
         $today = now()->format('Y-m-d');
 
+        // Get planned data
+        $plannedData = DB::table('planned_inventory_view')
+        ->whereMonth('planned_receiving_date', $currentMonth)
+        ->whereYear('planned_receiving_date', $currentYear)
+        ->where('location_id',$locationId)
+        ->get()
+        ->groupBy('item_code');
+
+        // Get actual data
+        $actualData = DB::table('actual_inventory_view')
+            ->whereMonth('receiving_date', $currentMonth)
+            ->whereYear('receiving_date', $currentYear)
+            ->whereDate('receiving_date', '<=', $today)
+            ->where('location_id',$locationId)
+            ->get()
+            ->groupBy('item_code');
+
         // Get comparisons for the current month until today
         $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
             ->whereYear('planned_receiving_date', $currentYear)
@@ -72,7 +89,7 @@ class HomeController extends Controller
 
 
 
-        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual','itemNotArrived'));
+        return view('home.index', compact('locationId','itemCodes','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual','itemNotArrived'));
     }
 
     public function indexCkd()
@@ -82,15 +99,22 @@ class HomeController extends Controller
         $currentYear = now()->year;
         $today = now()->format('Y-m-d');
 
-        // Get comparisons for the current month until today
-        $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
-            ->whereYear('planned_receiving_date', $currentYear)
-            ->whereDate('planned_receiving_date', '<=', $today)
-            ->where('id_location', $locationId)
-            ->get();
+        // Get planned data
+        $plannedData = DB::table('planned_inventory_view')
+        ->whereMonth('planned_receiving_date', $currentMonth)
+        ->whereYear('planned_receiving_date', $currentYear)
+        ->where('location_id',$locationId)
+        ->get()
+        ->groupBy('item_code');
 
-        // Group by item_code
-        $itemCodes = $comparisons->groupBy('item_code');
+        // Get actual data
+        $actualData = DB::table('actual_inventory_view')
+            ->whereMonth('receiving_date', $currentMonth)
+            ->whereYear('receiving_date', $currentYear)
+            ->whereDate('receiving_date', '<=', $today)
+            ->where('location_id',$locationId)
+            ->get()
+            ->groupBy('item_code');
 
         // Fetch the sum of planned and actual quantities grouped by vendor name and date for the current month until today
         $vendorData = DB::table('vendor_comparison')
@@ -156,7 +180,17 @@ class HomeController extends Controller
          ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
          ->get();
 
-        return view('home.ckd', compact('itemNotArrived','itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
+         // Get comparisons for the current month until today
+        $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
+        ->whereYear('planned_receiving_date', $currentYear)
+        ->whereDate('planned_receiving_date', '<=', $today)
+        ->where('id_location', $locationId)
+        ->get();
+
+    // Group by item_code
+    $itemCodes = $comparisons->groupBy('item_code');
+
+        return view('home.ckd', compact('locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 
 
@@ -168,15 +202,22 @@ class HomeController extends Controller
         $currentYear = now()->year;
         $today = now()->format('Y-m-d');
 
-        // Get comparisons for the current month until today
-        $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
-            ->whereYear('planned_receiving_date', $currentYear)
-            ->whereDate('planned_receiving_date', '<=', $today)
-            ->where('id_location', $locationId)
-            ->get();
+        // Get planned data
+        $plannedData = DB::table('planned_inventory_view')
+        ->whereMonth('planned_receiving_date', $currentMonth)
+        ->whereYear('planned_receiving_date', $currentYear)
+        ->where('location_id',$locationId)
+        ->get()
+        ->groupBy('item_code');
 
-        // Group by item_code
-        $itemCodes = $comparisons->groupBy('item_code');
+        // Get actual data
+        $actualData = DB::table('actual_inventory_view')
+            ->whereMonth('receiving_date', $currentMonth)
+            ->whereYear('receiving_date', $currentYear)
+            ->whereDate('receiving_date', '<=', $today)
+            ->where('location_id',$locationId)
+            ->get()
+            ->groupBy('item_code');
 
         // Fetch the sum of planned and actual quantities grouped by vendor name and date for the current month until today
         $vendorData = DB::table('vendor_comparison')
@@ -242,18 +283,17 @@ class HomeController extends Controller
          ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
          ->get();
 
-         // Fetch status counts
-            $statusCounts = DB::table('inventory_items')
-            ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories._id')
-            ->select('inventory_items.status', DB::raw('SUM(inventory_items.qty) as total_qty'))
-            ->where('inventories.location_id', $locationId)
-            ->whereMonth('inventory_items.receiving_date', $currentMonth)
-            ->whereYear('inventory_items.receiving_date', $currentYear)
-            ->groupBy('inventory_items.status')
-            ->get();
+         // Get comparisons for the current month until today
+        $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
+        ->whereYear('planned_receiving_date', $currentYear)
+        ->whereDate('planned_receiving_date', '<=', $today)
+        ->where('id_location', $locationId)
+        ->get();
 
+    // Group by item_code
+    $itemCodes = $comparisons->groupBy('item_code');
 
-        return view('home.ckd', compact('itemNotArrived','itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
+        return view('home.ckd', compact('locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 }
 

@@ -86,39 +86,46 @@
     <section class="content">
         <div class="container-fluid px-4 mt-n10">
             <div class="row">
-                <!-- Inventory Monitoring Carousel -->
-                <div class="col-md-6 mb-2">
+                 <!-- Inventory Monitoring Carousel -->
+                 <div class="col-md-6 mb-2">
                     <div class="card card-custom">
                         <div class="card-header">
                             <h4>Inventory Monitoring</h4>
                         </div>
                         <div class="card-body">
-
-
                             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-indicators">
-                                    @foreach ($itemCodes as $itemCode => $comparisons)
+                                    @foreach ($plannedData as $itemCode => $comparisons)
                                         <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
                                     @endforeach
                                 </div>
                                 <div class="carousel-inner">
-                                    @foreach ($itemCodes as $itemCode => $comparisons)
-                                        @php
-                                            $totalPercentage = 0;
-                                            $count = 0;
-                                            $today = now()->format('Y-m-d');
-                                            foreach ($comparisons as $comparison) {
-                                                if ($comparison->planned_receiving_date <= $today) {
-                                                    $planned = $comparison->planned_qty;
-                                                    $actual = $comparison->received_qty;
-                                                    if ($planned > 0) {
-                                                        $totalPercentage += ($actual / $planned) * 100;
-                                                        $count++;
-                                                    }
-                                                }
-                                            }
-                                            $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                                        @endphp
+                                    @foreach ($plannedData as $itemCode => $comparisons)
+
+                                    @php
+                                    // Mengambil data dari database
+                                    $comparisons = DB::table('inventory_comparison')
+                                        ->where('id_location', $locationId)
+                                        ->where('inventory_id', $comparisons[0]->inventory_id )
+                                        ->get();
+
+                                    // Inisialisasi variabel untuk menghitung total persentase dan jumlah entri
+                                    $totalPercentage = 0;
+                                    $count = 0;
+                                    $today = now()->format('Y-m-d');
+
+                                    // Loop melalui setiap entri dalam $comparisons
+                                    foreach ($comparisons as $comparison) {
+                                        // Memastikan bahwa hanya data hingga hari ini yang dihitung
+                                        if ($comparison->receiving_date <= $today) {
+                                            $totalPercentage += $comparison->percentage;
+                                            $count++;
+                                        }
+                                    }
+                                    // Menghitung rata-rata persentase
+                                    $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                                @endphp
+
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                             <div class="row">
                                                 <div class="col-md-8">
@@ -169,7 +176,6 @@
                                     <span class="visually-hidden">Next</span>
                                 </button>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -389,6 +395,8 @@
     const totalActual = @json($totalActual);
     const month = new Date().toLocaleString('default', { month: 'long' });
     const today = new Date().getDate(); // Get today's date
+    const groupedPlannedData = @json($plannedData);
+    const groupedActualData = @json($actualData);
 
     console.log('Grouped Comparisons:', groupedComparisons);
     console.log('Vendor Data:', vendorData);
@@ -396,6 +404,7 @@
     console.log('Vendors:', vendors);
     console.log('Total Planned:', totalPlanned);
     console.log('Total Actual:', totalActual);
+
 
     const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
@@ -418,142 +427,138 @@
         }
     };
 
-    if (typeof groupedComparisons === 'object') {
-        Object.keys(groupedComparisons).forEach((itemCode) => {
-            console.log('Processing item code:', itemCode);
+    if (typeof groupedPlannedData === 'object' && typeof groupedActualData === 'object') {
+                    Object.keys(groupedPlannedData).forEach((itemCode) => {
+                        const plannedComparisons = groupedPlannedData[itemCode];
+                        const actualComparisons = groupedActualData[itemCode] || [];
 
-            const comparisons = groupedComparisons[itemCode];
-            const plannedData = Array(31).fill(null);
-            const actualData = Array(31).fill(null);
-            const percentageDifference = Array(31).fill(0); // Default value set to 0%
+                        const plannedData = Array(31).fill(null);
+                        const actualData = Array(31).fill(null);
+                        const percentageDifference = Array(31).fill(0);
 
-            comparisons.forEach((comparison, index) => {
-                const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
-                const actualDay = new Date(comparison.receiving_date).getDate() - 1;
-                if (plannedDay < today) { // Ensure calculations are done only up to today's date
-                    plannedData[plannedDay] = comparison.planned_qty;
-                    actualData[actualDay] = comparison.received_qty;
-                }
-            });
+                        plannedComparisons.forEach((comparison) => {
+                            const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
+                            plannedData[plannedDay] = comparison.planned_qty;
+                        });
 
-            console.log(`Planned Data for ${itemCode}:`, plannedData);
-            console.log(`Actual Data for ${itemCode}:`, actualData);
+                        actualComparisons.forEach((comparison) => {
+                            const actualDay = new Date(comparison.receiving_date).getDate() - 1;
+                            actualData[actualDay] = comparison.received_qty;
+                        });
 
-            plannedData.forEach((value, index) => {
-                if (value !== null && actualData[index] !== null) {
-                    const percentage = Math.min((actualData[index] / value) * 100, 100); // Ensure percentage does not exceed 100%
-                    percentageDifference[index] = percentage !== 0 ? percentage : 0; // Set to 0% if percentage is 0%
-                }
-            });
-
-            console.log(`Percentage Difference for ${itemCode}:`, percentageDifference);
-
-            const ctx = document.getElementById(`chart-${itemCode}`).getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: getDefaultLabels(),
-                    datasets: [{
-                        label: 'Planned Stock',
-                        data: plannedData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 1
-                    },
-                    {
-                        label: 'Actual Stock',
-                        data: actualData,
-                        backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        order: 2
-                    },
-                    {
-                        label: 'Percentage Accuracy',
-                        data: percentageDifference,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        fill: false,
-                        type: 'line',
-                        yAxisID: 'y-axis-2',
-                        order: 0,
-                        borderWidth: 2 // Increase the line thickness here
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: false,
-                            categoryPercentage: 0.5,
-                            barPercentage: 0.5,
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0,
-                                callback: function(value, index, values) {
-                                    return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                                }
+                        plannedData.forEach((value, index) => {
+                            if (value !== null && actualData[index] !== null) {
+                                const percentage = Math.min((actualData[index] / value) * 100, 100);
+                                percentageDifference[index] = percentage !== 0 ? percentage : 0;
                             }
-                        },
-                        y: {
-                            stacked: false,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Stock Quantity'
-                            }
-                        },
-                        'y-axis-2': {
-                            stacked: false,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Percentage'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    let title = tooltipItems[0].label || '';
-                                    title += ` ${month}`;
-                                    return title;
+                        });
+
+                        const ctx = document.getElementById(`chart-${itemCode}`).getContext('2d');
+                        const myChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: getDefaultLabels(),
+                                datasets: [{
+                                    label: 'Planned Stock',
+                                    data: plannedData,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1,
+                                    type: 'bar',
+                                    order: 1
                                 },
-                                label: function(context) {
-                                    if (context.dataset.label === 'Percentage Accuracy') {
-                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                                {
+                                    label: 'Actual Stock',
+                                    data: actualData,
+                                    backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                                    borderColor: 'rgba(255, 159, 64, 1)',
+                                    borderWidth: 1,
+                                    type: 'bar',
+                                    order: 2
+                                },
+                                {
+                                    label: 'Percentage Accuracy',
+                                    data: percentageDifference,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                    fill: false,
+                                    type: 'line',
+                                    yAxisID: 'y-axis-2',
+                                    order: 0,
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        stacked: false,
+                                        categoryPercentage: 0.5,
+                                        barPercentage: 0.5,
+                                        ticks: {
+                                            autoSkip: false,
+                                            maxRotation: 0,
+                                            minRotation: 0,
+                                            callback: function(value, index, values) {
+                                                return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
+                                            }
+                                        }
+                                    },
+                                    y: {
+                                        stacked: false,
+                                        position: 'left',
+                                        title: {
+                                            display: true,
+                                            text: 'Stock Quantity'
+                                        }
+                                    },
+                                    'y-axis-2': {
+                                        stacked: false,
+                                        position: 'right',
+                                        title: {
+                                            display: true,
+                                            text: 'Percentage'
+                                        },
+                                        grid: {
+                                            drawOnChartArea: false
+                                        },
+                                        ticks: {
+                                            callback: function(value) {
+                                                return value + '%';
+                                            }
+                                        }
                                     }
-                                    return context.raw;
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            title: function(tooltipItems) {
+                                                let title = tooltipItems[0].label || '';
+                                                title += ` ${month}`;
+                                                return title;
+                                            },
+                                            label: function(context) {
+                                                if (context.dataset.label === 'Percentage Accuracy') {
+                                                    return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                                                }
+                                                return context.raw;
+                                            }
+                                        }
+                                    },
+                                    legend: {
+                                        labels: {
+                                            filter: function(item, chart) {
+                                                return item.text !== 'Percentage Accuracy';
+                                            }
+                                        }
+                                    }
                                 }
-                            }
-                        },
-                        legend: {
-                            labels: {
-                                filter: function(item, chart) {
-                                    return item.text !== 'Percentage Accuracy';
-                                }
-                            }
-                        }
-                    }
-                },
-                plugins: [addDottedLinePlugin]
-            });
-        });
-    }
+                            },
+                            plugins: [addDottedLinePlugin]
+                        });
+                    });
+                }
 
     if (typeof vendorData === 'object') {
         Object.keys(vendorData).forEach((vendorName) => {
