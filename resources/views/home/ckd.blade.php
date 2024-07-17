@@ -197,18 +197,23 @@
                                 </div>
                                 <div class="carousel-inner">
                                     @foreach ($vendorData as $vendorName => $data)
-                                        @php
-                                            $totalPercentage = 0;
-                                            $count = 0;
-                                            $today = now()->format('Y-m-d');
-                                            foreach ($data as $entry) {
-                                                if ($entry->date <= $today) {
-                                                    $totalPercentage += $entry->percentage;
-                                                    $count++;
+                                    @php
+                                        $totalPercentage = 0;
+                                        $count = 0;
+                                        $today = now()->format('Y-m-d');
+                                        foreach ($data as $entry) {
+                                            if ($entry->date <= $today) {
+                                                // Check if planning data is not available but actual data is present, or actual data exceeds planning data
+                                                if (!isset($entry->planning) || $entry->actual > $entry->planning) {
+                                                    $entry->percentage = 100;
                                                 }
+                                                $totalPercentage += $entry->percentage;
+                                                $count++;
                                             }
-                                            $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                                        @endphp
+                                        }
+                                        $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                                    @endphp
+
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                             <div class="row">
                                                 <div class="col-md-8">
