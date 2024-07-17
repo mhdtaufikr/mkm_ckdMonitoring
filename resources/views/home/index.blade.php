@@ -102,8 +102,6 @@
                                 <div class="carousel-inner">
                                     @foreach ($plannedData as $itemCode => $comparisons)
 
-                                    @foreach ($plannedData as $itemCode => $comparisons)
-
                                     @php
                                     // Mengambil data dari database
                                     $comparisons = DB::table('inventory_comparison')
@@ -120,20 +118,13 @@
                                     foreach ($comparisons as $comparison) {
                                         // Memastikan bahwa hanya data hingga hari ini yang dihitung
                                         if ($comparison->receiving_date <= $today) {
-                                            // Check if planning data is not available but actual data is present, or actual data exceeds planning data
-                                            if (!isset($comparison->planned_qty) || $comparison->received_qty > $comparison->planned_qty) {
-                                                $comparison->percentage = 100;
-                                            }
                                             $totalPercentage += $comparison->percentage;
                                             $count++;
                                         }
                                     }
                                     // Menghitung rata-rata persentase
                                     $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                                    @endphp
-
-                                @endforeach
-
+                                @endphp
 
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                             <div class="row">
