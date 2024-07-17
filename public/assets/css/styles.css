@@ -15937,8 +15937,8 @@ body {
 }
 
 .bg-gradient-primary-to-secondary {
-  background-color: #000 !important; /* Change to black */
-  background-image:  linear-gradient(90deg, rgba(53,53,65,1) 0%, rgba(157,157,147,1) 62%, rgba(127,128,128,1) 100%) !important; /* Gradient from black to red */
+    background: rgb(0,191,255);
+    background: linear-gradient(90deg, rgba(0,191,255,1) 0%, rgba(0,191,255,1) 27%, rgba(0,134,255,1) 80%);
 }
 
 
