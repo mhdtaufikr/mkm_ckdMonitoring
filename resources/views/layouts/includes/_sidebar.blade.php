@@ -17,6 +17,10 @@
                         <a class="nav-link" href="{{url('/home/ckd/nouba')}}">CKD Nouba</a>
                     </nav>
                 </div>
+                <a class="nav-link" href="{{url('/inventory')}}">
+                    <div class="nav-link-icon"><i class="fas fa-warehouse"></i></div>
+                    Inventory
+                </a>
                 @if(\Auth::user()->role === 'Super Admin' || \Auth::user()->role === 'IT')
                  <!-- Sidenav Menu Heading (Master)-->
                  <div class="sidenav-menu-heading">Master</div>
