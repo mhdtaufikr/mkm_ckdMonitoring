@@ -109,12 +109,24 @@
                                                                 @endif
                                                             </td>
                                                             <td>
-                                                                <a href="{{ route('inventory.details', $data->_id) }}" class="btn btn-primary btn-sm" title="Details">
-                                                                    <i class="fas fa-info-circle"></i>
-                                                                </a>
-                                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editPlannedReceiveModal" data-id="{{ $data->_id }}" title="Edit Planned Receive">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </button>
+                                                                <div class="btn-group">
+                                                                    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        Actions
+                                                                    </button>
+                                                                    <ul class="dropdown-menu">
+                                                                        <li>
+                                                                            <a class="dropdown-item" href="{{ route('inventory.details', $data->_id) }}" title="Details">
+                                                                                <i class="fas fa-info-circle" style="margin-right: 5px;"></i> Details
+                                                                            </a>
+                                                                        </li>
+                                                                        <li>
+                                                                            <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editPlannedReceiveModal" data-id="{{ $data->_id }}" title="Edit Planned Receive">
+                                                                                <i class="fas fa-edit" style="margin-right: 5px;"></i> Edit Planned Receive
+                                                                            </button>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+
 
                                                             </td>
                                                         </tr>
