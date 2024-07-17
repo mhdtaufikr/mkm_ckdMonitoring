@@ -15,7 +15,7 @@ class InventoryController extends Controller
 {
     public function index()
     {
-        $items = Inventory::with(['plannedInventoryItems' => function($query) {
+        $items = Inventory::with(['inventoryItems' => function($query) {
             $query->orderBy('created_at', 'desc');
         }])->orderBy('created_at', 'desc')->get();
 
