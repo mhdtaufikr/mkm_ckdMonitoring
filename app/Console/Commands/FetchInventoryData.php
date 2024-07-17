@@ -37,7 +37,6 @@ class FetchInventoryData extends Command
             if ($response->successful()) {
                 $data = $response->json();
                 $items = $data['collection']['data'];
-
                 foreach ($items as $item) {
                     // Ensure location exists
                     $location = MstLocation::updateOrCreate(
@@ -59,6 +58,7 @@ class FetchInventoryData extends Command
                             'code' => $item['code'],
                             'name' => $item['name'],
                             'qty' => $item['qty'],
+                            'variantCode' => $item['custom_field']['variantCode'] ?? null,
                             'location_id' => $item['location_id'],
                             'organization_id' => $item['organization_id'],
                             'updated_at' => $item['updated_at'],
@@ -76,3 +76,4 @@ class FetchInventoryData extends Command
         $this->info('Inventory data fetched and stored successfully.');
     }
 }
+

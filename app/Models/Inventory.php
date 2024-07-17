@@ -13,7 +13,7 @@ class Inventory extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        '_id', 'code', 'name', 'qty', 'location_id', 'organization_id', 'updated_at', 'created_at'
+        '_id', 'code', 'name', 'qty', 'location_id', 'organization_id', 'updated_at', 'created_at','variantCode'
     ];
 
     public function mstLocation()
