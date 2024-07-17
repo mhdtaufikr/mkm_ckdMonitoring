@@ -106,12 +106,15 @@
                                         @php
                                             $totalPercentage = 0;
                                             $count = 0;
+                                            $today = now()->format('Y-m-d');
                                             foreach ($comparisons as $comparison) {
-                                                $planned = $comparison->planned_qty;
-                                                $actual = $comparison->received_qty;
-                                                if ($planned > 0) {
-                                                    $totalPercentage += ($actual / $planned) * 100;
-                                                    $count++;
+                                                if ($comparison->planned_receiving_date <= $today) {
+                                                    $planned = $comparison->planned_qty;
+                                                    $actual = $comparison->received_qty;
+                                                    if ($planned > 0) {
+                                                        $totalPercentage += ($actual / $planned) * 100;
+                                                        $count++;
+                                                    }
                                                 }
                                             }
                                             $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
@@ -167,6 +170,7 @@
                                 </button>
                             </div>
 
+
                         </div>
                     </div>
                 </div>
@@ -191,9 +195,12 @@
                                         @php
                                             $totalPercentage = 0;
                                             $count = 0;
+                                            $today = now()->format('Y-m-d');
                                             foreach ($data as $entry) {
-                                                $totalPercentage += $entry->percentage;
-                                                $count++;
+                                                if ($entry->date <= $today) {
+                                                    $totalPercentage += $entry->percentage;
+                                                    $count++;
+                                                }
                                             }
                                             $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
                                         @endphp
@@ -247,6 +254,7 @@
                                     <span class="visually-hidden">Next</span>
                                 </button>
                             </div>
+
 
                         </div>
                     </div>
