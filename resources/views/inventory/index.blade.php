@@ -86,16 +86,16 @@
                                                         $no = 1;
                                                     @endphp
                                                     @foreach ($items as $data)
-                                                        <tr>
-                                                            <td>{{ $no++ }}</td>
-                                                            <td>{{ $data->code }}</td>
-                                                            <td>{{ $data->name }}</td>
-                                                            <td>{{ $data->qty }}</td>
-                                                            <td>
-                                                                @php
-                                                                    $vendorNames = $data->plannedInventoryItems->unique('vendor_name')->pluck('vendor_name')->implode(', ');
-                                                                @endphp
-                                                                {{ $vendorNames }}
+                                                    <tr>
+                                                        <td>{{ $no++ }}</td>
+                                                        <td>{{ $data->code }}</td>
+                                                        <td>{{ $data->name }}</td>
+                                                        <td>{{ $data->qty }}</td>
+                                                        <td>
+                                                            @php
+                                                                $vendorNamesList = $vendorNames[$data->_id] ?? '';
+                                                            @endphp
+                                                            {{ $vendorNamesList }}
                                                             </td>
                                                             <td>
                                                                 @if ($data->qty > 999)
