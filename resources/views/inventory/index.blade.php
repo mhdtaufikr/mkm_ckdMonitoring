@@ -109,8 +109,13 @@
                                                                 @endif
                                                             </td>
                                                             <td>
-                                                                <a href="{{ route('inventory.details', $data->_id) }}" class="btn btn-primary btn-sm">Details</a>
-                                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editPlannedReceiveModal" data-id="{{ $data->_id }}">Edit Planned Receive</button>
+                                                                <a href="{{ route('inventory.details', $data->_id) }}" class="btn btn-primary btn-sm" title="Details">
+                                                                    <i class="fas fa-info-circle"></i>
+                                                                </a>
+                                                                <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editPlannedReceiveModal" data-id="{{ $data->_id }}" title="Edit Planned Receive">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </button>
+
                                                             </td>
                                                         </tr>
                                                     @endforeach

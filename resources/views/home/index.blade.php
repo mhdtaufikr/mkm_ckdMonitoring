@@ -102,6 +102,8 @@
                                 <div class="carousel-inner">
                                     @foreach ($plannedData as $itemCode => $comparisons)
 
+                                    @foreach ($plannedData as $itemCode => $comparisons)
+
                                     @php
                                     // Mengambil data dari database
                                     $comparisons = DB::table('inventory_comparison')
@@ -118,13 +120,20 @@
                                     foreach ($comparisons as $comparison) {
                                         // Memastikan bahwa hanya data hingga hari ini yang dihitung
                                         if ($comparison->receiving_date <= $today) {
+                                            // Check if planning data is not available but actual data is present, or actual data exceeds planning data
+                                            if (!isset($comparison->planned_qty) || $comparison->received_qty > $comparison->planned_qty) {
+                                                $comparison->percentage = 100;
+                                            }
                                             $totalPercentage += $comparison->percentage;
                                             $count++;
                                         }
                                     }
                                     // Menghitung rata-rata persentase
                                     $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                                @endphp
+                                    @endphp
+
+                                @endforeach
+
 
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                             <div class="row">
@@ -315,57 +324,58 @@
                     </div>
                 </div>
 
-                    <div class="col-12">
-                      <div class="card">
-                        <div class="card-header">
-                          <h3 class="card-title">List of Item Balance Item</h3>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header" data-bs-toggle="collapse" href="#collapseCard" role="button" aria-expanded="false" aria-controls="collapseCard">
+                            <h3 class="card-title">List of Item Balance Item</h3>
                         </div>
 
                         <!-- /.card-header -->
-                        <div class="card-body">
-                          <div class="row">
-                              <div class="mb-3 col-sm-12">
-
-                          </div>
-                          <div class="table-responsive">
-                          <table id="tableUser" class="table table-bordered table-striped">
-                            <thead>
-                            <tr>
-                              <th>No</th>
-                              <th>Item Code</th>
-                              <th>Vendor Name</th>
-                              <th>Planned Receiving Date</th>
-                              <th>Planned Quantity</th>
-                              <th>Received Quantity</th>
-                              <th>Balance</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                              @php
-                                $no=1;
-                              @endphp
-                              @foreach ($itemNotArrived as $notArrived)
-                              <tr>
-                                  <td>{{ $no++ }}</td>
-                                  <td>{{ $notArrived->item_code }}</td>
-                                  <td>{{ $notArrived->vendor_name }}</td>
-                                  <td>{{ date('d M Y', strtotime($notArrived->planned_receiving_date)) }}</td>
-                                  <td>{{ $notArrived->planned_qty }}</td>
-                                  <td>{{ $notArrived->received_qty }}</td>
-                                  <td>{{ $notArrived->balance }}</td>
-                              </tr>
-
-                              @endforeach
-                            </tbody>
-                          </table>
+                        <div id="collapseCard" class="collapse">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="mb-3 col-sm-12">
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table id="tableUser" class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th>Item Code</th>
+                                                    <th>Vendor Name</th>
+                                                    <th>Planned Receiving Date</th>
+                                                    <th>Planned Quantity</th>
+                                                    <th>Received Quantity</th>
+                                                    <th>Balance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @php
+                                                    $no = 1;
+                                                @endphp
+                                                @foreach ($itemNotArrived as $notArrived)
+                                                    <tr>
+                                                        <td>{{ $no++ }}</td>
+                                                        <td>{{ $notArrived->item_code }}</td>
+                                                        <td>{{ $notArrived->vendor_name }}</td>
+                                                        <td>{{ date('d M Y', strtotime($notArrived->planned_receiving_date)) }}</td>
+                                                        <td>{{ $notArrived->planned_qty }}</td>
+                                                        <td>{{ $notArrived->received_qty }}</td>
+                                                        <td>{{ $notArrived->balance }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
                         </div>
-                        </div>
-                        <!-- /.card-body -->
-                      </div>
-                      <!-- /.card -->
+                        <!-- /.card -->
                     </div>
                     <!-- /.col -->
-                  </div>
+                </div>
+
 
             </div>
         </div>
