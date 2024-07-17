@@ -69,32 +69,6 @@ class HomeController extends Controller
         return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'averageInventoryMonitoring', 'averageOTDC', 'vendors', 'totalPlanned', 'totalActual'));
     }
 
-    private function calculateAverageInventoryMonitoring($comparisons)
-    {
-        $today = now()->format('Y-m-d');
-        $filteredComparisons = $comparisons->filter(function ($comparison) use ($today) {
-            return $comparison->planned_receiving_date <= $today;
-        });
-
-        $totalPlannedQtyInventory = $filteredComparisons->sum('planned_qty');
-        $totalReceivedQtyInventory = $filteredComparisons->sum('received_qty'); // assuming you have received_qty column
-        return ($totalPlannedQtyInventory > 0) ? ($totalReceivedQtyInventory / $totalPlannedQtyInventory) * 100 : 0;
-    }
-
-    private function calculateAverageOTDC($vendorData)
-    {
-        $today = now()->format('Y-m-d');
-        $flattenedData = $vendorData->flatten();
-        $filteredData = $flattenedData->filter(function ($data) use ($today) {
-            return $data->date <= $today;
-        });
-
-        $totalPlannedQtyOTDC = $filteredData->sum('total_planned_qty');
-        $totalReceivedQtyOTDC = $filteredData->sum('total_actual_qty');
-        return ($totalPlannedQtyOTDC > 0) ? ($totalReceivedQtyOTDC / $totalPlannedQtyOTDC) * 100 : 0;
-    }
-
-
     public function indexCkd()
     {
         $locationId = '65a72c7fad782dc26a0626f6';
@@ -214,8 +188,5 @@ class HomeController extends Controller
 
         return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'averageInventoryMonitoring', 'averageOTDC', 'vendors', 'totalPlanned', 'totalActual'));
     }
-
-
-
 }
 
