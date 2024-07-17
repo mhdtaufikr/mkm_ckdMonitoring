@@ -62,7 +62,18 @@ class HomeController extends Controller
         $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
 
-        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual'));
+        // Fetch vendor monthly summary
+        $itemNotArrived = DB::table('items_not_arrived')
+        ->whereMonth('planned_receiving_date', now()->month)
+        ->whereYear('planned_receiving_date', now()->year)
+        ->whereDate('planned_receiving_date', '<=', now()->toDateString())
+        ->where('location_id', $locationId)
+        ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
+        ->get();
+
+
+
+        return view('home.index', compact('itemCodes', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual','itemNotArrived'));
     }
 
     public function indexCkd()

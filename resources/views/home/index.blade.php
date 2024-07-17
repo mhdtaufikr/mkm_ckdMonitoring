@@ -309,12 +309,76 @@
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-12">
+                      <div class="card">
+                        <div class="card-header">
+                          <h3 class="card-title">List of Item Balance Item</h3>
+                        </div>
+
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                          <div class="row">
+                              <div class="mb-3 col-sm-12">
+
+                          </div>
+                          <div class="table-responsive">
+                          <table id="tableUser" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                              <th>No</th>
+                              <th>Item Code</th>
+                              <th>Vendor Name</th>
+                              <th>Planned Receiving Date</th>
+                              <th>Planned Quantity</th>
+                              <th>Received Quantity</th>
+                              <th>Balance</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                              @php
+                                $no=1;
+                              @endphp
+                              @foreach ($itemNotArrived as $notArrived)
+                              <tr>
+                                  <td>{{ $no++ }}</td>
+                                  <td>{{ $notArrived->item_code }}</td>
+                                  <td>{{ $notArrived->vendor_name }}</td>
+                                  <td>{{ date('d M Y', strtotime($notArrived->planned_receiving_date)) }}</td>
+                                  <td>{{ $notArrived->planned_qty }}</td>
+                                  <td>{{ $notArrived->received_qty }}</td>
+                                  <td>{{ $notArrived->balance }}</td>
+                              </tr>
+
+                              @endforeach
+                            </tbody>
+                          </table>
+                        </div>
+                        </div>
+                        <!-- /.card-body -->
+                      </div>
+                      <!-- /.card -->
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                </div>
+
             </div>
         </div>
         <!-- /.container-fluid -->
     </section>
 </main>
-
+<script>
+    $(document).ready(function() {
+      var table = $("#tableUser").DataTable({
+        "responsive": true,
+        "lengthChange": false,
+        "autoWidth": false,
+        // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+      });
+    });
+  </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
