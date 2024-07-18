@@ -96,22 +96,26 @@ class InventoryController extends Controller
     // Delete existing planned receive items for this inventory
     PlannedInventoryItem::where('inventory_id', $inventoryId)->delete();
 
-    // Insert new planned receive items
-    foreach ($plannedDates as $index => $date) {
-        $existingItem = $existingItemsMap->get($date);
+    // Check if there are planned dates provided in the request
+    if ($plannedDates) {
+        // Insert new planned receive items
+        foreach ($plannedDates as $index => $date) {
+            $existingItem = $existingItemsMap->get($date);
 
-        PlannedInventoryItem::create([
-            '_id' => uniqid(),
-            'inventory_id' => $inventoryId,
-            'planned_receiving_date' => $date,
-            'planned_qty' => $plannedQtys[$index],
-            'vendor_name' => $vendorNames[$index] ?? ($existingItem ? $existingItem->vendor_name : null),
-            'status' => $statuses[$index] ?? ($existingItem ? $existingItem->status : 'Pending'), // Set a default status if not available
-        ]);
+            PlannedInventoryItem::create([
+                '_id' => uniqid(),
+                'inventory_id' => $inventoryId,
+                'planned_receiving_date' => $date,
+                'planned_qty' => $plannedQtys[$index],
+                'vendor_name' => $vendorNames[$index] ?? ($existingItem ? $existingItem->vendor_name : null),
+                'status' => $statuses[$index] ?? ($existingItem ? $existingItem->status : 'Pending'), // Set a default status if not available
+            ]);
+        }
     }
 
     return redirect()->route('inventory.index')->with('status', 'Planned receive updated successfully.');
 }
+
 
 
 
