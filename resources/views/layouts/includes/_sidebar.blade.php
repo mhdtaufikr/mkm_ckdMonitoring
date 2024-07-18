@@ -15,6 +15,7 @@
                         <a class="nav-link" href="{{url('/home')}}">Raw Material</a>
                         <a class="nav-link" href="{{url('/home/ckd')}}">CKD Stamping</a>
                         <a class="nav-link" href="{{url('/home/ckd/nouba')}}">CKD Nouba</a>
+                        <a class="nav-link" href="{{url('/home/l305')}}">L305</a>
                     </nav>
                 </div>
                 <a class="nav-link" href="{{url('/inventory')}}">
