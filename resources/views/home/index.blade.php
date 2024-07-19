@@ -101,30 +101,32 @@
                                 </div>
                                 <div class="carousel-inner">
                                     @foreach ($plannedData as $itemCode => $comparisons)
-
                                     @php
-                                    // Mengambil data dari database
-                                    $comparisons = DB::table('inventory_comparison')
+                                    // Mengambil data dari view_comparison
+                                    $comparisons = DB::table('view_comparison')
                                         ->where('id_location', $locationId)
-                                        ->where('inventory_id', $comparisons[0]->inventory_id )
+                                        ->where('model', $model)
+                                        ->whereDate('date', '<=', now()->format('Y-m-d'))
                                         ->get();
 
                                     // Inisialisasi variabel untuk menghitung total persentase dan jumlah entri
                                     $totalPercentage = 0;
                                     $count = 0;
-                                    $today = now()->format('Y-m-d');
+                                    $totalPlannedQty = 0;
+                                    $totalActualQty = 0;
 
                                     // Loop melalui setiap entri dalam $comparisons
                                     foreach ($comparisons as $comparison) {
-                                        // Memastikan bahwa hanya data hingga hari ini yang dihitung
-                                        if ($comparison->receiving_date <= $today) {
-                                            $totalPercentage += $comparison->percentage;
-                                            $count++;
-                                        }
+                                        $totalPlannedQty += $comparison->total_planned_qty;
+                                        $totalActualQty += $comparison->total_actual_qty;
+                                        $totalPercentage += $comparison->percentage;
+                                        $count++;
                                     }
+
                                     // Menghitung rata-rata persentase
                                     $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
                                 @endphp
+
 
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                             <div class="row">

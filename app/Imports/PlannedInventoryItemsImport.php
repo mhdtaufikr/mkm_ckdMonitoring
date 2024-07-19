@@ -82,7 +82,7 @@ class PlannedInventoryItemsImport implements ToModel, WithHeadingRow
                                         'planned_receiving_date' => $plannedReceivingDate,
                                         'planned_qty' => $splitQty,
                                         'status' => 'planned',
-                                        'vendor_name' => $row['vendor_name']
+                                        'vendor_name' => 'SENOPATI'
                                     ]);
                                 }
                             }
