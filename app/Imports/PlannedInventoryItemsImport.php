@@ -27,13 +27,38 @@ class PlannedInventoryItemsImport implements ToModel, WithHeadingRow
                     ->where('code', 'like', '%' . $productCodeSuffix)
                     ->get();
 
-                // Hitung jumlah produk dengan kode belakang yang sesuai
-                $count = $inventories->count();
+                // Jika tidak ditemukan inventory, buat inventory baru
+                if ($inventories->isEmpty()) {
+                    $inventory = Inventory::create([
+                        '_id' => uniqid(),
+                        'code' => $row['product_code'],
+                        'location_id' => $row['location_id'],
+                        'name' => 'Auto-generated',
+                        'qty' => 0,  // Assume 0 for the quantity, you may adjust as needed
+                        'organization_id' => 'auto-generated',  // Adjust as needed
+                    ]);
 
-                if ($count > 0) {
                     foreach (range(1, 31) as $day) {
                         $plannedQty = $row[(string)$day];
-                        if ($plannedQty) {  // Proses hanya jika ada quantity yang direncanakan
+                        if (is_numeric($plannedQty) && $plannedQty > 0) {  // Proses hanya jika ada quantity yang direncanakan
+                            $plannedReceivingDate = $currentMonth . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                            PlannedInventoryItem::create([
+                                '_id' => uniqid(),
+                                'inventory_id' => $inventory->_id,
+                                'planned_receiving_date' => $plannedReceivingDate,
+                                'planned_qty' => (int) $plannedQty,
+                                'status' => 'planned',
+                                'vendor_name' => $row['vendor_name']
+                            ]);
+                        }
+                    }
+                } else {
+                    // Hitung jumlah produk dengan kode belakang yang sesuai
+                    $count = $inventories->count();
+
+                    foreach (range(1, 31) as $day) {
+                        $plannedQty = $row[(string)$day];
+                        if (is_numeric($plannedQty) && $plannedQty > 0) {  // Proses hanya jika ada quantity yang direncanakan
                             $splitQty = $plannedQty / $count;
                             $plannedReceivingDate = $currentMonth . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
 
@@ -63,44 +88,50 @@ class PlannedInventoryItemsImport implements ToModel, WithHeadingRow
                             }
                         }
                     }
-                } else {
-                    throw new Exception("No inventories found with suffix {$productCodeSuffix} for location {$row['location_id']}");
                 }
             } else {
                 // Logika sebelumnya untuk location_id yang tidak spesial
                 $inventory = Inventory::where('code', $row['product_code'])->where('location_id', $row['location_id'])->first();
 
-                if ($inventory) {
-                    foreach (range(1, 31) as $day) {
-                        $plannedQty = $row[(string)$day];
-                        if ($plannedQty) {  // Hanya proses jika ada quantity yang direncanakan
-                            $plannedReceivingDate = $currentMonth . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
-                            $plannedItem = PlannedInventoryItem::where('inventory_id', $inventory->_id)
-                                ->where('planned_receiving_date', $plannedReceivingDate)
-                                ->first();
+                if (!$inventory) {
+                    // Create a new inventory record if not found
+                    $inventory = Inventory::create([
+                        '_id' => uniqid(),
+                        'code' => $row['product_code'],
+                        'location_id' => $row['location_id'],
+                        'name' => 'Auto-generated',
+                        'qty' => 0,  // Assume 0 for the quantity, you may adjust as needed
+                        'organization_id' => 'auto-generated',  // Adjust as needed
+                    ]);
+                }
 
-                            if ($plannedItem) {
-                                // Update existing planned item
-                                $plannedItem->update([
-                                    'planned_qty' => $plannedQty,
-                                    'status' => 'planned',
-                                    'vendor_name' => $row['vendor_name']
-                                ]);
-                            } else {
-                                // Create new planned item
-                                PlannedInventoryItem::create([
-                                    '_id' => uniqid(),
-                                    'inventory_id' => $inventory->_id,
-                                    'planned_receiving_date' => $plannedReceivingDate,
-                                    'planned_qty' => $plannedQty,
-                                    'status' => 'planned',
-                                    'vendor_name' => $row['vendor_name']
-                                ]);
-                            }
+                foreach (range(1, 31) as $day) {
+                    $plannedQty = $row[(string)$day];
+                    if (is_numeric($plannedQty) && $plannedQty > 0) {  // Hanya proses jika ada quantity yang direncanakan
+                        $plannedReceivingDate = $currentMonth . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                        $plannedItem = PlannedInventoryItem::where('inventory_id', $inventory->_id)
+                            ->where('planned_receiving_date', $plannedReceivingDate)
+                            ->first();
+
+                        if ($plannedItem) {
+                            // Update existing planned item
+                            $plannedItem->update([
+                                'planned_qty' => $plannedQty,
+                                'status' => 'planned',
+                                'vendor_name' => $row['vendor_name']
+                            ]);
+                        } else {
+                            // Create new planned item
+                            PlannedInventoryItem::create([
+                                '_id' => uniqid(),
+                                'inventory_id' => $inventory->_id,
+                                'planned_receiving_date' => $plannedReceivingDate,
+                                'planned_qty' => (int) $plannedQty,
+                                'status' => 'planned',
+                                'vendor_name' => $row['vendor_name']
+                            ]);
                         }
                     }
-                } else {
-                    throw new Exception("Inventory not found for product code {$row['product_code']} and location {$row['location_id']}");
                 }
             }
         } catch (Exception $e) {
