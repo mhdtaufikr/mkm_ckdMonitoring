@@ -372,22 +372,23 @@
 </main>
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-        console.log('DOM fully loaded and parsed');
+    console.log('DOM fully loaded and parsed');
 
-        const variantCodeQuantities = @json($variantCodeQuantities);
+    const variantCodeQuantities = @json($variantCodeQuantities);
 
-        if (typeof variantCodeQuantities === 'object') {
-            Object.keys(variantCodeQuantities).forEach((groupIndex) => {
-                console.log('Processing group index:', groupIndex);
+    if (typeof variantCodeQuantities === 'object') {
+        Object.keys(variantCodeQuantities).forEach((groupIndex) => {
+            console.log('Processing group index:', groupIndex);
 
-                const group = variantCodeQuantities[groupIndex];
-                const variantCodes = group.map(item => item.variantCode);
-                const quantities = group.map(item => item.total_qty);
+            const group = variantCodeQuantities[groupIndex];
+            const variantCodes = group.map(item => item.variantCode);
+            const quantities = group.map(item => item.total_qty);
 
-                console.log(`Variant Codes for Group ${groupIndex}:`, variantCodes);
-                console.log(`Quantities for Group ${groupIndex}:`, quantities);
+            console.log(`Variant Codes for Group ${groupIndex}:`, variantCodes);
+            console.log(`Quantities for Group ${groupIndex}:`, quantities);
 
-                const ctx = document.getElementById(`variant-code-qty-chart-${groupIndex}`).getContext('2d');
+            const ctx = document.getElementById(`variant-code-qty-chart-${groupIndex}`);
+            if (ctx) {
                 const myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -425,6 +426,7 @@
                         },
                         plugins: {
                             tooltip: {
+                                enabled: true,
                                 callbacks: {
                                     title: function(tooltipItems) {
                                         let title = tooltipItems[0].label || '';
@@ -432,16 +434,29 @@
                                         return title;
                                     },
                                     label: function(context) {
-                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
+                                        if (typeof context.raw === 'number') {
+                                            return context.raw.toFixed(2);
+                                        }
+                                        return context.raw;
                                     }
                                 }
                             }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
                         }
                     }
                 });
-            });
-        }
-    });
+            } else {
+                console.error(`Canvas element with id variant-code-qty-chart-${groupIndex} not found`);
+            }
+        });
+    } else {
+        console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
+    }
+});
+
 </script>
 <script>
     $(document).ready(function() {
