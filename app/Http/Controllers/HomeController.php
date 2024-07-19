@@ -189,8 +189,29 @@ class HomeController extends Controller
 
     // Group by item_code
     $itemCodes = $comparisons->groupBy('item_code');
+    $plannedDataModel = DB::table('view_planning')
+    ->where('id_location', $locationId)
+    ->whereMonth('date', $currentMonth)
+    ->whereYear('date', $currentYear)
+    ->get()
+    ->groupBy('model');
 
-        return view('home.ckd', compact('locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
+$actualDataModel = DB::table('view_actual')
+    ->where('id_location', $locationId)
+    ->whereMonth('date', $currentMonth)
+    ->whereYear('date', $currentYear)
+    ->get()
+    ->groupBy('model');
+
+$comparisonDataModel = DB::table('view_comparison')
+    ->where('id_location', $locationId)
+    ->whereMonth('date', $currentMonth)
+    ->whereYear('date', $currentYear)
+    ->get()
+    ->groupBy('model');
+
+
+        return view('home.ckd', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 
 
