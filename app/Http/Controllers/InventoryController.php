@@ -14,34 +14,74 @@ use Carbon\Carbon;
 class InventoryController extends Controller
 {
     public function index()
-    {
-        $items = DB::table('inventories')
-            ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
-            ->select('inventories.*', 'mst_locations.name as location_name')
-            ->orderBy('inventories.created_at', 'desc')
-            ->get();
+{
+    $locationIds = ['5fc4b12bc329204cb00b56bf', '5f335f29a2ef087afa109156'];
 
-        $inventoryCodes = DB::table('inventories')
-            ->select('code')
-            ->distinct()
-            ->get();
+    $items = DB::table('inventories')
+        ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
+        ->whereIn('inventories.location_id', $locationIds)
+        ->select('inventories.*', 'mst_locations.name as location_name')
+        ->orderBy('inventories.created_at', 'desc')
+        ->get();
 
-        // Fetch vendor names for each inventory item
-        $vendorNames = DB::table('inventory_items')
-            ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
-            ->groupBy('inventory_id')
-            ->get()
-            ->pluck('vendor_names', 'inventory_id'); // Pluck to get an associative array with inventory_id as key
+    $inventoryCodes = DB::table('inventories')
+        ->whereIn('location_id', $locationIds)
+        ->select('code')
+        ->distinct()
+        ->get();
 
-        $plannedItems = DB::table('planned_inventory_items')->get();
+    // Fetch vendor names for each inventory item
+    $vendorNames = DB::table('inventory_items')
+        ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
+        ->groupBy('inventory_id')
+        ->get()
+        ->pluck('vendor_names', 'inventory_id'); // Pluck to get an associative array with inventory_id as key
 
-        return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
-    }
+    $plannedItems = DB::table('planned_inventory_items')
+        ->whereIn('inventory_id', function($query) use ($locationIds) {
+            $query->select('_id')
+                  ->from('inventories')
+                  ->whereIn('location_id', $locationIds);
+        })
+        ->get();
 
+    return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
+}
 
+public function indexCKD()
+{
+    $locationIds = ['617bd0ad83ef510374337d84', '65a72c7fad782dc26a0626f6'];
 
+    $items = DB::table('inventories')
+        ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
+        ->whereIn('inventories.location_id', $locationIds)
+        ->select('inventories.*', 'mst_locations.name as location_name')
+        ->orderBy('inventories.created_at', 'desc')
+        ->get();
 
+    $inventoryCodes = DB::table('inventories')
+        ->whereIn('location_id', $locationIds)
+        ->select('code')
+        ->distinct()
+        ->get();
 
+    // Fetch vendor names for each inventory item
+    $vendorNames = DB::table('inventory_items')
+        ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
+        ->groupBy('inventory_id')
+        ->get()
+        ->pluck('vendor_names', 'inventory_id'); // Pluck to get an associative array with inventory_id as key
+
+    $plannedItems = DB::table('planned_inventory_items')
+        ->whereIn('inventory_id', function($query) use ($locationIds) {
+            $query->select('_id')
+                  ->from('inventories')
+                  ->whereIn('location_id', $locationIds);
+        })
+        ->get();
+
+    return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
+}
 
     public function show($id)
     {
@@ -55,16 +95,23 @@ class InventoryController extends Controller
     }
 
     public function uploadPlanned(Request $request)
-    {
-        $request->validate([
-            'excel-file' => 'required|mimes:xlsx,csv'
-        ]);
+{
+    $request->validate([
+        'excel-file' => 'required|mimes:xlsx,csv'
+    ]);
 
+    try {
         $file = $request->file('excel-file');
         Excel::import(new PlannedInventoryItemsImport, $file);
 
         return redirect()->route('inventory.index')->with('status', 'Planned receiving items uploaded successfully.');
+    } catch (Exception $e) {
+        return redirect()->route('inventory.index')->with('error', 'Failed to upload planned receiving items: ' . $e->getMessage());
     }
+}
+
+
+
 
     public function downloadPlannedTemplate()
     {

@@ -4,7 +4,7 @@
             <div class="nav accordion" id="accordionSidenav">
                <!-- Sidenav Menu Heading (Home)-->
                 <div class="sidenav-menu-heading">Home</div>
-                <!-- Sidenav Accordion (Home)-->
+                <!-- Sidenav Accordion (Home) -->
                 <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseHome" aria-expanded="false" aria-controls="collapseHome">
                     <div class="nav-link-icon"><i class="fas fa-home"></i></div>
                     Home Sections
@@ -12,16 +12,26 @@
                 </a>
                 <div class="collapse" id="collapseHome" data-bs-parent="#accordionSidenav">
                     <nav class="sidenav-menu-nested nav">
-                        <a class="nav-link" href="{{url('/home')}}">Raw Material</a>
-                        <a class="nav-link" href="{{url('/home/ckd')}}">CKD Stamping</a>
-                        <a class="nav-link" href="{{url('/home/ckd/nouba')}}">CKD Nouba</a>
-                        <a class="nav-link" href="{{url('/home/l305')}}">L305</a>
+                        <a class="nav-link" href="{{ url('/home') }}">Raw Material</a>
+                        <a class="nav-link" href="{{ url('/home/ckd') }}">CKD Stamping</a>
+                        <a class="nav-link" href="{{ url('/home/ckd/nouba') }}">CKD Nouba</a>
+                        <a class="nav-link" href="{{ url('/home/l305') }}">L305</a>
                     </nav>
                 </div>
-                <a class="nav-link" href="{{url('/inventory')}}">
+
+                <!-- Sidenav Accordion (Inventory) -->
+                <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseInventory" aria-expanded="false" aria-controls="collapseInventory">
                     <div class="nav-link-icon"><i class="fas fa-warehouse"></i></div>
                     Inventory
+                    <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                 </a>
+                <div class="collapse" id="collapseInventory" data-bs-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link" href="{{ url('/inventory/ckd') }}">CKD</a>
+                        <a class="nav-link" href="{{ url('/inventory/raw-material') }}">Raw Material</a>
+                    </nav>
+                </div>
+
                 @if(\Auth::user()->role === 'Super Admin' || \Auth::user()->role === 'IT')
                  <!-- Sidenav Menu Heading (Master)-->
                  <div class="sidenav-menu-heading">Master</div>

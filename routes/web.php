@@ -34,7 +34,6 @@ Route::post('request/access', [AuthController::class, 'requestAccess']);
 Route::middleware(['auth'])->group(function () {
     //Home Controller
     Route::get('/home', [HomeController::class, 'index'])->name('checksheet');
-
     Route::get('/home/ckd', [HomeController::class, 'indexCkd'])->name('checksheet.CKD');
     Route::get('/home/ckd/nouba', [HomeController::class, 'indexCkdNouba'])->name('checksheet.CKDNouba');
     Route::get('/home/l305', [HomeController::class, 'l305'])->name('checksheet.l305');
@@ -60,7 +59,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/access/{user}', [UserController::class, 'access'])->middleware(['checkRole:IT']);
 
 
-    Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');;
+    Route::get('/inventory/ckd', [InventoryController::class, 'indexCKD'])->name('inventory.index');
+    Route::get('/inventory/raw-material', [InventoryController::class, 'index'])->name('inventory.index');;
     Route::get('/inventory/{id}/details', [InventoryController::class, 'show'])->name('inventory.details');
     Route::post('/inventory/planned/upload', [InventoryController::class, 'uploadPlanned'])->name('inventory.planned.upload');
     Route::get('/download/excel/format/planned', [InventoryController::class, 'downloadPlannedTemplate'])->name('inventory.planned.template');

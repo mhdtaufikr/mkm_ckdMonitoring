@@ -41,6 +41,10 @@ class FetchInventoryItemData extends Command
                 $data = $response->json();
                 $items = $data['data'];
 
+                // Fetch existing inventory item IDs from the database for this location
+                $existingInventoryItemIds = InventoryItem::whereIn('inventory_id', Inventory::where('location_id', $locationId)->pluck('_id'))->pluck('_id')->toArray();
+                $fetchedInventoryItemIds = [];
+
                 foreach ($items as $item) {
                     // Find the corresponding inventory by code
                     $inventory = Inventory::where('code', $item['code'])->first();
@@ -73,8 +77,17 @@ class FetchInventoryItemData extends Command
                                 'created_at' => $item['created_at'] ?? null
                             ]
                         );
+
+                        // Add the fetched inventory item ID to the array
+                        $fetchedInventoryItemIds[] = $item['_id'];
                     }
                 }
+
+                // Determine which inventory item IDs need to be deleted
+                $inventoryItemIdsToDelete = array_diff($existingInventoryItemIds, $fetchedInventoryItemIds);
+
+                // Delete the inventory items that are no longer in the API
+                InventoryItem::whereIn('_id', $inventoryItemIdsToDelete)->delete();
             } else {
                 Log::error('Failed to fetch inventory item data for location ' . $locationId, [
                     'response_body' => $response->body()

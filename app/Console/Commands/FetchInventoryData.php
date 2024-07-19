@@ -38,6 +38,11 @@ class FetchInventoryData extends Command
             if ($response->successful()) {
                 $data = $response->json();
                 $items = $data['collection']['data'];
+
+                // Fetch existing inventory IDs from the database for this location
+                $existingInventoryIds = Inventory::where('location_id', $locationId)->pluck('_id')->toArray();
+                $fetchedInventoryIds = [];
+
                 foreach ($items as $item) {
                     // Ensure location exists
                     $location = MstLocation::updateOrCreate(
@@ -66,7 +71,16 @@ class FetchInventoryData extends Command
                             'created_at' => $item['created_at']
                         ]
                     );
+
+                    // Add the fetched inventory ID to the array
+                    $fetchedInventoryIds[] = $item['_id'];
                 }
+
+                // Determine which inventory IDs need to be deleted
+                $inventoryIdsToDelete = array_diff($existingInventoryIds, $fetchedInventoryIds);
+
+                // Delete the inventories that are no longer in the API
+                Inventory::whereIn('_id', $inventoryIdsToDelete)->delete();
             } else {
                 Log::error('Failed to fetch inventory data for location ' . $locationId, [
                     'response_body' => $response->body()
@@ -77,4 +91,3 @@ class FetchInventoryData extends Command
         $this->info('Inventory data fetched and stored successfully.');
     }
 }
-

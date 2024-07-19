@@ -293,7 +293,28 @@ class HomeController extends Controller
     // Group by item_code
     $itemCodes = $comparisons->groupBy('item_code');
 
-        return view('home.ckd', compact('locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
+            $plannedDataModel = DB::table('view_planning')
+            ->where('id_location', $locationId)
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get()
+            ->groupBy('model');
+
+        $actualDataModel = DB::table('view_actual')
+            ->where('id_location', $locationId)
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get()
+            ->groupBy('model');
+
+        $comparisonDataModel = DB::table('view_comparison')
+            ->where('id_location', $locationId)
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get()
+            ->groupBy('model');
+
+        return view('home.ckd', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 
     public function l305()
@@ -334,7 +355,7 @@ class HomeController extends Controller
         $vendorData = DB::table('vendor_comparison')
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
-            ->whereIn('vendor_name', ['MOSSI', 'SCI', 'USC', 'AAP'])
+            ->whereIn('vendor_name', ['PRESS A','PRESS C','PRESS F'])
             ->where('location_id', $locationId)
             ->get()
             ->groupBy('vendor_name');
