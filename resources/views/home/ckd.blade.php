@@ -998,7 +998,7 @@
     function refreshPage() {
         setTimeout(function() {
             location.reload();
-        }, 100000); // 300000 milliseconds = 5 minutes
+        }, 200000); // 300000 milliseconds = 5 minutes
     }
 
     // Call the function when the page loads
