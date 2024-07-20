@@ -863,4 +863,14 @@ const vendorSummaryChart = new Chart(vendorSummaryCtx, {
 });
 
 </script>
+<script>
+    function refreshPage() {
+        setTimeout(function() {
+            location.reload();
+        }, 100000); // 300000 milliseconds = 5 minutes
+    }
+
+    // Call the function when the page loads
+    refreshPage();
+</script>
 @endsection
