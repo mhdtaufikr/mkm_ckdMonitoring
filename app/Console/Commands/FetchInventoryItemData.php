@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\InventoryItem;
 use App\Models\Inventory;
+use App\Models\PlannedInventoryItem;
 
 class FetchInventoryItemData extends Command
 {
@@ -86,7 +87,13 @@ class FetchInventoryItemData extends Command
                 // Determine which inventory item IDs need to be deleted
                 $inventoryItemIdsToDelete = array_diff($existingInventoryItemIds, $fetchedInventoryItemIds);
 
-                // Delete the inventory items that are no longer in the API
+                // Fetch planned inventory item IDs to exclude from deletion
+                $plannedInventoryItemIds = PlannedInventoryItem::whereIn('inventory_id', Inventory::where('location_id', $locationId)->pluck('_id'))->pluck('inventory_id')->toArray();
+
+                // Exclude inventory IDs that have planned inventory items
+                $inventoryItemIdsToDelete = array_diff($inventoryItemIdsToDelete, $plannedInventoryItemIds);
+
+                // Delete the inventory items that are no longer in the API and have no planned data
                 InventoryItem::whereIn('_id', $inventoryItemIdsToDelete)->delete();
             } else {
                 Log::error('Failed to fetch inventory item data for location ' . $locationId, [

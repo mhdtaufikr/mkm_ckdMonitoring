@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Inventory;
 use App\Models\MstLocation;
+use App\Models\PlannedInventoryItem;
 
 class FetchInventoryData extends Command
 {
@@ -79,7 +80,13 @@ class FetchInventoryData extends Command
                 // Determine which inventory IDs need to be deleted
                 $inventoryIdsToDelete = array_diff($existingInventoryIds, $fetchedInventoryIds);
 
-                // Delete the inventories that are no longer in the API
+                // Fetch planned inventory item IDs to exclude from deletion
+                $plannedInventoryItemIds = PlannedInventoryItem::whereIn('inventory_id', $inventoryIdsToDelete)->pluck('inventory_id')->toArray();
+
+                // Exclude inventory IDs that have planned inventory items
+                $inventoryIdsToDelete = array_diff($inventoryIdsToDelete, $plannedInventoryItemIds);
+
+                // Delete the inventories that are no longer in the API and have no planned data
                 Inventory::whereIn('_id', $inventoryIdsToDelete)->delete();
             } else {
                 Log::error('Failed to fetch inventory data for location ' . $locationId, [
