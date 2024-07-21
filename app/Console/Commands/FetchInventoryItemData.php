@@ -84,17 +84,8 @@ class FetchInventoryItemData extends Command
                     }
                 }
 
-                // Determine which inventory item IDs need to be deleted
-                $inventoryItemIdsToDelete = array_diff($existingInventoryItemIds, $fetchedInventoryItemIds);
-
-                // Fetch planned inventory item IDs to exclude from deletion
-                $plannedInventoryItemIds = PlannedInventoryItem::whereIn('inventory_id', Inventory::where('location_id', $locationId)->pluck('_id'))->pluck('inventory_id')->toArray();
-
-                // Exclude inventory IDs that have planned inventory items
-                $inventoryItemIdsToDelete = array_diff($inventoryItemIdsToDelete, $plannedInventoryItemIds);
-
-                // Delete the inventory items that are no longer in the API and have no planned data
-                InventoryItem::whereIn('_id', $inventoryItemIdsToDelete)->delete();
+                // Log fetched inventory item IDs (for debugging purposes)
+                Log::info('Fetched inventory item IDs for location ' . $locationId, $fetchedInventoryItemIds);
             } else {
                 Log::error('Failed to fetch inventory item data for location ' . $locationId, [
                     'response_body' => $response->body()
