@@ -9,7 +9,7 @@
     <div class="ms-2 preloader flex-column justify-content-center align-items-center">
         <a id="navbarDropdownUserImage" href="{{url('/home')}}"><img class="animation__shake" src="{{ asset('assets/img/Logo Option 3 (1).png') }}" alt="MKM Logo" height="50" width="180"> </a>
     </div>
-    <h1>MKM - IWS INTEGRATION</h1>
+    <h1>IWS INTEGRATION COLLAB WITH IT MKM</h1>
     <!-- Navbar Items-->
     <ul class="navbar-nav align-items-center ms-auto">
         <!-- Navbar Search Dropdown-->
