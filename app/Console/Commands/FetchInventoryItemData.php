@@ -21,7 +21,8 @@ class FetchInventoryItemData extends Command
             '5f335f29a2ef087afa109156',
             '65a72c7fad782dc26a0626f6',
             '617bd0ad83ef510374337d84',
-            '5fc4b12bc329204cb00b56bf'
+            '5fc4b12bc329204cb00b56bf',
+            '65bd1017b4490c26c00a82d9'
         ];
 
         foreach ($locationIds as $locationId) {

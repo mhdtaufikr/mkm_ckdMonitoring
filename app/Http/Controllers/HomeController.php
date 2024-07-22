@@ -420,5 +420,97 @@ $comparisonDataModel = DB::table('view_comparison')
 
         return view('home.index', compact('locationId','itemCodes','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual','itemNotArrived'));
     }
+
+    public function cvcL404()
+    {
+        $locationId = '65bd1017b4490c26c00a82d9';
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        $today = now()->format('Y-m-d');
+
+        // Get unique vendor names from inventory_items for the given location_id
+        $vendorNames = DB::table('inventory_items')
+            ->join('inventories', 'inventory_items.inventory_id', '=', 'inventories._id')
+            ->where('inventories.location_id', $locationId)
+            ->distinct()
+            ->pluck('inventory_items.vendor_name')
+            ->toArray();
+
+        // Get planned data
+        $plannedData = DB::table('planned_inventory_view')
+            ->whereMonth('planned_receiving_date', $currentMonth)
+            ->whereYear('planned_receiving_date', $currentYear)
+            ->where('location_id', $locationId)
+            ->get()
+            ->groupBy('item_code');
+
+        // Get actual data
+        $actualData = DB::table('actual_inventory_view')
+            ->whereMonth('receiving_date', $currentMonth)
+            ->whereYear('receiving_date', $currentYear)
+            ->whereDate('receiving_date', '<=', $today)
+            ->where('location_id', $locationId)
+            ->get()
+            ->groupBy('item_code');
+
+        // Get comparisons for the current month until today
+        $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
+            ->whereYear('planned_receiving_date', $currentYear)
+            ->whereDate('planned_receiving_date', '<=', $today)
+            ->where('id_location', $locationId)
+            ->get();
+
+        // Group by item_code
+        $itemCodes = $comparisons->groupBy('item_code');
+
+        // Fetch the sum of planned and actual quantities grouped by vendor name and date for the current month until today
+        $vendorData = DB::table('vendor_comparison')
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->whereIn('vendor_name', $vendorNames)
+            ->where('location_id', $locationId)
+            ->get()
+            ->groupBy('vendor_name');
+
+        // Fetch vendor monthly summary
+        $vendorMonthlySummary = DB::table('vendor_monthly_summary')
+            ->select('vendor_name', 'total_planned_qty', 'total_actual_qty')
+            ->where('year', $currentYear)
+            ->where('month', $currentMonth)
+            ->where('location_id', $locationId)
+            ->get();
+
+        // Fetch item code quantities from the inventories table
+        $itemCodeQuantities = DB::table('inventories')
+            ->select('code', 'qty')
+            ->where('location_id', $locationId)
+            ->get()
+            ->groupBy(function ($item) {
+                static $groupIndex = 0;
+                static $itemCount = 0;
+                if ($itemCount++ % 10 == 0) {
+                    $groupIndex++;
+                }
+                return $groupIndex;
+            });
+
+        // Prepare data for the chart
+        $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
+        $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
+        $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
+
+        // Fetch items not arrived
+        $itemNotArrived = DB::table('items_not_arrived')
+            ->whereMonth('planned_receiving_date', now()->month)
+            ->whereYear('planned_receiving_date', now()->year)
+            ->whereDate('planned_receiving_date', '<=', now()->toDateString())
+            ->where('location_id', $locationId)
+            ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
+            ->get();
+
+        return view('home.index', compact('locationId', 'itemCodes', 'plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'itemNotArrived'));
+    }
+
+
 }
 

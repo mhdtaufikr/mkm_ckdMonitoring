@@ -16,6 +16,7 @@
                         <a class="nav-link" href="{{ url('/home/ckd') }}">CKD Stamping</a>
                         <a class="nav-link" href="{{ url('/home/ckd/nouba') }}">CKD Nouba</a>
                         <a class="nav-link" href="{{ url('/home/l305') }}">L305</a>
+                        <a class="nav-link" href="{{ url('/home/cvcL404') }}">CVC L404</a>
                     </nav>
                 </div>
 
