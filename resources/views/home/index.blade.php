@@ -491,6 +491,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         yAxisID: 'y-axis-2',
                         order: 0,
                         borderWidth: 2,
+                       /*  trendlineLinear: {
+                            style: "rgba(255, 0, 0, 0.8)", // Change to red
+                            lineStyle: "dotted",
+                            width: 2
+                        } */
 
                     },
                     {
@@ -657,6 +662,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
                         yAxisID: 'y-axis-2',
                         order: 0,
                         borderWidth: 2,
+                        /* trendlineLinear: {
+                            style: "rgba(255, 0, 0, 0.8)", // Change to red
+                            lineStyle: "dotted",
+                            width: 2
+                        } */
 
                     },
                     {

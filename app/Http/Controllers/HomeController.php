@@ -472,6 +472,15 @@ $comparisonDataModel = DB::table('view_comparison')
             ->get()
             ->groupBy('vendor_name');
 
+             // Fetch the sum of planned and actual quantities grouped by vendor name and date for the current month until today
+             $vendorDataAggregate = DB::table('vendor_comparison_aggregate')
+             ->whereMonth('date', $currentMonth)
+             ->whereYear('date', $currentYear)
+             ->where('location_id', $locationId)
+             ->select('date', DB::raw('SUM(total_planned_qty) as total_planned_qty'), DB::raw('SUM(total_actual_qty) as total_actual_qty'), DB::raw('AVG(percentage) as percentage'))
+             ->groupBy('date', 'location_id')
+             ->get();
+
         // Fetch vendor monthly summary
         $vendorMonthlySummary = DB::table('vendor_monthly_summary')
             ->select('vendor_name', 'total_planned_qty', 'total_actual_qty')
@@ -508,7 +517,7 @@ $comparisonDataModel = DB::table('view_comparison')
             ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
             ->get();
 
-        return view('home.index', compact('locationId', 'itemCodes', 'plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'itemNotArrived'));
+        return view('home.l404', compact('vendorDataAggregate','locationId', 'itemCodes', 'plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'itemNotArrived'));
     }
 
 
