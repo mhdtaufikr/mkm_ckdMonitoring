@@ -147,24 +147,36 @@ class HomeController extends Controller
                 return $groupIndex;
             });
 
-        // Fetch variant code quantities from the inventories table
-        $variantCodeQuantities = DB::table('inventories')
-            ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
-            ->where('location_id', $locationId)
-            ->whereMonth('created_at', $currentMonth)
-            ->whereYear('created_at', $currentYear)
-            ->whereNotNull('variantCode') // Exclude null variantCode
-            ->groupBy('variantCode')
-            ->orderBy('variantCode')
-            ->get()
-            ->groupBy(function ($item) {
-                static $groupIndex = 0;
-                static $itemCount = 0;
-                if ($itemCount++ % 5 == 0) {
-                    $groupIndex++;
-                }
-                return $groupIndex;
-            });
+       // Fetch the total count of unique variant codes
+    $totalVariants = DB::table('inventories')
+    ->where('location_id', $locationId)
+    ->whereMonth('created_at', $currentMonth)
+    ->whereYear('created_at', $currentYear)
+    ->whereNotNull('variantCode') // Exclude null variantCode
+    ->distinct('variantCode')
+    ->count('variantCode');
+
+// Determine the group size
+$groupSize = ceil($totalVariants / 5);
+
+// Fetch variant code quantities from the inventories table
+$variantCodeQuantities = DB::table('inventories')
+    ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
+    ->where('location_id', $locationId)
+    ->whereMonth('created_at', $currentMonth)
+    ->whereYear('created_at', $currentYear)
+    ->whereNotNull('variantCode') // Exclude null variantCode
+    ->groupBy('variantCode')
+    ->orderBy('variantCode')
+    ->get()
+    ->groupBy(function ($item) use ($groupSize) {
+        static $groupIndex = 0;
+        static $itemCount = 0;
+        if ($itemCount++ % $groupSize == 0) {
+            $groupIndex++;
+        }
+        return $groupIndex;
+    });
 
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
@@ -271,24 +283,36 @@ $comparisonDataModel = DB::table('view_comparison')
                 return $groupIndex;
             });
 
-        // Fetch variant code quantities from the inventories table
-        $variantCodeQuantities = DB::table('inventories')
-            ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
-            ->where('location_id', $locationId)
-            ->whereMonth('created_at', $currentMonth)
-            ->whereYear('created_at', $currentYear)
-            ->whereNotNull('variantCode') // Exclude null variantCode
-            ->groupBy('variantCode')
-            ->orderBy('variantCode')
-            ->get()
-            ->groupBy(function ($item) {
-                static $groupIndex = 0;
-                static $itemCount = 0;
-                if ($itemCount++ % 5 == 0) {
-                    $groupIndex++;
-                }
-                return $groupIndex;
-            });
+                // Fetch the total count of unique variant codes
+                $totalVariants = DB::table('inventories')
+                ->where('location_id', $locationId)
+                ->whereMonth('created_at', $currentMonth)
+                ->whereYear('created_at', $currentYear)
+                ->whereNotNull('variantCode') // Exclude null variantCode
+                ->distinct('variantCode')
+                ->count('variantCode');
+
+            // Determine the group size
+            $groupSize = ceil($totalVariants / 5);
+
+            // Fetch variant code quantities from the inventories table
+            $variantCodeQuantities = DB::table('inventories')
+                ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
+                ->where('location_id', $locationId)
+                ->whereMonth('created_at', $currentMonth)
+                ->whereYear('created_at', $currentYear)
+                ->whereNotNull('variantCode') // Exclude null variantCode
+                ->groupBy('variantCode')
+                ->orderBy('variantCode')
+                ->get()
+                ->groupBy(function ($item) use ($groupSize) {
+                    static $groupIndex = 0;
+                    static $itemCount = 0;
+                    if ($itemCount++ % $groupSize == 0) {
+                        $groupIndex++;
+                    }
+                    return $groupIndex;
+                });
 
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
