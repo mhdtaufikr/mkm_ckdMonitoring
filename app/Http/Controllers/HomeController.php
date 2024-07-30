@@ -160,7 +160,7 @@ class HomeController extends Controller
             ->groupBy(function ($item) {
                 static $groupIndex = 0;
                 static $itemCount = 0;
-                if ($itemCount++ % 12 == 0) {
+                if ($itemCount++ % 13 == 0) {
                     $groupIndex++;
                 }
                 return $groupIndex;
