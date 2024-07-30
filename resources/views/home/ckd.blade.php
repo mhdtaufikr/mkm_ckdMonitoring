@@ -260,21 +260,42 @@
                     </div>
                 </div>
 
-              <!-- Variant Code Summary Chart -->
-                @foreach ($variantCodeQuantities as $groupIndex => $group)
+                <!-- Variant Code Summary Chart -->
                 <div class="col-md-6 mb-2">
-                    <div style="height: 375px" class="card card-custom">
+                    <div style="height: 375px"   class="card card-custom">
                         <div class="card-header">
-                            <h4>Variant Code Summary (Group {{ $groupIndex + 1 }})</h4>
+                            <h4>Variant Code Summary</h4>
                         </div>
                         <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="variant-code-qty-chart-{{ $groupIndex }}"></canvas>
+                            <div id="variantCodeSummaryCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    @foreach ($variantCodeQuantities as $groupIndex => $group)
+                                        <button type="button" data-bs-target="#variantCodeSummaryCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+                                    @endforeach
+                                </div>
+                                <div class="carousel-inner">
+                                    @foreach ($variantCodeQuantities as $groupIndex => $group)
+                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                                            <p style="margin-top: -20px" class="text-center">Group {{ $groupIndex + 1 }}</p>
+                                            <div style="margin-top: -20px" class="chart-container">
+                                                <canvas id="variant-code-qty-chart-{{ $groupIndex }}" class="chart-custom"></canvas>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#variantCodeSummaryCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#variantCodeSummaryCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-                @endforeach
+
 
                 <!-- Item Code Quantity Carousel -->
                 <div class="col-md-6 mb-2">
@@ -370,94 +391,95 @@
         <!-- /.container-fluid -->
     </section>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOM fully loaded and parsed');
+        console.log('Loading variant code quantities chart.');
 
-    const variantCodeQuantities = @json($variantCodeQuantities);
+        const variantCodeQuantities = @json($variantCodeQuantities);
 
-    if (typeof variantCodeQuantities === 'object') {
-        Object.keys(variantCodeQuantities).forEach((groupIndex) => {
-            console.log('Processing group index:', groupIndex);
+        if (typeof variantCodeQuantities === 'object') {
+            Object.keys(variantCodeQuantities).forEach((groupIndex) => {
+                console.log('Processing group index:', groupIndex);
 
-            const group = variantCodeQuantities[groupIndex];
-            const variantCodes = group.map(item => item.variantCode);
-            const quantities = group.map(item => item.total_qty);
+                const group = variantCodeQuantities[groupIndex];
+                const variantCodes = group.map(item => item.variantCode);
+                const quantities = group.map(item => item.total_qty);
 
-            console.log(`Variant Codes for Group ${groupIndex}:`, variantCodes);
-            console.log(`Quantities for Group ${groupIndex}:`, quantities);
+                console.log(`Variant Codes for Group ${groupIndex}:`, variantCodes);
+                console.log(`Quantities for Group ${groupIndex}:`, quantities);
 
-            const ctx = document.getElementById(`variant-code-qty-chart-${groupIndex}`);
-            if (ctx) {
-                const myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: variantCodes,
-                        datasets: [{
-                            label: 'Quantity',
-                            data: quantities,
-                            backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                stacked: false,
-                                categoryPercentage: 0.5,
-                                barPercentage: 0.5,
-                                ticks: {
-                                    autoSkip: false,
-                                    maxRotation: 0,
-                                    minRotation: 0
-                                }
-                            },
-                            y: {
-                                stacked: false,
-                                position: 'left',
-                                title: {
-                                    display: true,
-                                    text: 'Quantity'
-                                }
-                            }
+                const ctx = document.getElementById(`variant-code-qty-chart-${groupIndex}`);
+                if (ctx) {
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: variantCodes,
+                            datasets: [{
+                                label: 'Quantity',
+                                data: quantities,
+                                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
                         },
-                        plugins: {
-                            tooltip: {
-                                enabled: true,
-                                callbacks: {
-                                    title: function(tooltipItems) {
-                                        let title = tooltipItems[0].label || '';
-                                        title += ` ${new Date().toLocaleString('default', { month: 'long' })}`;
-                                        return title;
-                                    },
-                                    label: function(context) {
-                                        if (typeof context.raw === 'number') {
-                                            return context.raw.toFixed(2);
-                                        }
-                                        return context.raw;
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: false,
+                                    categoryPercentage: 0.5,
+                                    barPercentage: 0.5,
+                                    ticks: {
+                                        autoSkip: false,
+                                        maxRotation: 0,
+                                        minRotation: 0
+                                    }
+                                },
+                                y: {
+                                    stacked: false,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: 'Quantity'
                                     }
                                 }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    enabled: true,
+                                    callbacks: {
+                                        title: function(tooltipItems) {
+                                            let title = tooltipItems[0].label || '';
+                                            title += ` ${new Date().toLocaleString('default', { month: 'long' })}`;
+                                            return title;
+                                        },
+                                        label: function(context) {
+                                            if (typeof context.raw === 'number') {
+                                                return context.raw.toFixed(2);
+                                            }
+                                            return context.raw;
+                                        }
+                                    }
+                                }
+                            },
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
                             }
-                        },
-                        interaction: {
-                            mode: 'index',
-                            intersect: false
                         }
-                    }
-                });
-            } else {
-                console.error(`Canvas element with id variant-code-qty-chart-${groupIndex} not found`);
-            }
-        });
-    } else {
-        console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
-    }
-});
-
+                    });
+                } else {
+                    console.error(`Canvas element with id variant-code-qty-chart-${groupIndex} not found`);
+                }
+            });
+        } else {
+            console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
+        }
+    });
 </script>
+
 <script>
     $(document).ready(function() {
       var table = $("#tableUser").DataTable({
