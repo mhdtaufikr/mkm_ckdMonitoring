@@ -152,8 +152,6 @@ class HomeController extends Controller
         $variantCodeQuantities = DB::table('inventories')
             ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
             ->where('location_id', $locationId)
-            ->whereMonth('created_at', $currentMonth)
-            ->whereYear('created_at', $currentYear)
             ->whereNotNull('variantCode') // Exclude null variantCode
             ->groupBy('variantCode')
             ->orderBy('variantCode')
@@ -276,8 +274,6 @@ $comparisonDataModel = DB::table('view_comparison')
         $variantCodeQuantities = DB::table('inventories')
             ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
             ->where('location_id', $locationId)
-            ->whereMonth('created_at', $currentMonth)
-            ->whereYear('created_at', $currentYear)
             ->whereNotNull('variantCode') // Exclude null variantCode
             ->groupBy('variantCode')
             ->orderBy('variantCode')
