@@ -62,17 +62,18 @@ class HomeController extends Controller
 
         // Fetch item code quantities from the inventories table
         $itemCodeQuantities = DB::table('inventories')
-            ->select('code', 'qty')
-            ->where('location_id', $locationId)
-            ->get()
-            ->groupBy(function ($item) {
-                static $groupIndex = 0;
-                static $itemCount = 0;
-                if ($itemCount++ % 10 == 0) {
-                    $groupIndex++;
-                }
-                return $groupIndex;
-            });
+        ->select('_id', 'code', 'qty') // Ensure 'id' is selected
+        ->where('location_id', $locationId)
+        ->get()
+        ->groupBy(function ($item) {
+            static $groupIndex = 0;
+            static $itemCount = 0;
+            if ($itemCount++ % 10 == 0) {
+                $groupIndex++;
+            }
+            return $groupIndex;
+        });
+
 
         // Prepare data for the chart
         $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
@@ -489,15 +490,14 @@ $comparisonDataModel = DB::table('view_comparison')
             ->where('location_id', $locationId)
             ->get();
 
-        // Fetch item code quantities from the inventories table
-        $itemCodeQuantities = DB::table('inventories')
-            ->select('code', 'qty')
+            $itemCodeQuantities = DB::table('inventories')
+            ->select('_id', 'code', 'qty') // Ensure 'id' is selected
             ->where('location_id', $locationId)
             ->get()
             ->groupBy(function ($item) {
                 static $groupIndex = 0;
                 static $itemCount = 0;
-                if ($itemCount++ % 10 == 0) {
+                if ($itemCount++ % 5 == 0) {
                     $groupIndex++;
                 }
                 return $groupIndex;

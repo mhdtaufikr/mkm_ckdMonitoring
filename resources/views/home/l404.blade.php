@@ -844,6 +844,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
             const group = itemCodeQuantities[groupIndex];
             const itemCodes = group.map(item => item.code);
             const quantities = group.map(item => item.qty);
+            const itemIds = group.map(item => item._id); // Assuming you have the IDs available
 
             console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
             console.log(`Quantities for Group ${groupIndex}:`, quantities);
@@ -897,7 +898,15 @@ document.addEventListener('DOMContentLoaded', (event) => {
                                 }
                             }
                         }
-                    }
+                    },
+                    onClick: function (e, elements) {
+                if (elements.length > 0) {
+                    const elementIndex = elements[0].index;
+                    const itemId = itemIds[elementIndex];
+                    const url = `/inventory/${itemId}/details`;
+                    window.open(url, '_blank');
+                }
+            }
                 }
             });
         });

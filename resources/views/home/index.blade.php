@@ -758,70 +758,81 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
     if (typeof itemCodeQuantities === 'object') {
-        Object.keys(itemCodeQuantities).forEach((groupIndex) => {
-            console.log('Processing item code group:', groupIndex);
+    Object.keys(itemCodeQuantities).forEach((groupIndex) => {
+        console.log('Processing item code group:', groupIndex);
 
-            const group = itemCodeQuantities[groupIndex];
-            const itemCodes = group.map(item => item.code);
-            const quantities = group.map(item => item.qty);
+        const group = itemCodeQuantities[groupIndex];
+        const itemCodes = group.map(item => item.code);
+        const quantities = group.map(item => item.qty);
+        const itemIds = group.map(item => item._id); // Assuming you have the IDs available
 
-            console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
-            console.log(`Quantities for Group ${groupIndex}:`, quantities);
+        console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
+        console.log(`Quantities for Group ${groupIndex}:`, quantities);
 
-            const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
-            const myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: itemCodes,
-                    datasets: [{
-                        label: 'Quantity',
-                        data: quantities,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: false,
-                            categoryPercentage: 0.5,
-                            barPercentage: 0.5,
-                            ticks: {
-                                autoSkip: false,
-                                maxRotation: 0,
-                                minRotation: 0
-                            }
-                        },
-                        y: {
-                            stacked: false,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Quantity'
-                            }
+        const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: itemCodes,
+                datasets: [{
+                    label: 'Quantity',
+                    data: quantities,
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: false,
+                        categoryPercentage: 0.5,
+                        barPercentage: 0.5,
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 0,
+                            minRotation: 0
                         }
                     },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                title: function (tooltipItems) {
-                                    let title = tooltipItems[0].label || '';
-                                    title += ` ${month}`;
-                                    return title;
-                                },
-                                label: function (context) {
-                                    return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
-                                }
+                    y: {
+                        stacked: false,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Quantity'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function (tooltipItems) {
+                                let title = tooltipItems[0].label || '';
+                                title += ` ${month}`;
+                                return title;
+                            },
+                            label: function (context) {
+                                return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
                             }
                         }
                     }
+                },
+                onClick: function (e, elements) {
+                if (elements.length > 0) {
+                    const elementIndex = elements[0].index;
+                    const itemId = itemIds[elementIndex];
+                    const url = `/inventory/${itemId}/details`;
+                    window.open(url, '_blank');
                 }
-            });
+            }
+
+            }
         });
-    }
+    });
+}
+
 
     // Vendor Monthly Summary Chart
     const vendorSummaryCtx = document.getElementById('vendorSummaryChart').getContext('2d');
