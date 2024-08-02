@@ -188,21 +188,28 @@
                                 <div class="carousel-inner">
                                     @foreach ($vendorData as $vendorName => $data)
                                     @php
-                                        $totalPercentage = 0;
-                                        $count = 0;
-                                        $today = now()->format('Y-m-d');
-                                        foreach ($data as $entry) {
-                                            if ($entry->date <= $today) {
-                                                // Check if planning data is not available but actual data is present, or actual data exceeds planning data
-                                                if (!isset($entry->planning) || $entry->actual > $entry->planning) {
-                                                    $entry->percentage = 100;
-                                                }
-                                                $totalPercentage += $entry->percentage;
-                                                $count++;
+                                    $totalPercentage = 0;
+                                    $count = 0;
+                                    $today = now()->format('Y-m-d');
+                                    $startOfMonth = now()->startOfMonth()->format('Y-m-d');
+
+                                    $includedEntries = [];
+
+                                    foreach ($data as $entry) {
+                                        if ($entry->date >= $startOfMonth && $entry->date <= $today) {
+                                            // Check if planning data is not available but actual data is present, or actual data exceeds planning data
+                                            if (!isset($entry->total_planned_qty) || $entry->total_actual_qty > $entry->total_planned_qty) {
+                                                $entry->percentage = 100;
+
                                             }
+                                            $count++;
+                                            $totalPercentage += $entry->percentage;
+                                            $includedEntries[] = $entry;
                                         }
-                                        $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                                    @endphp
+                                    }
+
+                                    $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                               @endphp
 
                                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                                             <div class="row">
