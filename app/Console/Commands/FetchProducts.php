@@ -20,7 +20,7 @@ class FetchProducts extends Command
     {
         set_time_limit(300);
 
-        $page = 1;
+        $page = -1;
         $limit = -1; // Adjust the limit according to the API documentation and performance needs
         $moreData = true;
 
