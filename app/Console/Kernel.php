@@ -16,11 +16,13 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\FetchInventoryData::class,
         Commands\FetchInventoryItemData::class,
+        Commands\FetchProducts::class,
     ];
 
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('fetch:inventory')->everyTenMinutes();
         $schedule->command('fetch:inventory-item')->everyTenMinutes();
+        $schedule->command('fetch:products')->dailyAt('00:00');
     }
 }

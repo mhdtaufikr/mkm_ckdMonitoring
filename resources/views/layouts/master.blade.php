@@ -18,7 +18,7 @@
         <script src="https://cdn.ckeditor.com/4.6.2/standard/ckeditor.js"></script>
         <script src="{{ url('https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js') }}"></script>
 
-         <!-- DataTables CSS -->
+        <!-- DataTables CSS -->
         <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
         <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
@@ -45,19 +45,14 @@
         <!-- Include Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-       <!-- Include the chart.js-adapter-date-fns -->
+        <!-- Include the chart.js-adapter-date-fns -->
         <script src="{{ asset('plugins/chart.js/Chart.bundle.min.js') }}"></script>
-
-
 
         <!-- Include Chosen CSS -->
         <link href="{{asset('chosen/chosen.min.css')}}" rel="stylesheet" />
 
         <!-- Include Chosen JS -->
         <script src="{{asset('chosen/chosen.jquery.min.js')}}"></script>
-
-
-
     </head>
 
     <body class="nav-fixed sidenav-toggled">
@@ -71,6 +66,5 @@
             </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
         <script src={{asset('assets/js/scripts.js')}} ></script>
-
     </body>
 </html>

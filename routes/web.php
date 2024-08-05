@@ -7,6 +7,7 @@ use App\Http\Controllers\DropdownController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RulesController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,5 +68,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/download/excel/format/planned', [InventoryController::class, 'downloadPlannedTemplate'])->name('inventory.planned.template');
     Route::post('/inventory/planned/update', [InventoryController::class, 'updatePlannedReceive'])->name('inventory.planned.update');
 
+    //Master Product
+    Route::get('/master/product', [ProductController::class, 'index']);
 
 });

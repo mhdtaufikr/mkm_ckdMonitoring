@@ -44,7 +44,7 @@
                  </a>
                  <div class="collapse" id="collapsemaster" data-bs-parent="#accordionSidenav">
                      <nav class="sidenav-menu-nested nav">
-                        <a class="nav-link" href="{{url('/master/mechine')}}">Mechine Checksheet</a>
+                        <a class="nav-link" href="{{url('/master/product')}}">Master Product</a>
                      </nav>
                  </div>
                  @endif
