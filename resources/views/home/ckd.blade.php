@@ -86,265 +86,245 @@
     <section class="content">
         <div class="container-fluid px-4 mt-n10">
             <div class="row">
-              <!-- Inventory Monitoring Carousel -->
-<div class="col-md-6 mb-2">
-    <div class="card card-custom">
-        <div class="card-header">
-            <h4>Inventory Monitoring</h4>
-        </div>
-        <div class="card-body">
-            <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-indicators">
-                    @foreach ($comparisonDataModel as $model => $comparisons)
-                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
-                    @endforeach
+                <!-- Variant Code Summary Chart -->
+                <div class="col-md-6 mb-2">
+                    <div style="height: 826px" class="card card-custom">
+                    <div class="card-header">
+                        <h4>Variant Code Summary</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="variant-code-pie-chart" style="width: 145%; height: 1000px;"></div>
+                    </div>
+                    </div>
                 </div>
-                <div class="carousel-inner">
-                    @foreach ($comparisonDataModel as $model => $comparisons)
-                        @php
-                            // Calculate average percentage for each model
-                            $totalPercentage = 0;
-                            $count = 0;
-                            $today = now()->format('Y-m-d');
 
-                            foreach ($comparisons as $comparison) {
-                                if ($comparison->date <= $today) {
-                                    $totalPercentage += $comparison->percentage;
-                                    $count++;
-                                }
+
+                <div class="col-md-6 mb-2">
+<!-- OTDC Chart Carousel -->
+
+<div class="card card-custom">
+    <div class="card-header">
+        <h4>OTDC</h4>
+    </div>
+    <div class="card-body">
+
+
+        <div id="otdcCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                @foreach ($vendorData as $vendorName => $data)
+                    <button type="button" data-bs-target="#otdcCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+                @endforeach
+            </div>
+            <div class="carousel-inner">
+                @foreach ($vendorData as $vendorName => $data)
+                @php
+                $totalPercentage = 0;
+                $count = 0;
+                $today = now()->format('Y-m-d');
+                $startOfMonth = now()->startOfMonth()->format('Y-m-d');
+
+                $includedEntries = [];
+                $uniqueDates = [];
+
+                foreach ($data as $entry) {
+                    if ($entry->date >= $startOfMonth && $entry->date <= $today) {
+                        // Ensure no duplicate dates are counted
+                        if (!in_array($entry->date, $uniqueDates)) {
+                            if (!isset($entry->total_planned_qty) || $entry->total_actual_qty > $entry->total_planned_qty) {
+                                $entry->percentage = 100;
                             }
-                            $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                        @endphp
+                            $totalPercentage += $entry->percentage;
+                            $count++;
+                            $includedEntries[] = $entry;
+                            $uniqueDates[] = $entry->date;
+                        }
+                    }
+                }
 
-                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <table class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Signal Indicator</th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="signal green px-2">G</span> ≥ 95%
-                                                <span class="signal yellow">Y</span> ≥ 85%
-                                                <span class="signal red">R</span> < 85%
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-4">
-                                    <table class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Average Inventory</th>
-                                            <th>Signal</th>
-                                        </tr>
-                                        <tr>
-                                            <td>{{ number_format($averagePercentage, 2) }}%</td>
-                                            <td>
-                                                <span id="signal-inventory" class="signal
-                                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
-                                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+                $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+            @endphp
+
+
+
+
+                    <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <table class="indicator-table mb-4">
+                                    <tr>
+                                        <th>Signal Indicator</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="signal green px-2">G</span> ≥ 95%
+                                            <span class="signal yellow">Y</span> ≥ 85%
+                                            <span class="signal red">R</span> < 85%
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
-                            <p style="margin-top: -20px" class="text-center">{{ $model }}</p>
-                            <div style="margin-top: -20px" class="chart-container">
-                                <canvas id="chart-{{ $model }}" class="chart-custom"></canvas>
+                            <div class="col-md-4">
+                                <table class="indicator-table mb-4">
+                                    <tr>
+                                        <th>Average OTDC</th>
+                                        <th>Signal</th>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                        <td>
+                                            <span id="signal-otdc" class="signal
+                                                {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                                {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
-                    @endforeach
-                </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
+                        <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
+                        <div style="margin-top: -20px" class="chart-container">
+                            <canvas id="otdc-chart-{{ $vendorName }}" class="chart-custom"></canvas>
+                        </div>
+                    </div>
+                @endforeach
             </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#otdcCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#otdcCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
         </div>
+
+
     </div>
 </div>
 
-                <!-- OTDC Chart Carousel -->
-                <div class="col-md-6 mb-2">
-                    <div class="card card-custom">
-                        <div class="card-header">
-                            <h4>OTDC</h4>
+
+<!-- Item Code Quantity Carousel -->
+
+<div style="height: 375px" class="card card-custom">
+<div class="card-header">
+    <h4>Item Code Quantities</h4>
+</div>
+<div class="card-body">
+    <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            @foreach ($itemCodeQuantities as $groupIndex => $group)
+                <button type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+            @endforeach
+        </div>
+        <div style="margin-top: -20px" class="carousel-inner">
+            @foreach ($itemCodeQuantities as $groupIndex => $group)
+                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                    <p class="text-center">Group {{ $groupIndex + 1 }}</p>
+                    <div class="chart-container">
+                        <canvas id="item-code-quantity-chart-{{ $groupIndex }}" class="chart-custom"></canvas>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+</div>
+</div>
+                </div>
+              <!-- Inventory Monitoring Carousel -->
+        <div hidden class="col-md-6 mb-2">
+            <div class="card card-custom">
+                <div class="card-header">
+                    <h4>Inventory Monitoring</h4>
+                </div>
+                <div class="card-body">
+                    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            @foreach ($comparisonDataModel as $model => $comparisons)
+                                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+                            @endforeach
                         </div>
-                        <div class="card-body">
-
-
-                            <div id="otdcCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-indicators">
-                                    @foreach ($vendorData as $vendorName => $data)
-                                        <button type="button" data-bs-target="#otdcCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
-                                    @endforeach
-                                </div>
-                                <div class="carousel-inner">
-                                    @foreach ($vendorData as $vendorName => $data)
-                                    @php
+                        <div class="carousel-inner">
+                            @foreach ($comparisonDataModel as $model => $comparisons)
+                                @php
+                                    // Calculate average percentage for each model
                                     $totalPercentage = 0;
                                     $count = 0;
                                     $today = now()->format('Y-m-d');
-                                    $startOfMonth = now()->startOfMonth()->format('Y-m-d');
 
-                                    $includedEntries = [];
-                                    $uniqueDates = [];
-
-                                    foreach ($data as $entry) {
-                                        if ($entry->date >= $startOfMonth && $entry->date <= $today) {
-                                            // Ensure no duplicate dates are counted
-                                            if (!in_array($entry->date, $uniqueDates)) {
-                                                if (!isset($entry->total_planned_qty) || $entry->total_actual_qty > $entry->total_planned_qty) {
-                                                    $entry->percentage = 100;
-                                                }
-                                                $totalPercentage += $entry->percentage;
-                                                $count++;
-                                                $includedEntries[] = $entry;
-                                                $uniqueDates[] = $entry->date;
-                                            }
+                                    foreach ($comparisons as $comparison) {
+                                        if ($comparison->date <= $today) {
+                                            $totalPercentage += $comparison->percentage;
+                                            $count++;
                                         }
                                     }
-
                                     $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
                                 @endphp
 
-
-
-
-                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <table class="indicator-table mb-4">
-                                                        <tr>
-                                                            <th>Signal Indicator</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <span class="signal green px-2">G</span> ≥ 95%
-                                                                <span class="signal yellow">Y</span> ≥ 85%
-                                                                <span class="signal red">R</span> < 85%
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <table class="indicator-table mb-4">
-                                                        <tr>
-                                                            <th>Average OTDC</th>
-                                                            <th>Signal</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>{{ number_format($averagePercentage, 2) }}%</td>
-                                                            <td>
-                                                                <span id="signal-otdc" class="signal
-                                                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
-                                                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
-                                            <div style="margin-top: -20px" class="chart-container">
-                                                <canvas id="otdc-chart-{{ $vendorName }}" class="chart-custom"></canvas>
-                                            </div>
+                                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <table class="indicator-table mb-4">
+                                                <tr>
+                                                    <th>Signal Indicator</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <span class="signal green px-2">G</span> ≥ 95%
+                                                        <span class="signal yellow">Y</span> ≥ 85%
+                                                        <span class="signal red">R</span> < 85%
+                                                    </td>
+                                                </tr>
+                                            </table>
                                         </div>
-                                    @endforeach
+                                        <div class="col-md-4">
+                                            <table class="indicator-table mb-4">
+                                                <tr>
+                                                    <th>Average Inventory</th>
+                                                    <th>Signal</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                                    <td>
+                                                        <span id="signal-inventory" class="signal
+                                                            {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                                            {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <p style="margin-top: -20px" class="text-center">{{ $model }}</p>
+                                    <div style="margin-top: -20px" class="chart-container">
+                                        <canvas id="chart-{{ $model }}" class="chart-custom"></canvas>
+                                    </div>
                                 </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#otdcCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#otdcCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-
-
+                            @endforeach
                         </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Variant Code Summary Chart -->
-                <div class="col-md-6 mb-2">
-                    <div style="height: 375px"   class="card card-custom">
-                        <div class="card-header">
-                            <h4>Variant Code Summary</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="variantCodeSummaryCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-indicators">
-                                    @foreach ($variantCodeQuantities as $groupIndex => $group)
-                                        <button type="button" data-bs-target="#variantCodeSummaryCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
-                                    @endforeach
-                                </div>
-                                <div class="carousel-inner">
-                                    @foreach ($variantCodeQuantities as $groupIndex => $group)
-                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <p style="margin-top: -20px" class="text-center">Group {{ $groupIndex + 1 }}</p>
-                                            <div style="margin-top: -20px" class="chart-container">
-                                                <canvas id="variant-code-qty-chart-{{ $groupIndex }}" class="chart-custom"></canvas>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#variantCodeSummaryCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#variantCodeSummaryCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+        </div>
 
 
-                <!-- Item Code Quantity Carousel -->
-                <div class="col-md-6 mb-2">
-                    <div style="height: 375px" class="card card-custom">
-                        <div class="card-header">
-                            <h4>Item Code Quantities</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-indicators">
-                                    @foreach ($itemCodeQuantities as $groupIndex => $group)
-                                        <button type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
-                                    @endforeach
-                                </div>
-                                <div style="margin-top: -20px" class="carousel-inner">
-                                    @foreach ($itemCodeQuantities as $groupIndex => $group)
-                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <p class="text-center">Group {{ $groupIndex + 1 }}</p>
-                                            <div class="chart-container">
-                                                <canvas id="item-code-quantity-chart-{{ $groupIndex }}" class="chart-custom"></canvas>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+
 
                 <div class="col-12">
                     <div class="card">
@@ -405,92 +385,77 @@
     </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        console.log('Loading variant code quantities chart.');
+  document.addEventListener('DOMContentLoaded', (event) => {
+    console.log('Loading variant code quantities chart.');
 
-        const variantCodeQuantities = @json($variantCodeQuantities);
+    const variantCodeQuantities = @json($variantCodeQuantities);
 
-        if (typeof variantCodeQuantities === 'object') {
-            Object.keys(variantCodeQuantities).forEach((groupIndex) => {
-                console.log('Processing group index:', groupIndex);
+    if (typeof variantCodeQuantities === 'object') {
+      const combinedData = [];
 
-                const group = variantCodeQuantities[groupIndex];
-                const variantCodes = group.map(item => item.variantCode);
-                const quantities = group.map(item => item.total_qty);
+      Object.keys(variantCodeQuantities).forEach((groupIndex) => {
+        const group = variantCodeQuantities[groupIndex];
+        group.forEach(item => {
+          if (item.total_qty > 0) { // Only include items with a quantity greater than 0
+            combinedData.push({ category: item.variantCode, value: item.total_qty });
+          }
+        });
+      });
 
-                console.log(`Variant Codes for Group ${groupIndex}:`, variantCodes);
-                console.log(`Quantities for Group ${groupIndex}:`, quantities);
+      // Create the combined chart
+      am5.ready(function() {
+        // Create root element
+        var root = am5.Root.new("variant-code-pie-chart");
 
-                const ctx = document.getElementById(`variant-code-qty-chart-${groupIndex}`);
-                if (ctx) {
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: variantCodes,
-                            datasets: [{
-                                label: 'Quantity',
-                                data: quantities,
-                                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                                borderColor: 'rgba(54, 162, 235, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                x: {
-                                    stacked: false,
-                                    categoryPercentage: 0.5,
-                                    barPercentage: 0.5,
-                                    ticks: {
-                                        autoSkip: false,
-                                        maxRotation: 0,
-                                        minRotation: 0
-                                    }
-                                },
-                                y: {
-                                    stacked: false,
-                                    position: 'left',
-                                    title: {
-                                        display: true,
-                                        text: 'Quantity'
-                                    }
-                                }
-                            },
-                            plugins: {
-                                tooltip: {
-                                    enabled: true,
-                                    callbacks: {
-                                        title: function(tooltipItems) {
-                                            let title = tooltipItems[0].label || '';
-                                            title += ` ${new Date().toLocaleString('default', { month: 'long' })}`;
-                                            return title;
-                                        },
-                                        label: function(context) {
-                                            if (typeof context.raw === 'number') {
-                                                return context.raw.toFixed(2);
-                                            }
-                                            return context.raw;
-                                        }
-                                    }
-                                }
-                            },
-                            interaction: {
-                                mode: 'index',
-                                intersect: false
-                            }
-                        }
-                    });
-                } else {
-                    console.error(`Canvas element with id variant-code-qty-chart-${groupIndex} not found`);
-                }
-            });
-        } else {
-            console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
-        }
-    });
+        // Set themes
+        root.setThemes([am5themes_Animated.new(root)]);
+
+        // Create chart
+        var chart = root.container.children.push(
+          am5percent.PieChart.new(root, {
+            layout: root.verticalLayout,
+            innerRadius: am5.percent(50)
+          })
+        );
+
+        // Create series
+        var series = chart.series.push(
+          am5percent.PieSeries.new(root, {
+            name: "Series",
+            valueField: "value",
+            categoryField: "category"
+          })
+        );
+
+        // Set data
+        series.data.setAll(combinedData);
+
+        // Configure labels
+        series.labels.template.set("text", "{category}: {value}");
+
+        // Configure tooltips
+        series.slices.template.set("tooltipText", "{category}: {value}");
+
+        // Add legend
+        var legend = chart.children.push(am5.Legend.new(root, {
+          centerX: am5.p50,
+          x: am5.p50
+        }));
+
+        legend.data.setAll(series.dataItems);
+
+        // Animate chart
+        series.appear(1000, 100);
+      }); // end am5.ready()
+    } else {
+      console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
+    }
+  });
 </script>
 
 <script>
