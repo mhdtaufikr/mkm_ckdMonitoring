@@ -236,7 +236,7 @@
         var yAxisRight = chart.yAxes.push(
             am5xy.ValueAxis.new(root, {
                 min: 0,
-                max: 160, // Adjust the max value as needed
+                max: 100, // Adjust the max value to 100%
                 renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
             })
         );
@@ -361,6 +361,7 @@
         percentageSeries.appear();
     });
 </script>
+
 
 
 
