@@ -117,12 +117,19 @@ class HomeController extends Controller
                     ->get()
                     ->groupBy('item_code');
 
-                // Fetch the sum of planned and actual quantities grouped by vendor name and date for the current month until today
-                $vendorData = DB::table('vendor_comparison')
+                    $vendorData = DB::table('vendor_comparison')
+                    ->select(
+                        'vendor_name',
+                        'date',
+                        DB::raw('SUM(total_actual_qty) as total_actual_qty'),
+                        DB::raw('SUM(total_planned_qty) as total_planned_qty'),
+                        DB::raw('AVG(percentage) as percentage') // Jika perlu rata-rata persentase
+                    )
                     ->whereMonth('date', $currentMonth)
                     ->whereYear('date', $currentYear)
                     ->whereIn('vendor_name', ['SENOPATI'])
                     ->where('location_id', $locationId)
+                    ->groupBy('vendor_name', 'date')
                     ->get()
                     ->groupBy('vendor_name');
 
@@ -136,8 +143,9 @@ class HomeController extends Controller
 
                 // Fetch item code quantities from the inventories table
                 $itemCodeQuantities = DB::table('inventories')
-                    ->select('code', 'qty')
+                    ->select('code', 'qty','_id')
                     ->where('location_id', $locationId)
+                    ->where('qty', '>', 0)
                     ->get()
                     ->groupBy(function ($item) {
                         static $groupIndex = 0;
@@ -514,6 +522,127 @@ class HomeController extends Controller
             ->get();
 
         return view('home.l404', compact('vendorDataAggregate','locationId', 'itemCodes', 'plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'itemNotArrived'));
+    }
+
+    public function test()
+    {
+                $locationId = '65a72c7fad782dc26a0626f6';
+                $currentMonth = now()->month;
+                $currentYear = now()->year;
+                $today = now()->format('Y-m-d');
+
+                // Get planned data
+                $plannedData = DB::table('planned_inventory_view')
+                ->whereMonth('planned_receiving_date', $currentMonth)
+                ->whereYear('planned_receiving_date', $currentYear)
+                ->where('location_id',$locationId)
+                ->get()
+                ->groupBy('item_code');
+
+                // Get actual data
+                $actualData = DB::table('actual_inventory_view')
+                    ->whereMonth('receiving_date', $currentMonth)
+                    ->whereYear('receiving_date', $currentYear)
+                    ->whereDate('receiving_date', '<=', $today)
+                    ->where('location_id',$locationId)
+                    ->get()
+                    ->groupBy('item_code');
+
+                    $vendorData = DB::table('vendor_comparison')
+                    ->select(
+                        'vendor_name',
+                        'date',
+                        DB::raw('SUM(total_actual_qty) as total_actual_qty'),
+                        DB::raw('SUM(total_planned_qty) as total_planned_qty'),
+                        DB::raw('AVG(percentage) as percentage') // Jika perlu rata-rata persentase
+                    )
+                    ->whereMonth('date', $currentMonth)
+                    ->whereYear('date', $currentYear)
+                    ->whereIn('vendor_name', ['SENOPATI'])
+                    ->where('location_id', $locationId)
+                    ->groupBy('vendor_name', 'date')
+                    ->get()
+                    ->groupBy('vendor_name');
+
+                // Fetch vendor monthly summary
+                $vendorMonthlySummary = DB::table('vendor_monthly_summary')
+                    ->select('vendor_name', 'total_planned_qty', 'total_actual_qty')
+                    ->where('year', $currentYear)
+                    ->where('month', $currentMonth)
+                    ->where('location_id', $locationId)
+                    ->get();
+
+                    $itemCodeQuantities = DB::table('inventories')
+                    ->select('_id', 'code', 'qty') // Ensure 'id' is selected
+                    ->where('location_id', $locationId)
+                    ->where('qty', '>', 0) // Exclude entries where qty is 0
+                    ->get()
+                    ->groupBy(function ($item) {
+                        static $groupIndex = 0;
+                        static $itemCount = 0;
+                        if ($itemCount++ % 5 == 0) {
+                            $groupIndex++;
+                        }
+                        return $groupIndex;
+                    });
+
+
+                // Fetch variant code quantities from the inventories table
+                $variantCodeQuantities = DB::table('inventories')
+                    ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
+                    ->where('location_id', $locationId)
+                    ->whereNotNull('variantCode') // Exclude null variantCode
+                    ->groupBy('variantCode')
+                    ->orderBy('variantCode')
+                    ->get()
+                    ->groupBy(function ($item) {
+                        static $groupIndex = 0;
+                        static $itemCount = 0;
+                        if ($itemCount++ % 5 == 0) {
+                            $groupIndex++;
+                        }
+                        return $groupIndex;
+                    });
+
+                // Prepare data for the chart
+                $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
+                $totalPlanned = $vendorMonthlySummary->pluck('total_planned_qty')->toArray();
+                $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
+
+
+
+                // Get comparisons for the current month until today
+                $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
+                ->whereYear('planned_receiving_date', $currentYear)
+                ->whereDate('planned_receiving_date', '<=', $today)
+                ->where('id_location', $locationId)
+                ->get();
+
+            // Group by item_code
+            $itemCodes = $comparisons->groupBy('item_code');
+            $plannedDataModel = DB::table('view_planning')
+            ->where('id_location', $locationId)
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get()
+            ->groupBy('model');
+
+        $actualDataModel = DB::table('view_actual')
+            ->where('id_location', $locationId)
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get()
+            ->groupBy('model');
+
+        $comparisonDataModel = DB::table('view_comparison')
+            ->where('id_location', $locationId)
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get()
+            ->groupBy('model');
+
+
+        return view('home.test', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 
 

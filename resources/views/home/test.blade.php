@@ -402,57 +402,7 @@
 
                 </div>
 
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header" data-bs-toggle="collapse" href="#collapseCard" role="button" aria-expanded="false" aria-controls="collapseCard">
-                            <h3 class="card-title">List of Item Balance Item</h3>
-                        </div>
 
-                        <!-- /.card-header -->
-                        <div id="collapseCard" class="collapse">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="mb-3 col-sm-12">
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table id="tableUser" class="table table-bordered table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th>No</th>
-                                                    <th>Item Code</th>
-                                                    <th>Vendor Name</th>
-                                                    <th>Planned Receiving Date</th>
-                                                    <th>Planned Quantity</th>
-                                                    <th>Received Quantity</th>
-                                                    <th>Balance</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @php
-                                                    $no = 1;
-                                                @endphp
-                                                @foreach ($itemNotArrived as $notArrived)
-                                                    <tr>
-                                                        <td>{{ $no++ }}</td>
-                                                        <td>{{ $notArrived->item_code }}</td>
-                                                        <td>{{ $notArrived->vendor_name }}</td>
-                                                        <td>{{ date('d M Y', strtotime($notArrived->planned_receiving_date)) }}</td>
-                                                        <td>{{ $notArrived->planned_qty }}</td>
-                                                        <td>{{ $notArrived->received_qty }}</td>
-                                                        <td>{{ $notArrived->balance }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <!-- /.card-body -->
-                            </div>
-                        </div>
-                        <!-- /.card -->
-                    </div>
-                    <!-- /.col -->
-                </div>
             </div>
         </div>
     </section>
@@ -529,92 +479,81 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-        console.log('Loading item code quantities charts.');
+    console.log('Loading item code quantities charts.');
 
-        const itemCodeQuantities = @json($itemCodeQuantities);
-        const month = new Date().toLocaleString('default', { month: 'long' });
+    const itemCodeQuantities = @json($itemCodeQuantities);
+    const month = new Date().toLocaleString('default', { month: 'long' });
 
-        if (typeof itemCodeQuantities === 'object') {
-            Object.keys(itemCodeQuantities).forEach((groupIndex) => {
-                console.log('Processing item code group:', groupIndex);
+    if (typeof itemCodeQuantities === 'object') {
+        Object.keys(itemCodeQuantities).forEach((groupIndex) => {
+            console.log('Processing item code group:', groupIndex);
 
-                const group = itemCodeQuantities[groupIndex];
+            const group = itemCodeQuantities[groupIndex];
+            const itemCodes = group.map(item => item.code);
+            const quantities = group.map(item => item.qty);
 
-                const itemCodes = group.map(item => item.code);
-                const quantities = group.map(item => item.qty);
-                const itemIds = group.map(item => item._id); // Add this line to get item IDs
+            console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
+            console.log(`Quantities for Group ${groupIndex}:`, quantities);
 
-                console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
-                console.log(`Quantities for Group ${groupIndex}:`, quantities);
-
-                const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
-                const myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: itemCodes,
-                        datasets: [{
-                            label: 'Quantity',
-                            data: quantities,
-                            backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
+            const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: itemCodes,
+                    datasets: [{
+                        label: 'Quantity',
+                        data: quantities,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: false,
+                            categoryPercentage: 0.5,
+                            barPercentage: 0.5,
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Quantity'
+                            }
+                        }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                stacked: false,
-                                categoryPercentage: 0.5,
-                                barPercentage: 0.5,
-                                ticks: {
-                                    autoSkip: false,
-                                    maxRotation: 0,
-                                    minRotation: 0
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    let title = tooltipItems[0].label || '';
+                                    title += ` ${month}`;
+                                    return title;
+                                },
+                                label: function(context) {
+                                    return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
                                 }
-                            },
-                            y: {
-                                stacked: false,
-                                position: 'left',
-                                title: {
-                                    display: true,
-                                    text: 'Quantity'
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    title: function(tooltipItems) {
-                                        let title = tooltipItems[0].label || '';
-                                        title += ` ${month}`;
-                                        return title;
-                                    },
-                                    label: function(context) {
-                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) : '';
-                                    }
-                                }
-                            }
-                        },
-                        onClick: (e, elements) => {
-
-                            if (elements.length > 0) {
-                                const chart = elements[0].chart;
-                                const index = elements[0].index;
-                                const itemId = itemIds[index]; // Get the item ID for the clicked bar
-                                window.location.href = `/inventory/${itemId}/details`;
                             }
                         }
                     }
-                });
+                }
             });
-        } else {
-            console.error('itemCodeQuantities is not an object:', itemCodeQuantities);
-        }
-    });
-</script>
+        });
+    } else {
+        console.error('itemCodeQuantities is not an object:', itemCodeQuantities);
+    }
+});
 
+</script>
 
 <script>
     $(document).ready(function() {
