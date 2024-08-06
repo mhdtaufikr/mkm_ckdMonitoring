@@ -603,7 +603,9 @@
                                 const chart = elements[0].chart;
                                 const index = elements[0].index;
                                 const itemId = itemIds[index]; // Get the item ID for the clicked bar
-                                window.location.href = `/inventory/${itemId}/details`;
+                                const url = `/inventory/${itemId}/details`;
+                                window.open(url, '_blank');
+
                             }
                         }
                     }
