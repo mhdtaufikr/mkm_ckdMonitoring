@@ -11,6 +11,7 @@ class HomeController extends Controller
 {
     public function index()
     {
+        set_time_limit(120);
         $locationId = '5f335f29a2ef087afa109156';
         $currentMonth = now()->month;
         $currentYear = now()->year;
@@ -87,7 +88,6 @@ class HomeController extends Controller
         ->where('location_id', $locationId)
         ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
         ->get();
-
 
 
         return view('home.index', compact('locationId','itemCodes','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual','itemNotArrived'));
