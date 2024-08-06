@@ -156,13 +156,15 @@ class HomeController extends Controller
                         return $groupIndex;
                     });
 
-                // Fetch variant code quantities from the inventories table
-                $variantCodeQuantities = DB::table('inventories')
-                    ->select('variantCode', DB::raw('SUM(qty) as total_qty'))
-                    ->where('location_id', $locationId)
-                    ->whereNotNull('variantCode') // Exclude null variantCode
-                    ->groupBy('variantCode')
-                    ->orderBy('variantCode')
+                                    // Fetch variant code quantities from the inventories table, joined with master_products
+                    $variantCodeQuantities = DB::table('inventories')
+                    ->join('master_products', 'inventories.variantCode', '=', 'master_products.variantCode')
+                    ->select('inventories.variantCode', 'master_products.model', DB::raw('SUM(inventories.qty) as total_qty'))
+                    ->where('inventories.location_id', $locationId)
+                    ->whereNotNull('inventories.variantCode') // Exclude null variantCode
+                    ->whereNotNull('master_products.model') // Exclude null model
+                    ->groupBy('inventories.variantCode', 'master_products.model')
+                    ->orderBy('inventories.variantCode')
                     ->get()
                     ->groupBy(function ($item) {
                         static $groupIndex = 0;

@@ -94,7 +94,7 @@
                             <h4>Variant Code Summary</h4>
                         </div>
                         <div class="card-body">
-                            <div id="variant-code-pie-chart" style="width: 130%; height: 130%; margin-left: 20px;"></div>
+                            <div  id="variant-code-pie-chart" style=" width: 130%; height: 130%; margin-left: 20px;"></div>
                         </div>
                     </div>
                 </div>
@@ -258,7 +258,7 @@
                 clustered: true,
                 tooltip: am5.Tooltip.new(root, {
                     pointerOrientation: "horizontal",
-                    labelText: "{name} on {categoryX}: {valueY}"
+                    labelText: "{name}: {valueY}"
                 })
             })
         );
@@ -276,7 +276,7 @@
                 clustered: true,
                 tooltip: am5.Tooltip.new(root, {
                     pointerOrientation: "horizontal",
-                    labelText: "{name} on {categoryX}: {valueY}"
+                    labelText: "{name}: {valueY}"
                 })
             })
         );
@@ -293,7 +293,7 @@
                 categoryXField: "date",
                 tooltip: am5.Tooltip.new(root, {
                     pointerOrientation: "horizontal",
-                    labelText: "{name} on {categoryX}: {valueY}%"
+                    labelText: "{name}: {valueY}%"
                 }),
                 stroke: am5.color(0x000000), // Set the color of the percentage line to black
                 fill: am5.color(0x000000) // Set the fill color if needed
@@ -361,6 +361,7 @@
         percentageSeries.appear();
     });
 </script>
+
 
 
                   <!-- Item Code Quantity Carousel -->
@@ -459,73 +460,74 @@
 </main>
 
 <script>
-  document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('Loading variant code quantities chart.');
+    document.addEventListener('DOMContentLoaded', (event) => {
+      console.log('Loading variant code quantities chart.');
 
-    const variantCodeQuantities = @json($variantCodeQuantities);
+      const variantCodeQuantities = @json($variantCodeQuantities);
 
-    if (typeof variantCodeQuantities === 'object') {
-      const combinedData = [];
+      if (typeof variantCodeQuantities === 'object') {
+        const combinedData = [];
 
-      Object.keys(variantCodeQuantities).forEach((groupIndex) => {
-        const group = variantCodeQuantities[groupIndex];
-        group.forEach(item => {
-          if (item.total_qty > 0) { // Only include items with a quantity greater than 0
-            combinedData.push({ category: item.variantCode, value: item.total_qty });
-          }
+        Object.keys(variantCodeQuantities).forEach((groupIndex) => {
+          const group = variantCodeQuantities[groupIndex];
+          group.forEach(item => {
+            if (item.total_qty > 0) { // Only include items with a quantity greater than 0
+              combinedData.push({ category: item.model, value: item.total_qty });
+            }
+          });
         });
-      });
 
-      // Create the combined chart
-      am5.ready(function() {
-        // Create root element
-        var root = am5.Root.new("variant-code-pie-chart");
+        // Create the combined chart
+        am5.ready(function() {
+          // Create root element
+          var root = am5.Root.new("variant-code-pie-chart");
 
-        // Set themes
-        root.setThemes([am5themes_Animated.new(root)]);
+          // Set themes
+          root.setThemes([am5themes_Animated.new(root)]);
 
-        // Create chart
-        var chart = root.container.children.push(
-          am5percent.PieChart.new(root, {
-            layout: root.verticalLayout,
-            innerRadius: am5.percent(50)
-          })
-        );
+          // Create chart
+          var chart = root.container.children.push(
+            am5percent.PieChart.new(root, {
+              layout: root.verticalLayout,
+              innerRadius: am5.percent(50)
+            })
+          );
 
-        // Create series
-        var series = chart.series.push(
-          am5percent.PieSeries.new(root, {
-            name: "Series",
-            valueField: "value",
-            categoryField: "category"
-          })
-        );
+          // Create series
+          var series = chart.series.push(
+            am5percent.PieSeries.new(root, {
+              name: "Series",
+              valueField: "value",
+              categoryField: "category"
+            })
+          );
 
-        // Set data
-        series.data.setAll(combinedData);
+          // Set data
+          series.data.setAll(combinedData);
 
-        // Configure labels
-        series.labels.template.set("text", "{category}: {value}");
+          // Configure labels
+          series.labels.template.set("text", "{category}: {value}");
 
-        // Configure tooltips
-        series.slices.template.set("tooltipText", "{category}: {value}");
+          // Configure tooltips
+          series.slices.template.set("tooltipText", "{category}: {value}");
 
-        // Add legend
-        var legend = chart.children.push(am5.Legend.new(root, {
-          centerX: am5.p50,
-          x: am5.p50
-        }));
+          // Add legend
+          var legend = chart.children.push(am5.Legend.new(root, {
+            centerX: am5.p50,
+            x: am5.p50
+          }));
 
-        legend.data.setAll(series.dataItems);
+          legend.data.setAll(series.dataItems);
 
-        // Animate chart
-        series.appear(1000, 100);
-      }); // end am5.ready()
-    } else {
-      console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
-    }
-  });
-</script>
+          // Animate chart
+          series.appear(1000, 100);
+        }); // end am5.ready()
+      } else {
+        console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
+      }
+    });
+  </script>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
