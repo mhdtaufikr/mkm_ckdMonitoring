@@ -93,7 +93,7 @@
                         <h4>Variant Code Summary</h4>
                     </div>
                     <div class="card-body">
-                        <div id="variant-code-pie-chart" style="width: 145%; height: 1000px;"></div>
+                        <div id="variant-code-pie-chart" style="width: 130%; height: 130%;margin-left: 20px;"></div>
                     </div>
                     </div>
                 </div>
