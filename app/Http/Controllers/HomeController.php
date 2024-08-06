@@ -342,7 +342,7 @@ class HomeController extends Controller
             ->get()
             ->groupBy('model');
 
-        return view('home.ckd', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
+        return view('home.cdknouba', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 
     public function l305()
