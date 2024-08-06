@@ -87,7 +87,7 @@
         <div class="container-fluid px-4 mt-n10">
             <div class="row">
                 <!-- Variant Code Summary Chart -->
-                <div class="col-md-6 mb-2">
+                <div class="col-md-4 mb-2">
                     <div style="height: 826px" class="card card-custom">
                     <div class="card-header">
                         <h4>Variant Code Summary</h4>
@@ -99,7 +99,7 @@
                 </div>
 
 
-                <div class="col-md-6 mb-2">
+                <div class="col-md-8 mb-2">
 <!-- OTDC Chart Carousel -->
 
 <div class="card card-custom">
