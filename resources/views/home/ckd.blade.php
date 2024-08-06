@@ -504,53 +504,55 @@
     });
   </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOM fully loaded and parsed');
+        console.log('DOM fully loaded and parsed');
 
-    const groupedComparisons = @json($itemCodes);
-    const vendorData = @json($vendorData);
-    const itemCodeQuantities = @json($itemCodeQuantities);
-    const vendors = @json($vendors);
-    const totalPlanned = @json($totalPlanned);
-    const totalActual = @json($totalActual);
-    const month = new Date().toLocaleString('default', { month: 'long' });
-    const today = new Date().getDate(); // Get today's date
-    const groupedPlannedData = @json($plannedData);
-    const groupedActualData = @json($actualData);
-    const groupedPlannedDatamodel = @json($plannedDataModel);
-    const groupedActualDatamodel = @json($actualDataModel);
-    const groupedComparisonData = @json($comparisonDataModel);
+        const groupedComparisons = @json($itemCodes);
+        const vendorData = @json($vendorData);
+        const itemCodeQuantities = @json($itemCodeQuantities);
+        const vendors = @json($vendors);
+        const totalPlanned = @json($totalPlanned);
+        const totalActual = @json($totalActual);
+        const month = new Date().toLocaleString('default', { month: 'long' });
+        const today = new Date().getDate(); // Get today's date
+        const groupedPlannedData = @json($plannedData);
+        const groupedActualData = @json($actualData);
+        const groupedPlannedDatamodel = @json($plannedDataModel);
+        const groupedActualDatamodel = @json($actualDataModel);
+        const groupedComparisonData = @json($comparisonDataModel);
 
-    console.log('Grouped Comparisons:', groupedComparisons);
-    console.log('Vendor Data:', vendorData);
-    console.log('Item Code Quantities:', itemCodeQuantities);
-    console.log('Vendors:', vendors);
-    console.log('Total Planned:', totalPlanned);
-    console.log('Total Actual:', totalActual);
+        console.log('Grouped Comparisons:', groupedComparisons);
+        console.log('Vendor Data:', vendorData);
+        console.log('Item Code Quantities:', itemCodeQuantities);
+        console.log('Vendors:', vendors);
+        console.log('Total Planned:', totalPlanned);
+        console.log('Total Actual:', totalActual);
 
-    const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+        const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-    const addDottedLinePlugin = {
-        id: 'dottedLinePlugin',
-        beforeDraw: (chart) => {
-            const ctx = chart.ctx;
-            const yScale = chart.scales['y-axis-2'];
-            const yValue = yScale.getPixelForValue(100);
+        const addDottedLinePlugin = {
+            id: 'dottedLinePlugin',
+            beforeDraw: (chart) => {
+                const ctx = chart.ctx;
+                const yScale = chart.scales['y-axis-2'];
+                const yValue = yScale.getPixelForValue(100);
 
-            ctx.save();
-            ctx.beginPath();
-            ctx.setLineDash([5, 5]);
-            ctx.moveTo(chart.chartArea.left, yValue);
-            ctx.lineTo(chart.chartArea.right, yValue);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'black';
-            ctx.stroke();
-            ctx.restore();
-        }
-    };
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(chart.chartArea.left, yValue);
+                ctx.lineTo(chart.chartArea.right, yValue);
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'black';
+                ctx.stroke();
+                ctx.restore();
+            }
+        };
 
-    Object.keys(groupedComparisonData).forEach((model) => {
+        Object.keys(groupedComparisonData).forEach((model) => {
             const plannedComparisons = groupedPlannedDatamodel[model] || [];
             const actualComparisons = groupedActualDatamodel[model] || [];
 
@@ -607,7 +609,12 @@
                         type: 'line',
                         yAxisID: 'y-axis-2',
                         order: 0,
-                        borderWidth: 2
+                        borderWidth: 2,
+                        trendlineLinear: {
+                            style: "rgba(75, 192, 192, 0.5)",
+                            lineStyle: "line",
+                            width: 2
+                        }
                     }]
                 },
                 options: {
@@ -681,283 +688,154 @@
             });
         });
 
-            /* if (typeof groupedPlannedData === 'object' && typeof groupedActualData === 'object') {
-                        Object.keys(groupedPlannedData).forEach((itemCode) => {
-                            const plannedComparisons = groupedPlannedData[itemCode];
-                            const actualComparisons = groupedActualData[itemCode] || [];
+        if (typeof vendorData === 'object') {
+            Object.keys(vendorData).forEach((vendorName) => {
+                console.log(`Processing vendor: ${vendorName}`);
 
-                            const plannedData = Array(31).fill(null);
-                            const actualData = Array(31).fill(null);
-                            const percentageDifference = Array(31).fill(0);
+                const data = vendorData[vendorName];
+                const plannedData = Array(31).fill(null);
+                const actualData = Array(31).fill(null);
+                const percentageAccuracy = Array(31).fill(0); // Default value set to 0%
 
-                            plannedComparisons.forEach((comparison) => {
-                                const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
-                                plannedData[plannedDay] = comparison.planned_qty;
-                            });
+                let totalPercentage = 0;
+                let count = 0;
 
-                            actualComparisons.forEach((comparison) => {
-                                const actualDay = new Date(comparison.receiving_date).getDate() - 1;
-                                actualData[actualDay] = comparison.received_qty;
-                            });
+                data.forEach((entry) => {
+                    const day = new Date(entry.date).getDate() - 1;
+                    plannedData[day] = entry.total_planned_qty;
+                    actualData[day] = entry.total_actual_qty;
 
-                            plannedData.forEach((value, index) => {
-                                if (value !== null && actualData[index] !== null) {
-                                    const percentage = Math.min((actualData[index] / value) * 100, 100);
-                                    percentageDifference[index] = percentage !== 0 ? percentage : 0;
-                                }
-                            });
+                    if (day < today) { // Ensure calculations are done only up to today's date
+                        const percentage = Math.min((entry.total_actual_qty / entry.total_planned_qty) * 100, 100); // Ensure percentage does not exceed 100%
+                        percentageAccuracy[day] = isNaN(percentage) ? 0 : percentage;
 
-                            const ctx = document.getElementById(`chart-${itemCode}`).getContext('2d');
-                            const myChart = new Chart(ctx, {
-                                type: 'bar',
-                                data: {
-                                    labels: getDefaultLabels(),
-                                    datasets: [{
-                                        label: 'Planned Stock',
-                                        data: plannedData,
-                                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                                        borderColor: 'rgba(54, 162, 235, 1)',
-                                        borderWidth: 1,
-                                        type: 'bar',
-                                        order: 1
-                                    },
-                                    {
-                                        label: 'Actual Stock',
-                                        data: actualData,
-                                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
-                                        borderColor: 'rgba(255, 159, 64, 1)',
-                                        borderWidth: 1,
-                                        type: 'bar',
-                                        order: 2
-                                    },
-                                    {
-                                        label: 'Percentage Accuracy',
-                                        data: percentageDifference,
-                                        borderColor: 'rgba(75, 192, 192, 1)',
-                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                        fill: false,
-                                        type: 'line',
-                                        yAxisID: 'y-axis-2',
-                                        order: 0,
-                                        borderWidth: 2
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    scales: {
-                                        x: {
-                                            stacked: false,
-                                            categoryPercentage: 0.5,
-                                            barPercentage: 0.5,
-                                            ticks: {
-                                                autoSkip: false,
-                                                maxRotation: 0,
-                                                minRotation: 0,
-                                                callback: function(value, index, values) {
-                                                    return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                                                }
-                                            }
-                                        },
-                                        y: {
-                                            stacked: false,
-                                            position: 'left',
-                                            title: {
-                                                display: true,
-                                                text: 'Stock Quantity'
-                                            }
-                                        },
-                                        'y-axis-2': {
-                                            stacked: false,
-                                            position: 'right',
-                                            title: {
-                                                display: true,
-                                                text: 'Percentage'
-                                            },
-                                            grid: {
-                                                drawOnChartArea: false
-                                            },
-                                            ticks: {
-                                                callback: function(value) {
-                                                    return value + '%';
-                                                }
-                                            }
-                                        }
-                                    },
-                                    plugins: {
-                                        tooltip: {
-                                            callbacks: {
-                                                title: function(tooltipItems) {
-                                                    let title = tooltipItems[0].label || '';
-                                                    title += ` ${month}`;
-                                                    return title;
-                                                },
-                                                label: function(context) {
-                                                    if (context.dataset.label === 'Percentage Accuracy') {
-                                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
-                                                    }
-                                                    return context.raw;
-                                                }
-                                            }
-                                        },
-                                        legend: {
-                                            labels: {
-                                                filter: function(item, chart) {
-                                                    return item.text !== 'Percentage Accuracy';
-                                                }
-                                            }
-                                        }
-                                    }
-                                },
-                                plugins: [addDottedLinePlugin]
-                            });
-                        });
-                    } */
-
-                if (typeof vendorData === 'object') {
-    Object.keys(vendorData).forEach((vendorName) => {
-        console.log(`Processing vendor: ${vendorName}`);
-
-        const data = vendorData[vendorName];
-        const plannedData = Array(31).fill(null);
-        const actualData = Array(31).fill(null);
-        const percentageAccuracy = Array(31).fill(0); // Default value set to 0%
-
-        let totalPercentage = 0;
-        let count = 0;
-
-        data.forEach((entry) => {
-            const day = new Date(entry.date).getDate() - 1;
-            plannedData[day] = entry.total_planned_qty;
-            actualData[day] = entry.total_actual_qty;
-
-            if (day < today) { // Ensure calculations are done only up to today's date
-                const percentage = Math.min((entry.total_actual_qty / entry.total_planned_qty) * 100, 100); // Ensure percentage does not exceed 100%
-                percentageAccuracy[day] = isNaN(percentage) ? 0 : percentage;
-
-                totalPercentage += percentageAccuracy[day];
-                count++;
-            }
-        });
-
-        const averagePercentage = count > 0 ? totalPercentage / count : 0;
-
-        console.log(`Planned Data for ${vendorName}:`, plannedData);
-        console.log(`Actual Data for ${vendorName}:`, actualData);
-        console.log(`Percentage Accuracy for ${vendorName}:`, percentageAccuracy);
-        console.log(`Average OTDC for ${vendorName}: ${averagePercentage.toFixed(2)}%`);
-
-        createChart(vendorName, plannedData, actualData, percentageAccuracy);
-    });
-    }
-
-    function createChart(vendorName, plannedData, actualData, percentageAccuracy) {
-        const ctx = document.getElementById(`otdc-chart-${vendorName}`).getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: getDefaultLabels(),
-                datasets: [{
-                    label: 'Planned Qty',
-                    data: plannedData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    type: 'bar',
-                    order: 1
-                },
-                {
-                    label: 'Actual Qty',
-                    data: actualData,
-                    backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
-                    borderColor: 'rgba(255, 159, 64, 1)',
-                    borderWidth: 1,
-                    type: 'bar',
-                    order: 2
-                },
-                {
-                    label: 'Percentage Accuracy',
-                    data: percentageAccuracy,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    fill: false,
-                    type: 'line',
-                    yAxisID: 'y-axis-2',
-                    order: 0,
-                    borderWidth: 2 // Increase the line thickness here
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        stacked: false,
-                        categoryPercentage: 0.5,
-                        barPercentage: 0.5,
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: 0,
-                            minRotation: 0,
-                            callback: function(value, index, values) {
-                                return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                            }
-                        }
-                    },
-                    y: {
-                        stacked: false,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Quantity'
-                        }
-                    },
-                    'y-axis-2': {
-                        stacked: false,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Percentage'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
-                            }
-                        }
+                        totalPercentage += percentageAccuracy[day];
+                        count++;
                     }
+                });
+
+                const averagePercentage = count > 0 ? totalPercentage / count : 0;
+
+                console.log(`Planned Data for ${vendorName}:`, plannedData);
+                console.log(`Actual Data for ${vendorName}:`, actualData);
+                console.log(`Percentage Accuracy for ${vendorName}:`, percentageAccuracy);
+                console.log(`Average OTDC for ${vendorName}: ${averagePercentage.toFixed(2)}%`);
+
+                createChart(vendorName, plannedData, actualData, percentageAccuracy);
+            });
+        }
+
+        function createChart(vendorName, plannedData, actualData, percentageAccuracy) {
+            const ctx = document.getElementById(`otdc-chart-${vendorName}`).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: getDefaultLabels(),
+                    datasets: [{
+                        label: 'Planned Qty',
+                        data: plannedData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        type: 'bar',
+                        order: 1
+                    },
+                    {
+                        label: 'Actual Qty',
+                        data: actualData,
+                        backgroundColor: 'rgba(255, 159, 64, 0.8)', // Increase opacity
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1,
+                        type: 'bar',
+                        order: 2
+                    },
+                    {
+                        label: 'Percentage Accuracy',
+                        data: percentageAccuracy,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: false,
+                        type: 'line',
+                        yAxisID: 'y-axis-2',
+                        order: 0,
+                        borderWidth: 2,
+                        trendlineLinear: {
+                            style: "rgba(75, 192, 192, 0.5)",
+                            lineStyle: "line",
+                            width: 2
+                        }
+                    }]
                 },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            title: function(tooltipItems) {
-                                let title = tooltipItems[0].label || '';
-                                title += ` ${month}`;
-                                return title;
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: false,
+                            categoryPercentage: 0.5,
+                            barPercentage: 0.5,
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                callback: function(value, index, values) {
+                                    return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Quantity'
+                            }
+                        },
+                        'y-axis-2': {
+                            stacked: false,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Percentage'
                             },
-                            label: function(context) {
-                                if (context.dataset.label === 'Percentage Accuracy') {
-                                    return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
                                 }
-                                return context.raw;
                             }
                         }
                     },
-                    legend: {
-                        labels: {
-                            filter: function(item, chart) {
-                                return item.text !== 'Percentage Accuracy';
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    let title = tooltipItems[0].label || '';
+                                    title += ` ${month}`;
+                                    return title;
+                                },
+                                label: function(context) {
+                                    if (context.dataset.label === 'Percentage Accuracy') {
+                                        return context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '';
+                                    }
+                                    return context.raw;
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                filter: function(item, chart) {
+                                    return item.text !== 'Percentage Accuracy';
+                                }
                             }
                         }
                     }
-                }
-            },
-            plugins: [addDottedLinePlugin]
-        });
-    }
-
+                },
+                plugins: [addDottedLinePlugin]
+            });
+        }
 
         if (typeof itemCodeQuantities === 'object') {
             Object.keys(itemCodeQuantities).forEach((groupIndex) => {
@@ -1024,11 +902,9 @@
                 });
             });
         }
-
-
     });
-
 </script>
+
 <script>
     function refreshPage() {
         setTimeout(function() {
