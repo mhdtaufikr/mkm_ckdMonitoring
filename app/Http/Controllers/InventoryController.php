@@ -48,17 +48,30 @@ class InventoryController extends Controller
     return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
 }
 
-public function indexCKD()
+public function indexCKD(Request $request)
 {
     $locationIds = ['617bd0ad83ef510374337d84', '65a72c7fad782dc26a0626f6'];
 
-    $items = DB::table('inventories')
+    // Initial query for items
+    $itemsQuery = DB::table('inventories')
         ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
         ->whereIn('inventories.location_id', $locationIds)
         ->select('inventories.*', 'mst_locations.name as location_name')
-        ->orderBy('inventories.created_at', 'desc')
-        ->get();
+        ->orderBy('inventories.created_at', 'desc');
 
+    // Filter by planned date if provided
+    if ($request->has('planned_date') && $request->planned_date) {
+        $itemsQuery->whereIn('inventories._id', function ($query) use ($request) {
+            $query->select('inventory_id')
+                  ->from('planned_inventory_items')
+                  ->whereDate('planned_receiving_date', $request->planned_date);
+        });
+    }
+
+    // Execute the query
+    $items = $itemsQuery->get();
+
+    // Fetch distinct inventory codes
     $inventoryCodes = DB::table('inventories')
         ->whereIn('location_id', $locationIds)
         ->select('code')
@@ -70,10 +83,11 @@ public function indexCKD()
         ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
         ->groupBy('inventory_id')
         ->get()
-        ->pluck('vendor_names', 'inventory_id'); // Pluck to get an associative array with inventory_id as key
+        ->pluck('vendor_names', 'inventory_id');
 
+    // Fetch all planned items for the given locations
     $plannedItems = DB::table('planned_inventory_items')
-        ->whereIn('inventory_id', function($query) use ($locationIds) {
+        ->whereIn('inventory_id', function ($query) use ($locationIds) {
             $query->select('_id')
                   ->from('inventories')
                   ->whereIn('location_id', $locationIds);
@@ -82,6 +96,7 @@ public function indexCKD()
 
     return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
 }
+
 
     public function show($id)
     {

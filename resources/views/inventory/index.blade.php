@@ -13,6 +13,12 @@
                         </h1>
                     </div>
                     <div class="col-auto">
+                        <form action="{{ route('inventory.ckd') }}" method="GET" class="d-flex">
+                            <input type="date" name="planned_date" class="form-control" value="{{ request('planned_date') }}">
+                            <button type="submit" class="btn btn-primary ms-2">Filter by Date</button>
+                        </form>
+                    </div>
+                    <div class="col-auto">
                         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadPlannedModal">
                             <i class="fas fa-file-excel"></i> Upload Planned Received Item
                         </button>
