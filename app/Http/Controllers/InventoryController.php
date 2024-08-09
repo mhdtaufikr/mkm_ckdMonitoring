@@ -160,8 +160,9 @@ public function indexCKD()
         }
     }
 
-    return redirect()->route('inventory.index')->with('status', 'Planned receive updated successfully.');
+    return redirect()->back()->with('status', 'Planned receive updated successfully.');
 }
+
 
 
 
