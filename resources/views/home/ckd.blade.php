@@ -247,23 +247,6 @@
                             centerX: am5.p50
                         }), 0);
 
-                        // Add Actual series
-                        var actualSeries = chart.series.push(
-                            am5xy.ColumnSeries.new(root, {
-                                name: "Actual",
-                                xAxis: xAxis,
-                                yAxis: yAxis,
-                                valueYField: "actual",
-                                categoryXField: "date",
-                                clustered: true,
-                                tooltip: am5.Tooltip.new(root, {
-                                    pointerOrientation: "horizontal",
-                                    labelText: "{name}: {valueY}"
-                                })
-                            })
-                        );
-                        actualSeries.columns.template.setAll({ fill: am5.color("#fbb659"), width: am5.percent(80), tooltipY: am5.percent(10), marginRight: 0 });
-                        actualSeries.data.setAll(data);
 
                         // Add Plan series
                         var planSeries = chart.series.push(
@@ -282,6 +265,25 @@
                         );
                         planSeries.columns.template.setAll({ fill: am5.color("#1e81b0"), width: am5.percent(80), tooltipY: am5.percent(10), marginLeft: 0 });
                         planSeries.data.setAll(data);
+
+                        // Add Actual series
+                        var actualSeries = chart.series.push(
+                            am5xy.ColumnSeries.new(root, {
+                                name: "Actual",
+                                xAxis: xAxis,
+                                yAxis: yAxis,
+                                valueYField: "actual",
+                                categoryXField: "date",
+                                clustered: true,
+                                tooltip: am5.Tooltip.new(root, {
+                                    pointerOrientation: "horizontal",
+                                    labelText: "{name}: {valueY}"
+                                })
+                            })
+                        );
+                        actualSeries.columns.template.setAll({ fill: am5.color("#fbb659"), width: am5.percent(80), tooltipY: am5.percent(10), marginRight: 0 });
+                        actualSeries.data.setAll(data);
+
 
                         // Add Percentage series
                         var percentageSeries = chart.series.push(

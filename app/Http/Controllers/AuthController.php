@@ -36,7 +36,7 @@ class AuthController extends Controller
                 ]);
 
                 // Redirect to the intended route after login
-                return redirect()->intended('/home');
+                return redirect()->intended('/home/ckd');
             } else {
                 return redirect('/')->with('statusLogin', 'Give Access First to User');
             }
