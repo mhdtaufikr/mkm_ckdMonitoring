@@ -500,6 +500,7 @@ class HomeController extends Controller
             ->where('location_id', $locationId)
             ->get();
 
+
             $itemCodeQuantities = DB::table('inventories')
             ->select('_id', 'code', 'qty') // Ensure 'id' is selected
             ->where('location_id', $locationId)
