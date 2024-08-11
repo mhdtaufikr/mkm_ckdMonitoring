@@ -503,6 +503,7 @@ class HomeController extends Controller
             $itemCodeQuantities = DB::table('inventories')
             ->select('_id', 'code', 'qty') // Ensure 'id' is selected
             ->where('location_id', $locationId)
+            ->where('qty', '>', 0)
             ->get()
             ->groupBy(function ($item) {
                 static $groupIndex = 0;
