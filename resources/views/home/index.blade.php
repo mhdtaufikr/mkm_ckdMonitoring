@@ -439,6 +439,7 @@
             var xAxis = chart.xAxes.push(
                 am5xy.CategoryAxis.new(root, {
                     categoryField: "date",
+                    tooltip: am5.Tooltip.new(root, {}),
                     renderer: am5xy.AxisRendererX.new(root, {
                         minGridDistance: 30
                     })
@@ -587,6 +588,7 @@
 
             var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
                 categoryField: "date",
+                tooltip: am5.Tooltip.new(root, {}),
                 renderer: am5xy.AxisRendererX.new(root, { minGridDistance: 30 })
             }));
 
