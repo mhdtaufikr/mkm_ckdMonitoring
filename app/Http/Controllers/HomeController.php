@@ -11,7 +11,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        set_time_limit(120);
+        set_time_limit(300);
         $locationId = '5f335f29a2ef087afa109156';
         $currentMonth = now()->month;
         $currentYear = now()->year;
@@ -95,6 +95,7 @@ class HomeController extends Controller
 
     public function indexCkd()
     {
+        set_time_limit(300);
                 $locationId = '65a72c7fad782dc26a0626f6';
                 $currentMonth = now()->month;
                 $currentYear = now()->year;
@@ -227,6 +228,7 @@ class HomeController extends Controller
 
     public function indexCkdNouba()
     {
+        set_time_limit(300);
         $locationId = '617bd0ad83ef510374337d84';
         $currentMonth = now()->month;
         $currentYear = now()->year;
@@ -347,6 +349,7 @@ class HomeController extends Controller
 
     public function l305()
     {
+        set_time_limit(300);
         $locationId = '5fc4b12bc329204cb00b56bf';
         $currentMonth = now()->month;
         $currentYear = now()->year;
@@ -430,6 +433,7 @@ class HomeController extends Controller
 
     public function cvcL404()
     {
+        set_time_limit(300);
         $locationId = '65bd1017b4490c26c00a82d9';
         $currentMonth = now()->month;
         $currentYear = now()->year;

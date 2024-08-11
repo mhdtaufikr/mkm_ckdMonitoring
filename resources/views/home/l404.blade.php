@@ -29,11 +29,7 @@
         height: 450px; /* Adjust the height as needed */
         width: 100%; /* Adjust the width as needed */
     }
-    body {
-        transform: scale(0.7);
-        transform-origin: top left;
-        width: 142.857%; /* 100 / 70 */
-    }
+
     .nav-fixed #layoutSidenav #layoutSidenav_nav {
         width: 15rem;
         height: 250vh;
@@ -148,23 +144,22 @@
                                 </div>
                             </div>
                             <div style="margin-top: -20px" class="chart-container">
-                                <canvas id="otdcAllVendorChart" class="chart-custom"></canvas>
+                                <div id="chartdiv" class="chart-custom" style="width: 100%; height: 100%;"></div>
+
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- OTDC Chart Carousel -->
+              <!-- OTDC Chart Carousel -->
                 <div class="col-md-6 mb-2">
                     <div class="card card-custom">
                         <div class="card-header">
                             <h4>OTDC</h4>
                         </div>
                         <div class="card-body">
-
-
                             <div id="otdcCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-indicators">
+                                <div hidden class="carousel-indicators">
                                     @foreach ($vendorData as $vendorName => $data)
                                         <button type="button" data-bs-target="#otdcCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
                                     @endforeach
@@ -219,39 +214,51 @@
                                             </div>
                                             <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
                                             <div style="margin-top: -20px" class="chart-container">
-                                                <canvas id="otdc-chart-{{ $vendorName }}" class="chart-custom"></canvas>
+                                                <div id="otdc-chart-{{ $vendorName }}" class="chart-custom"></div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
                                 <button class="carousel-control-prev" type="button" data-bs-target="#otdcCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
+                                    <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span hidden class="visually-hidden">Previous</span>
                                 </button>
                                 <button class="carousel-control-next" type="button" data-bs-target="#otdcCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
+                                    <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span hidden class="visually-hidden">Next</span>
                                 </button>
                             </div>
-
-
                         </div>
                     </div>
                 </div>
 
-                <!-- Vendor Monthly Summary Chart -->
+
                 <div class="col-md-6 mb-2">
                     <div style="height: 375px" class="card card-custom">
                         <div class="card-header">
                             <h4>Vendor Monthly Summary</h4>
                         </div>
                         <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="vendorSummaryChart"></canvas>
+                            <div id="vendorSummaryCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div hidden class="carousel-indicators">
+                                    <!-- Carousel indicators will be populated dynamically -->
+                                </div>
+                                <div class="carousel-inner">
+                                    <!-- Carousel items will be populated dynamically -->
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#vendorSummaryCarousel" data-bs-slide="prev">
+                                    <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span hidden class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#vendorSummaryCarousel" data-bs-slide="next">
+                                    <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span hidden class="visually-hidden">Next</span>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Item Code Quantity Carousel -->
                 <div class="col-md-6 mb-2">
@@ -261,7 +268,7 @@
                         </div>
                         <div class="card-body">
                             <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div class="carousel-indicators">
+                                <div hidden class="carousel-indicators">
                                     @foreach ($itemCodeQuantities as $groupIndex => $group)
                                         <button type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
                                     @endforeach
@@ -277,12 +284,12 @@
                                     @endforeach
                                 </div>
                                 <button class="carousel-control-prev" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
+                                    <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span hidden class="visually-hidden">Previous</span>
                                 </button>
                                 <button class="carousel-control-next" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
+                                    <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span hidden class="visually-hidden">Next</span>
                                 </button>
                             </div>
                         </div>
@@ -361,472 +368,495 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline"></script>
 
 <script>
-            document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOM fully loaded and parsed');
+    am5.ready(function() {
+        // Create root element
+        var root = am5.Root.new("chartdiv");
 
-    const vendorDataAggregate = @json($vendorDataAggregate);
-    const month = new Date().toLocaleString('default', { month: 'long' });
-    const today = new Date().getDate(); // Get today's date
+        // Set themes
+        root.setThemes([am5themes_Animated.new(root)]);
 
-    console.log('Vendor Data Aggregate:', vendorDataAggregate);
+        // Create chart
+        var chart = root.container.children.push(
+            am5xy.XYChart.new(root, {
+                panX: false,
+                panY: false,
+                wheelX: "none",
+                wheelY: "none",
+                paddingLeft: 0,
+                layout: root.verticalLayout
+            })
+        );
 
-    const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+        // Data from your backend
+        const vendorDataAggregate = @json($vendorDataAggregate);
+        const daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-    const addDottedLinePlugin = {
-        id: 'dottedLinePlugin',
-        beforeDraw: (chart) => {
-            const ctx = chart.ctx;
-            const yScale = chart.scales['y-axis-2'];
-            const yValue = yScale.getPixelForValue(100);
+        const data = daysOfMonth.map(day => {
+            const entry = vendorDataAggregate.find(item => new Date(item.date).getDate().toString() === day);
+            return {
+                date: day,
+                actual: entry ? parseInt(entry.total_actual_qty) : 0,
+                plan: entry ? parseInt(entry.total_planned_qty) : 0,
+                percentage: entry ? parseFloat(entry.percentage) : 0
+            };
+        });
 
-            ctx.save();
-            ctx.beginPath();
-            ctx.setLineDash([5, 5]);
-            ctx.moveTo(chart.chartArea.left, yValue);
-            ctx.lineTo(chart.chartArea.right, yValue);
-            ctx.lineWidth = 1;
-            ctx.strokeStyle = 'black';
-            ctx.stroke();
-            ctx.restore();
-        }
-    };
+        // Predefine x-axis categories to 1-31
+        var xRenderer = am5xy.AxisRendererX.new(root, {
+            minorGridEnabled: true,
+            minGridDistance: 30
+        });
 
-    const plannedData = Array(31).fill(0);
-    const actualData = Array(31).fill(0);
-    const percentageDifference = Array(31).fill(0);
-    const percentageTrendData = Array(today).fill(0); // Limited to today's date
+        var xAxis = chart.xAxes.push(
+            am5xy.CategoryAxis.new(root, {
+                categoryField: "date",
+                renderer: xRenderer,
+                tooltip: am5.Tooltip.new(root, {})
+            })
+        );
 
-    vendorDataAggregate.forEach((entry) => {
-        const day = new Date(entry.date).getDate() - 1;
-        plannedData[day] += entry.total_planned_qty;
-        actualData[day] += entry.total_actual_qty;
+        xAxis.data.setAll(daysOfMonth.map(date => ({ date }))); // Set x-axis to 1-31
+        xRenderer.grid.template.setAll({ location: 1 });
+
+        var yAxis = chart.yAxes.push(
+            am5xy.ValueAxis.new(root, {
+                min: 0,
+                extraMax: 0.1,
+                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
+            })
+        );
+
+        yAxis.children.moveValue(am5.Label.new(root, {
+            rotation: -90,
+            text: "Quantity",
+            y: am5.p50,
+            centerX: am5.p50
+        }), 0);
+
+        var yAxisRight = chart.yAxes.push(
+            am5xy.ValueAxis.new(root, {
+                min: 0,
+                max: 120, // Cap the percentage at 120%
+                strictMinMax: true, // Ensure min and max are strictly followed
+                extraMax: 0, // Disable extra max
+                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
+            })
+        );
+
+        yAxisRight.children.moveValue(am5.Label.new(root, {
+            rotation: -90,
+            text: "Percentage (%)",
+            y: am5.p50,
+            centerX: am5.p50
+        }), 0);
+
+        // Plan series
+        var planSeries = chart.series.push(
+            am5xy.ColumnSeries.new(root, {
+                name: "Plan",
+                xAxis: xAxis,
+                yAxis: yAxis,
+                valueYField: "plan",
+                categoryXField: "date",
+                clustered: true,
+                tooltip: am5.Tooltip.new(root, {
+                    pointerOrientation: "horizontal",
+                    labelText: "{name}: {valueY}"
+                })
+            })
+        );
+        planSeries.columns.template.setAll({ fill: am5.color("#1e81b0"), width: am5.percent(80), tooltipY: am5.percent(10), marginLeft: 0 });
+        planSeries.data.setAll(data);
+
+        // Actual series
+        var actualSeries = chart.series.push(
+            am5xy.ColumnSeries.new(root, {
+                name: "Actual",
+                xAxis: xAxis,
+                yAxis: yAxis,
+                valueYField: "actual",
+                categoryXField: "date",
+                clustered: true,
+                tooltip: am5.Tooltip.new(root, {
+                    pointerOrientation: "horizontal",
+                    labelText: "{name}: {valueY}"
+                })
+            })
+        );
+        actualSeries.columns.template.setAll({ fill: am5.color("#fbb659"), width: am5.percent(80), tooltipY: am5.percent(10), marginRight: 0 });
+        actualSeries.data.setAll(data);
+
+        // Percentage series
+        var percentageSeries = chart.series.push(
+            am5xy.LineSeries.new(root, {
+                name: "Percentage",
+                xAxis: xAxis,
+                yAxis: yAxisRight,
+                valueYField: "percentage",
+                categoryXField: "date",
+                tooltip: am5.Tooltip.new(root, {
+                    pointerOrientation: "horizontal",
+                    labelText: "{name}: {valueY}%"
+                }),
+                stroke: am5.color(0x000000),
+                fill: am5.color(0x000000)
+            })
+        );
+        percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
+        percentageSeries.data.setAll(data);
+        percentageSeries.bullets.push(function(root, series, dataItem) {
+            var value = dataItem.dataContext.percentage;
+            var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
+            return am5.Bullet.new(root, {
+                sprite: am5.Circle.new(root, {
+                    strokeWidth: 3,
+                    stroke: series.get("stroke"),
+                    radius: 5,
+                    fill: bulletColor
+                })
+            });
+        });
+
+        // Add legend
+        var legend = chart.children.push(
+            am5.Legend.new(root, {
+                centerX: am5.p50,
+                x: am5.p50
+            })
+        );
+        legend.data.setAll(chart.series.values);
+
+        // Enable cursor and tooltips for all series
+        var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+            behavior: "none",
+            xAxis: xAxis
+        }));
+        cursor.lineY.set("visible", false);
+
+        // Make everything animate on load
+        chart.appear(1000, 100);
+        actualSeries.appear();
+        planSeries.appear();
+        percentageSeries.appear();
     });
-
-    plannedData.forEach((value, index) => {
-        if (value !== null && actualData[index] !== null) {
-            const percentage = Math.min((actualData[index] / value) * 100, 100);
-            percentageDifference[index] = isFinite(percentage) ? percentage : 0;
-            if (index < today) {
-                percentageTrendData[index] = percentageDifference[index];
-            }
-        }
-    });
-
-    const ctx = document.getElementById('otdcAllVendorChart').getContext('2d');
-    const myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: getDefaultLabels(),
-            datasets: [{
-                label: 'Planned Qty',
-                data: plannedData,
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                type: 'bar',
-                order: 1
-            },
-            {
-                label: 'Actual Qty',
-                data: actualData,
-                backgroundColor: 'rgba(255, 159, 64, 0.8)',
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 1,
-                type: 'bar',
-                order: 2
-            },
-            {
-                label: 'Percentage Accuracy',
-                data: percentageDifference,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-                type: 'line',
-                yAxisID: 'y-axis-2',
-                order: 0,
-                borderWidth: 2,
-            },
-            {
-                label: 'Trendline',
-                data: percentageTrendData,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: false,
-                type: 'line',
-                yAxisID: 'y-axis-2',
-                order: 3,
-                borderWidth: 2,
-                trendlineLinear: {
-                    style: "rgba(75, 192, 192, 1)",
-                    lineStyle: "line",
-                    width: 5
-                }
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    stacked: false,
-                    categoryPercentage: 0.5,
-                    barPercentage: 0.5,
-                    ticks: {
-                        autoSkip: false,
-                        maxRotation: 0,
-                        minRotation: 0,
-                        callback: function (value, index, values) {
-                            return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                        }
-                    }
-                },
-                y: {
-                    stacked: false,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Quantity'
-                    },
-                    ticks: {
-                        callback: function (value) {
-                            return value.toLocaleString(); // Format numbers with commas
-                        }
-                    }
-                },
-                'y-axis-2': {
-                    stacked: false,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Percentage'
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    },
-                    ticks: {
-                        callback: function (value) {
-                            return value + '%';
-                        }
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        title: function (tooltipItems) {
-                            let title = tooltipItems[0].label || '';
-                            title += ` ${month}`;
-                            return title;
-                        },
-                        label: function (context) {
-                            let label = context.dataset.label || '';
-                            if (context.dataset.label === 'Percentage Accuracy') {
-                                label += ': ' + (context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '');
-                            } else {
-                                label += ': ' + (context.raw !== null && !isNaN(context.raw) ? parseInt(context.raw).toLocaleString() : '');
-                            }
-                            return label;
-                        }
-                    }
-                },
-                legend: {
-                    labels: {
-                        filter: function (item, chart) {
-                            return item.text !== 'Percentage Accuracy';
-                        }
-                    }
-                }
-            }
-        },
-        plugins: [addDottedLinePlugin]
-    });
-});
 </script>
 
 
-
-
-
-<!-- Script for OTDC Chart -->
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        console.log('DOM fully loaded and parsed');
-
+    am5.ready(function() {
         const vendorData = @json($vendorData);
-        const month = new Date().toLocaleString('default', { month: 'long' });
         const today = new Date().getDate(); // Get today's date
+        const daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-        console.log('Vendor Data:', vendorData);
+        // Iterate over each vendor and create a chart
+        Object.keys(vendorData).forEach((vendorName) => {
+            const data = vendorData[vendorName];
 
-        const getDefaultLabels = () => Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+            // Prepare data arrays
+            const plannedData = Array(31).fill(0);
+            const actualData = Array(31).fill(0);
+            const percentageDifference = Array(31).fill(0);
 
-        const addDottedLinePlugin = {
-            id: 'dottedLinePlugin',
-            beforeDraw: (chart) => {
-                const ctx = chart.ctx;
-                const yScale = chart.scales['y-axis-2'];
-                const yValue = yScale.getPixelForValue(100);
+            data.forEach((comparison) => {
+                const day = new Date(comparison.date).getDate() - 1;
+                plannedData[day] += parseInt(comparison.total_planned_qty);
+                actualData[day] += parseInt(comparison.total_actual_qty);
+            });
 
-                ctx.save();
-                ctx.beginPath();
-                ctx.setLineDash([5, 5]);
-                ctx.moveTo(chart.chartArea.left, yValue);
-                ctx.lineTo(chart.chartArea.right, yValue);
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = 'black';
-                ctx.stroke();
-                ctx.restore();
-            }
-        };
+            plannedData.forEach((value, index) => {
+                if (value > 0) {
+                    const percentage = Math.min((actualData[index] / value) * 100, 100);
+                    percentageDifference[index] = isFinite(percentage) ? percentage : 0;
+                }
+            });
 
-        if (typeof vendorData === 'object') {
-            Object.keys(vendorData).forEach((vendorName) => {
-                const data = vendorData[vendorName];
+            // Create a unique root for each vendor's chart
+            var root = am5.Root.new(`otdc-chart-${vendorName}`);
 
-                const plannedData = Array(31).fill(0);
-                const actualData = Array(31).fill(0);
-                const percentageDifference = Array(31).fill(0);
-                const percentageTrendData = Array(today).fill(0); // Limited to today's date
+            // Set themes
+            root.setThemes([am5themes_Animated.new(root)]);
 
-                data.forEach((comparison) => {
-                    const day = new Date(comparison.date).getDate() - 1;
-                    plannedData[day] += comparison.total_planned_qty;
-                    actualData[day] += comparison.total_actual_qty;
-                });
+            // Create chart for each vendor
+            var chart = root.container.children.push(
+                am5xy.XYChart.new(root, {
+                    panX: false,
+                    panY: false,
+                    wheelX: "none",
+                    wheelY: "none",
+                    paddingLeft: 0,
+                    layout: root.verticalLayout
+                })
+            );
 
-                plannedData.forEach((value, index) => {
-                    if (value !== null && actualData[index] !== null) {
-                        const percentage = Math.min((actualData[index] / value) * 100, 100);
-                        percentageDifference[index] = isFinite(percentage) ? percentage : 0;
-                        if (index < today) {
-                            percentageTrendData[index] = percentageDifference[index];
-                        }
-                    }
-                });
+            // X-axis
+            var xAxis = chart.xAxes.push(
+                am5xy.CategoryAxis.new(root, {
+                    categoryField: "date",
+                    tooltip: am5.Tooltip.new(root, {}),
+                    renderer: am5xy.AxisRendererX.new(root, {
+                        minGridDistance: 30
+                    })
+                })
+            );
+            xAxis.data.setAll(daysOfMonth.map(date => ({ date })));
 
-                const ctx = document.getElementById(`otdc-chart-${vendorName}`).getContext('2d');
-                const myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: getDefaultLabels(),
-                        datasets: [{
-                            label: 'Planned Qty',
-                            data: plannedData,
-                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1,
-                            type: 'bar',
-                            order: 1
-                        },
-                        {
-                            label: 'Actual Qty',
-                            data: actualData,
-                            backgroundColor: 'rgba(255, 159, 64, 0.8)',
-                            borderColor: 'rgba(255, 159, 64, 1)',
-                            borderWidth: 1,
-                            type: 'bar',
-                            order: 2
-                        },
-                        {
-                            label: 'Percentage Accuracy',
-                            data: percentageDifference,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            fill: false,
-                            type: 'line',
-                            yAxisID: 'y-axis-2',
-                            order: 0,
-                            borderWidth: 2,
-                        },
-                        {
-                            label: 'Trendline',
-                            data: percentageTrendData,
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            fill: false,
-                            type: 'line',
-                            yAxisID: 'y-axis-2',
-                            order: 3,
-                            borderWidth: 2,
-                            trendlineLinear: {
-                                style: "rgba(75, 192, 192, 1)",
-                                lineStyle: "line",
-                                width: 5
-                            }
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                stacked: false,
-                                categoryPercentage: 0.5,
-                                barPercentage: 0.5,
-                                ticks: {
-                                    autoSkip: false,
-                                    maxRotation: 0,
-                                    minRotation: 0,
-                                    callback: function (value, index, values) {
-                                        return (index + 1) % 4 === 0 || index === 0 ? (index + 1).toString() : '';
-                                    }
-                                }
-                            },
-                            y: {
-                                stacked: false,
-                                position: 'left',
-                                title: {
-                                    display: true,
-                                    text: 'Quantity'
-                                }
-                            },
-                            'y-axis-2': {
-                                stacked: false,
-                                position: 'right',
-                                title: {
-                                    display: true,
-                                    text: 'Percentage'
-                                },
-                                grid: {
-                                    drawOnChartArea: false
-                                },
-                                ticks: {
-                                    callback: function (value) {
-                                        return value + '%';
-                                    }
-                                }
-                            }
-                        },
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    title: function (tooltipItems) {
-                                        let title = tooltipItems[0].label || '';
-                                        title += ` ${month}`;
-                                        return title;
-                                    },
-                                    label: function (context) {
-                                        let label = context.dataset.label || '';
-                                        if (context.dataset.label === 'Percentage Accuracy') {
-                                            label += ': ' + (context.raw !== null && !isNaN(context.raw) ? context.raw.toFixed(2) + '%' : '');
-                                        } else {
-                                            label += ': ' + parseInt(context.raw).toLocaleString(); // Remove leading zeros and format numbers with commas
-                                        }
-                                        return label;
-                                    }
-                                }
-                            },
-                            legend: {
-                                labels: {
-                                    filter: function (item, chart) {
-                                        return item.text !== 'Percentage Accuracy';
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    plugins: [addDottedLinePlugin]
+            // Y-axis for quantity (left)
+            var yAxis = chart.yAxes.push(
+                am5xy.ValueAxis.new(root, {
+                    min: 0,
+                    extraMax: 0.1,
+                    renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
+                })
+            );
+
+            // Add a label to the left Y-axis
+            yAxis.children.moveValue(am5.Label.new(root, {
+                rotation: -90,
+                text: "Quantity",  // Label text for quantity
+                y: am5.p50,
+                centerX: am5.p50
+            }), 0);
+
+            // Y-axis for percentage (right)
+            var yAxisRight = chart.yAxes.push(
+                am5xy.ValueAxis.new(root, {
+                    min: 0,
+                    max: 120, // Cap the percentage at 120%
+                    strictMinMax: true, // Ensure min and max are strictly followed
+                    extraMax: 0, // Disable extra max
+                    renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
+                })
+            );
+
+            // Add a label to the right Y-axis
+            yAxisRight.children.moveValue(am5.Label.new(root, {
+                rotation: -90,
+                text: "Percentage (%)",  // Label text for percentage
+                y: am5.p50,
+                centerX: am5.p50
+            }), 0);
+
+
+            // Plan series
+            var planSeries = chart.series.push(
+                am5xy.ColumnSeries.new(root, {
+                    name: "Planned Qty",
+                    xAxis: xAxis,
+                    yAxis: yAxis,
+                    valueYField: "plan",
+                    categoryXField: "date",
+                    clustered: true,
+                    tooltip: am5.Tooltip.new(root, {
+                        labelText: "{name}: {valueY}"
+                    })
+                })
+            );
+            planSeries.columns.template.setAll({ fill: am5.color("#36A2EB"), width: am5.percent(80) });
+            planSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, plan: plannedData[i] })));
+
+            // Actual series
+            var actualSeries = chart.series.push(
+                am5xy.ColumnSeries.new(root, {
+                    name: "Actual Qty",
+                    xAxis: xAxis,
+                    yAxis: yAxis,
+                    valueYField: "actual",
+                    categoryXField: "date",
+                    clustered: true,
+                    tooltip: am5.Tooltip.new(root, {
+                        labelText: "{name}: {valueY}"
+                    })
+                })
+            );
+            actualSeries.columns.template.setAll({ fill: am5.color("#FF9F40"), width: am5.percent(80) });
+            actualSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, actual: actualData[i] })));
+
+            // Percentage series
+            var percentageSeries = chart.series.push(
+                am5xy.LineSeries.new(root, {
+                    name: "Percentage Accuracy",
+                    xAxis: xAxis,
+                    yAxis: yAxisRight,
+                    valueYField: "percentage",
+                    categoryXField: "date",
+                    tooltip: am5.Tooltip.new(root, {
+                        labelText: "{name}: {valueY}%"
+                    }),
+                    stroke: am5.color(0x000000),
+                    fill: am5.color(0x000000)
+                })
+            );
+            percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
+            percentageSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, percentage: percentageDifference[i] })));
+
+            // Add bullets for the percentage series
+            percentageSeries.bullets.push(function(root, series, dataItem) {
+                var value = dataItem.dataContext.percentage;
+                var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
+                return am5.Bullet.new(root, {
+                    sprite: am5.Circle.new(root, {
+                        strokeWidth: 3,
+                        stroke: series.get("stroke"),
+                        radius: 5,
+                        fill: bulletColor
+                    })
                 });
             });
-        }
+
+            // Add legend
+            var legend = chart.children.push(
+                am5.Legend.new(root, {
+                    centerX: am5.p50,
+                    x: am5.p50
+                })
+            );
+            legend.data.setAll(chart.series.values);
+
+            // Enable cursor
+            var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+                behavior: "none",
+                xAxis: xAxis
+            }));
+            cursor.lineY.set("visible", false);
+
+            // Make everything animate on load
+            chart.appear(1000, 100);
+            actualSeries.appear();
+            planSeries.appear();
+            percentageSeries.appear();
+        });
     });
 </script>
+
+
 
 
 <!-- Script for Vendor Monthly Summary Chart -->
 <script>
-document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOM fully loaded and parsed');
-
+    document.addEventListener('DOMContentLoaded', (event) => {
     const vendors = @json($vendors);
     const totalPlanned = @json($totalPlanned);
     const totalActual = @json($totalActual);
-    const month = new Date().toLocaleString('default', { month: 'long' });
+    const chunkSize = 5; // Split vendors into groups of 5
+    const vendorDataChunks = [];
 
-    console.log('Vendors:', vendors);
-    console.log('Total Planned:', totalPlanned);
-    console.log('Total Actual:', totalActual);
+    // Split data into chunks
+    for (let i = 0; i < vendors.length; i += chunkSize) {
+        vendorDataChunks.push({
+            vendors: vendors.slice(i, i + chunkSize),
+            planned: totalPlanned.slice(i, i + chunkSize),
+            actual: totalActual.slice(i, i + chunkSize),
+        });
+    }
 
-    const vendorSummaryCtx = document.getElementById('vendorSummaryChart').getContext('2d');
-    const vendorSummaryChart = new Chart(vendorSummaryCtx, {
-        type: 'bar',
-        data: {
-            labels: vendors,
-            datasets: [{
-                label: 'Planned',
-                data: totalPlanned,
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                type: 'bar'
+    const carouselIndicators = document.querySelector('#vendorSummaryCarousel .carousel-indicators');
+    const carouselInner = document.querySelector('#vendorSummaryCarousel .carousel-inner');
+
+    vendorDataChunks.forEach((chunk, index) => {
+        // Create a new carousel item
+        const carouselItem = document.createElement('div');
+        carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+
+        const chartDiv = document.createElement('div');
+        chartDiv.style.height = "300px";
+        carouselItem.appendChild(chartDiv);
+
+        carouselInner.appendChild(carouselItem);
+
+        const indicatorButton = document.createElement('button');
+        indicatorButton.type = 'button';
+        indicatorButton.dataset.bsTarget = '#vendorSummaryCarousel';
+        indicatorButton.dataset.bsSlideTo = index;
+        indicatorButton.className = `${index === 0 ? 'active' : ''}`;
+        indicatorButton.ariaLabel = `Slide ${index + 1}`;
+        carouselIndicators.appendChild(indicatorButton);
+
+        // Create chart for this chunk
+        const canvas = document.createElement('canvas');
+        chartDiv.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chunk.vendors,
+                datasets: [{
+                    label: 'Planned',
+                    data: chunk.planned,
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    type: 'bar'
+                },
+                {
+                    label: 'Actual',
+                    data: chunk.actual,
+                    backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1,
+                    type: 'bar'
+                }]
             },
-            {
-                label: 'Actual',
-                data: totalActual,
-                backgroundColor: 'rgba(255, 159, 64, 0.8)',
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 1,
-                type: 'bar'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y', // Swapping the axes
-            scales: {
-                x: {
-                    stacked: false,
-                    categoryPercentage: 0.5,
-                    barPercentage: 0.5,
-                    title: {
-                        display: true,
-                        text: 'Quantity'
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal bar chart
+                scales: {
+                    x: {
+                        stacked: false,
+                        categoryPercentage: 0.5,
+                        barPercentage: 0.5,
+                        title: {
+                            display: true,
+                            text: 'Quantity'
+                        }
+                    },
+                    y: {
+                        stacked: false,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Vendor'
+                        }
                     }
                 },
-                y: {
-                    stacked: false,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Vendor'
-                    }
-                }
-            },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        title: function (tooltipItems) {
-                            let title = tooltipItems[0].label || '';
-                            title += ` ${month}`;
-                            return title;
-                        },
-                        label: function (context) {
-                            let label = `${context.dataset.label || ''}: `;
-                            if (typeof context.raw === 'number') {
-                                label += context.raw.toFixed(0); // Show quantity with no decimal places
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function (tooltipItems) {
+                                let title = tooltipItems[0].label || '';
+                                title += ` ${month}`;
+                                return title;
+                            },
+                            label: function (context) {
+                                let label = `${context.dataset.label || ''}: `;
+                                if (typeof context.raw === 'number') {
+                                    label += context.raw.toFixed(0); // Show quantity with no decimal places
+                                }
+                                return label;
+                            },
+                            afterLabel: function (context) {
+                                const plannedIndex = context.datasetIndex === 0 ? context.dataIndex : null;
+                                const actualIndex = context.datasetIndex === 1 ? context.dataIndex : null;
+                                if (plannedIndex !== null) {
+                                    const plannedValue = context.chart.data.datasets[0].data[plannedIndex];
+                                    const actualValue = context.chart.data.datasets[1].data[plannedIndex];
+                                    return ` Planned: ${plannedValue}`;
+                                } else if (actualIndex !== null) {
+                                    const plannedValue = context.chart.data.datasets[0].data[actualIndex];
+                                    const actualValue = context.chart.data.datasets[1].data[actualIndex];
+                                    return ` Actual: ${actualValue}`;
+                                }
+                                return null;
                             }
-                            return label;
-                        },
-                        afterLabel: function (context) {
-                            const plannedIndex = context.datasetIndex === 0 ? context.dataIndex : null;
-                            const actualIndex = context.datasetIndex === 1 ? context.dataIndex : null;
-                            if (plannedIndex !== null) {
-                                const plannedValue = context.chart.data.datasets[0].data[plannedIndex];
-                                const actualValue = context.chart.data.datasets[1].data[plannedIndex];
-                                return ` Planned: ${plannedValue}`;
-                            } else if (actualIndex !== null) {
-                                const plannedValue = context.chart.data.datasets[0].data[actualIndex];
-                                const actualValue = context.chart.data.datasets[1].data[actualIndex];
-                                return ` Actual: ${actualValue}`;
-                            }
-                            return null;
                         }
                     }
                 }
             }
-        }
+        });
     });
 });
+
 </script>
 
 <!-- Script for Item Code Quantity Chart -->

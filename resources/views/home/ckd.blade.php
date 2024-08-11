@@ -18,8 +18,8 @@
     .chart-container {
     margin-top: 0px;
     position: relative;
-    height: 400px; /* Adjust the height as needed */
-    width: 140%; /* Use auto for dynamic width */
+    height: 75%; /* Adjust the height as needed */
+    width: 100%; /* Use auto for dynamic width */
 }
 .chart-custom {
     width: 100% !important;
@@ -27,19 +27,11 @@
 }
 
 .card-custom {
-    height: 450px; /* Adjust the height as needed */
+    height: 100%; /* Adjust the height as needed */
     width: 100%; /* Adjust the width as needed */
 }
-    body {
-        transform: scale(0.7);
-        transform-origin: top left;
-        width: 142.857%; /* 100 / 70 */
-    }
-    .nav-fixed #layoutSidenav #layoutSidenav_nav {
-        width: 15rem;
-        height: 250vh;
-        z-index: 1038;
-    }
+
+
     .indicator-table {
         width: 100%;
         margin-bottom: 10px;
@@ -89,12 +81,15 @@
             <div class="row">
                 <!-- Variant Code Summary Chart -->
                 <div class="col-md-5 mb-2">
-                    <div style="height: 905px" class="card card-custom">
+                    <div  class="card card-custom">
                         <div class="card-header">
                             <h4>Variant Code Summary</h4>
                         </div>
                         <div class="card-body">
-                            <div  id="variant-code-pie-chart" style=" width: 130%; height: 130%; margin-left: 20px;"></div>
+                            <div  id="variant-code-pie-chart" style="margin-top: 0px;
+    position: relative;
+    height: 100%;
+    width: 100%;"></div>
                         </div>
                     </div>
                 </div>
@@ -167,202 +162,191 @@
                                 </div>
                             </div>
                             <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
-                            <div style="margin-top: -20px; width: 140%; height: 130%; margin-left: 20px;" class="chart-container">
+                            <div style="margin-top: -20px; width: 100%%; height: 100%%; margin-left: 0px;" class="chart-container">
                                 <div  class="chart-custom" id="chartdiv"></div>
                             </div>
                         </div>
                     </div>
 
-                <!-- Chart code -->
-                <script>
-                    am5.ready(function() {
-                        // Create root element
-                        var root = am5.Root.new("chartdiv");
+                    <script>
+                        am5.ready(function() {
+                            var root = am5.Root.new("chartdiv");
 
-                        // Set themes
-                        root.setThemes([am5themes_Animated.new(root)]);
+                            root.setThemes([am5themes_Animated.new(root)]);
 
-                        // Create chart
-                        var chart = root.container.children.push(
-                            am5xy.XYChart.new(root, {
-                                panX: false,
-                                panY: false,
-                                wheelX: "none",
-                                wheelY: "none",
-                                paddingLeft: 0,
-                                layout: root.verticalLayout
-                            })
-                        );
-
-                        // Process vendor data
-                        const vendorData = @json($vendorData);
-                        const data = vendorData.SENOPATI.map(item => ({
-                            date: new Date(item.date).getDate().toString(), // Convert date to day of month as string
-                            actual: parseInt(item.total_actual_qty),
-                            plan: parseInt(item.total_planned_qty),
-                            percentage: parseFloat(item.percentage) // Renamed from 'expenses' to 'percentage'
-                        }));
-
-                        // Create axes
-                        var xRenderer = am5xy.AxisRendererX.new(root, {
-                            minorGridEnabled: true,
-                            minGridDistance: 30
-                        });
-
-                        var xAxis = chart.xAxes.push(
-                            am5xy.CategoryAxis.new(root, {
-                                categoryField: "date",
-                                renderer: xRenderer,
-                                tooltip: am5.Tooltip.new(root, {})
-                            })
-                        );
-                        xRenderer.grid.template.setAll({ location: 1 });
-                        xAxis.data.setAll(data);
-
-                        var yAxis = chart.yAxes.push(
-                            am5xy.ValueAxis.new(root, {
-                                min: 0,
-                                extraMax: 0.1,
-                                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
-                            })
-                        );
-                        yAxis.children.moveValue(am5.Label.new(root, {
-                            rotation: -90,
-                            text: "Quantity",
-                            y: am5.p50,
-                            centerX: am5.p50
-                        }), 0);
-
-                        var yAxisRight = chart.yAxes.push(
-                            am5xy.ValueAxis.new(root, {
-                                min: 0,
-                                max: 100, // Adjust the max value to 100%
-                                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
-                            })
-                        );
-                        yAxisRight.children.moveValue(am5.Label.new(root, {
-                            rotation: -90,
-                            text: "Percentage (%)",
-                            y: am5.p50,
-                            centerX: am5.p50
-                        }), 0);
-
-
-                        // Add Plan series
-                        var planSeries = chart.series.push(
-                            am5xy.ColumnSeries.new(root, {
-                                name: "Plan",
-                                xAxis: xAxis,
-                                yAxis: yAxis,
-                                valueYField: "plan",
-                                categoryXField: "date",
-                                clustered: true,
-                                tooltip: am5.Tooltip.new(root, {
-                                    pointerOrientation: "horizontal",
-                                    labelText: "{name}: {valueY}"
-                                })
-                            })
-                        );
-                        planSeries.columns.template.setAll({ fill: am5.color("#1e81b0"), width: am5.percent(80), tooltipY: am5.percent(10), marginLeft: 0 });
-                        planSeries.data.setAll(data);
-
-                        // Add Actual series
-                        var actualSeries = chart.series.push(
-                            am5xy.ColumnSeries.new(root, {
-                                name: "Actual",
-                                xAxis: xAxis,
-                                yAxis: yAxis,
-                                valueYField: "actual",
-                                categoryXField: "date",
-                                clustered: true,
-                                tooltip: am5.Tooltip.new(root, {
-                                    pointerOrientation: "horizontal",
-                                    labelText: "{name}: {valueY}"
-                                })
-                            })
-                        );
-                        actualSeries.columns.template.setAll({ fill: am5.color("#fbb659"), width: am5.percent(80), tooltipY: am5.percent(10), marginRight: 0 });
-                        actualSeries.data.setAll(data);
-
-
-                        // Add Percentage series
-                        var percentageSeries = chart.series.push(
-                            am5xy.LineSeries.new(root, {
-                                name: "Percentage",
-                                xAxis: xAxis,
-                                yAxis: yAxisRight,
-                                valueYField: "percentage",
-                                categoryXField: "date",
-                                tooltip: am5.Tooltip.new(root, {
-                                    pointerOrientation: "horizontal",
-                                    labelText: "{name}: {valueY}%"
-                                }),
-                                stroke: am5.color(0x000000), // Set the color of the percentage line to black
-                                fill: am5.color(0x000000) // Set the fill color if needed
-                            })
-                        );
-                        percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
-                        percentageSeries.data.setAll(data);
-                        percentageSeries.bullets.push(function (root, series, dataItem) {
-                            var value = dataItem.dataContext.percentage;
-                            var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00); // Red if below 100%, green if 100% or more
-                            return am5.Bullet.new(root, {
-                                sprite: am5.Circle.new(root, {
-                                    strokeWidth: 3,
-                                    stroke: series.get("stroke"),
-                                    radius: 5,
-                                    fill: bulletColor
-                                })
-                            });
-                        });
-
-                        // Function to create trend line
-                        function createTrendLine(data, color) {
-                            var series = chart.series.push(
-                                am5xy.LineSeries.new(root, {
-                                    name: "Trend Line",
-                                    xAxis: xAxis,
-                                    yAxis: yAxisRight,
-                                    valueXField: "date",
-                                    stroke: color,
-                                    strokeWidth: 4,
-                                    valueYField: "value"
+                            var chart = root.container.children.push(
+                                am5xy.XYChart.new(root, {
+                                    panX: false,
+                                    panY: false,
+                                    wheelX: "none",
+                                    wheelY: "none",
+                                    paddingLeft: 0,
+                                    layout: root.verticalLayout
                                 })
                             );
 
-                            // Log trend line data to console
-                            console.log("Trend Line Data:", data);
+                            const vendorData = @json($vendorData);
+                            const data = vendorData.SENOPATI.map(item => ({
+                                date: new Date(item.date).getDate().toString(),
+                                actual: parseInt(item.total_actual_qty),
+                                plan: parseInt(item.total_planned_qty),
+                                percentage: parseFloat(item.percentage)
+                            }));
 
-                            series.data.setAll(data);
-                            series.strokes.template.setAll({ stroke: color, strokeWidth: 4, strokeDasharray: [5, 5] });
-                            series.appear(1000, 100);
-                        }
+                            // Predefine x-axis categories to 1-31
+                            var daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-                        // Create trend line based on percentage data
-                        var trendLineData = data.map((item) => ({ date: item.date, value: item.percentage }));
-                        console.log("Mapped Trend Line Data:", trendLineData);
-                        createTrendLine(trendLineData, root.interfaceColors.get("positive"));
+                            var xRenderer = am5xy.AxisRendererX.new(root, {
+                                minorGridEnabled: true,
+                                minGridDistance: 30
+                            });
 
-                        chart.set("cursor", am5xy.XYCursor.new(root, {
-                            behavior: "none" // Disable cursor behavior to avoid misalignment
-                        }));
+                            var xAxis = chart.xAxes.push(
+                                am5xy.CategoryAxis.new(root, {
+                                    categoryField: "date",
+                                    renderer: xRenderer,
+                                    tooltip: am5.Tooltip.new(root, {})
+                                })
+                            );
 
-                        // Add legend
-                        var legend = chart.children.push(
-                            am5.Legend.new(root, {
-                                centerX: am5.p50,
-                                x: am5.p50
-                            })
-                        );
-                        legend.data.setAll(chart.series.values);
+                            xAxis.data.setAll(daysOfMonth.map(date => ({ date }))); // Set x-axis to 1-31
+                            xRenderer.grid.template.setAll({ location: 1 });
 
-                        // Make stuff animate on load
-                        chart.appear(1000, 100);
-                        actualSeries.appear();
-                        planSeries.appear();
-                        percentageSeries.appear();
-                    });
-                </script>
+                            var yAxis = chart.yAxes.push(
+                                am5xy.ValueAxis.new(root, {
+                                    min: 0,
+                                    extraMax: 0.1,
+                                    renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
+                                })
+                            );
+
+                            yAxis.children.moveValue(am5.Label.new(root, {
+                                rotation: -90,
+                                text: "Quantity",
+                                y: am5.p50,
+                                centerX: am5.p50
+                            }), 0);
+
+                            var yAxisRight = chart.yAxes.push(
+                                am5xy.ValueAxis.new(root, {
+                                    min: 0,
+                                    max: 120, // Set the max value to 120%
+                                    renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
+                                })
+                            );
+
+                            yAxisRight.children.moveValue(am5.Label.new(root, {
+                                rotation: -90,
+                                text: "Percentage (%)",
+                                y: am5.p50,
+                                centerX: am5.p50
+                            }), 0);
+
+                            var planSeries = chart.series.push(
+                                am5xy.ColumnSeries.new(root, {
+                                    name: "Plan",
+                                    xAxis: xAxis,
+                                    yAxis: yAxis,
+                                    valueYField: "plan",
+                                    categoryXField: "date",
+                                    clustered: true,
+                                    tooltip: am5.Tooltip.new(root, {
+                                        pointerOrientation: "horizontal",
+                                        labelText: "{name}: {valueY}"
+                                    })
+                                })
+                            );
+                            planSeries.columns.template.setAll({ fill: am5.color("#1e81b0"), width: am5.percent(80), tooltipY: am5.percent(10), marginLeft: 0 });
+                            planSeries.data.setAll(data);
+
+                            var actualSeries = chart.series.push(
+                                am5xy.ColumnSeries.new(root, {
+                                    name: "Actual",
+                                    xAxis: xAxis,
+                                    yAxis: yAxis,
+                                    valueYField: "actual",
+                                    categoryXField: "date",
+                                    clustered: true,
+                                    tooltip: am5.Tooltip.new(root, {
+                                        pointerOrientation: "horizontal",
+                                        labelText: "{name}: {valueY}"
+                                    })
+                                })
+                            );
+                            actualSeries.columns.template.setAll({ fill: am5.color("#fbb659"), width: am5.percent(80), tooltipY: am5.percent(10), marginRight: 0 });
+                            actualSeries.data.setAll(data);
+
+                            var percentageSeries = chart.series.push(
+                                am5xy.LineSeries.new(root, {
+                                    name: "Percentage",
+                                    xAxis: xAxis,
+                                    yAxis: yAxisRight,
+                                    valueYField: "percentage",
+                                    categoryXField: "date",
+                                    tooltip: am5.Tooltip.new(root, {
+                                        pointerOrientation: "horizontal",
+                                        labelText: "{name}: {valueY}%"
+                                    }),
+                                    stroke: am5.color(0x000000),
+                                    fill: am5.color(0x000000)
+                                })
+                            );
+                            percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
+                            percentageSeries.data.setAll(data);
+                            percentageSeries.bullets.push(function(root, series, dataItem) {
+                                var value = dataItem.dataContext.percentage;
+                                var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
+                                return am5.Bullet.new(root, {
+                                    sprite: am5.Circle.new(root, {
+                                        strokeWidth: 3,
+                                        stroke: series.get("stroke"),
+                                        radius: 5,
+                                        fill: bulletColor
+                                    })
+                                });
+                            });
+
+                            // Function to create trend line
+                            function createTrendLine(data, color) {
+                                var series = chart.series.push(
+                                    am5xy.LineSeries.new(root, {
+                                        name: "Trend Line",
+                                        xAxis: xAxis,
+                                        yAxis: yAxisRight,
+                                        valueXField: "date",
+                                        stroke: color,
+                                        strokeWidth: 4,
+                                        valueYField: "value"
+                                    })
+                                );
+
+                                series.data.setAll(data);
+                                series.strokes.template.setAll({ stroke: color, strokeWidth: 4, strokeDasharray: [5, 5] });
+                                series.appear(1000, 100);
+                            }
+
+                            var trendLineData = data.map((item) => ({ date: item.date, value: item.percentage }));
+                            createTrendLine(trendLineData, root.interfaceColors.get("positive"));
+
+                            chart.set("cursor", am5xy.XYCursor.new(root, {
+                                behavior: "none"
+                            }));
+
+                            var legend = chart.children.push(
+                                am5.Legend.new(root, {
+                                    centerX: am5.p50,
+                                    x: am5.p50
+                                })
+                            );
+                            legend.data.setAll(chart.series.values);
+
+                            chart.appear(1000, 100);
+                            actualSeries.appear();
+                            planSeries.appear();
+                            percentageSeries.appear();
+                        });
+                    </script>
+
 
 
 
