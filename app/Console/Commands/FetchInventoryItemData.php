@@ -49,7 +49,7 @@ class FetchInventoryItemData extends Command
 
                 foreach ($items as $item) {
                     // Find the corresponding inventory by code
-                    $inventory = Inventory::where('code', $item['code'])->where('location_id', $locationId)->first();
+                    $inventory = Inventory::where('code', $item['code'])->first();
 
                     if ($inventory) {
                         // Extract rack_type from the first word of rack
