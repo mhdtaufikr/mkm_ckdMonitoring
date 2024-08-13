@@ -488,7 +488,7 @@
 
                 </div>
 
-                <div class="col-md-6 mb-2">
+                <div hidden class="col-md-6 mb-2">
                     <div class="card card-custom">
                         <div class="card-header">
                             <h4>OTDC</h4>
