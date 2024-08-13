@@ -221,8 +221,27 @@ class HomeController extends Controller
             ->get()
             ->groupBy('model');
 
+            // Fetch variant code quantities from the inventories table, joined with master_products
+            $variantCodeQuantitiesCNI = DB::table('inventories')
+            ->join(DB::raw('(SELECT DISTINCT variantCode, model FROM master_products) as mp'), 'inventories.variantCode', '=', 'mp.variantCode')
+            ->select('inventories.variantCode', 'mp.model', DB::raw('SUM(inventories.qty) as total_qty'))
+            ->where('inventories.location_id', '6582ef8060c9390d890568d4')
+            ->whereNotNull('inventories.variantCode') // Exclude null variantCode
+            ->whereNotNull('mp.model') // Exclude null model
+            ->groupBy('inventories.variantCode', 'mp.model')
+            ->orderBy('inventories.variantCode')
+            ->get()
+            ->groupBy(function ($item) {
+                static $groupIndex = 0;
+                static $itemCount = 0;
+                if ($itemCount++ % 5 == 0) {
+                    $groupIndex++;
+                }
+                return $groupIndex;
+            });
 
-        return view('home.ckd', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
+
+        return view('home.ckd', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
     }
 
 

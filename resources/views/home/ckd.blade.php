@@ -390,6 +390,86 @@
 
                 </div>
 
+                <div class="col-md-5 mb-4">
+                    <!-- Second Variant Code Summary Chart -->
+
+                        <div class="card card-custom">
+                            <div class="card-header">
+                                <h4>Variant Code Summary CNI</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="variant-code-pie-chart-cni" style="margin-top: 0px; height: 250px; width: 100%;"></div>
+                            </div>
+                        </div>
+
+
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', (event) => {
+                                console.log('Loading variant code quantities chart for CNI.');
+
+                                const variantCodeQuantitiesCNI = @json($variantCodeQuantitiesCNI[1]);
+
+                                console.log(variantCodeQuantitiesCNI);
+
+                                if (Array.isArray(variantCodeQuantitiesCNI) && variantCodeQuantitiesCNI.length > 0) {
+                                    const combinedDataCNI = [];
+
+                                    variantCodeQuantitiesCNI.forEach(item => {
+                                        if (item.total_qty > 0) { // Only include items with a quantity greater than 0
+                                            combinedDataCNI.push({ category: item.model, value: item.total_qty });
+                                        }
+                                    });
+
+                                    // Initialize the chart
+                                    am5.ready(function() {
+                                        var root = am5.Root.new("variant-code-pie-chart-cni");
+
+                                        root.setThemes([am5themes_Animated.new(root)]);
+
+                                        var chart = root.container.children.push(
+                                            am5percent.PieChart.new(root, {
+                                                layout: root.verticalLayout,
+                                                innerRadius: am5.percent(50)
+                                            })
+                                        );
+
+                                        var series = chart.series.push(
+                                            am5percent.PieSeries.new(root, {
+                                                valueField: "value",
+                                                categoryField: "category"
+                                            })
+                                        );
+
+                                        series.data.setAll(combinedDataCNI);
+
+                                        series.labels.template.set("text", "{category}: {value}");
+                                        series.slices.template.set("tooltipText", "{category}: {value}");
+
+                                        var legend = chart.children.push(am5.Legend.new(root, {
+                                            centerX: am5.p50,
+                                            x: am5.p50
+                                        }));
+
+                                        legend.data.setAll(series.dataItems);
+
+                                        series.appear(1000, 100);
+                                    });
+                                } else {
+                                    console.error('variantCodeQuantitiesCNI is not an object or is empty:', variantCodeQuantitiesCNI);
+                                }
+                            });
+                            </script>
+
+
+
+
+
+                </div>
+                <div class="col-md-6">
+
+                </div>
+
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header" data-bs-toggle="collapse" href="#collapseCard" role="button" aria-expanded="false" aria-controls="collapseCard">
