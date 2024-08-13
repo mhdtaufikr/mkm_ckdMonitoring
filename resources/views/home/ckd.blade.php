@@ -426,19 +426,19 @@
                                 var series = chart.series.push(am5percent.PieSeries.new(root, {
                                     name: "Series",
                                     valueField: "total_qty",  // Adjusted for your data
-                                    categoryField: "model"    // Adjusted for your data
+                                    categoryField: "name"    // Adjusted for your data
                                 }));
 
                                 // Set data (using your dynamic data from Laravel)
-                                const variantCodeQuantitiesCNI = @json($variantCodeQuantitiesCNI[1]);
+                                const variantCodeQuantitiesCNI = @json($variantCodeQuantitiesCNI);
                                 series.data.setAll(variantCodeQuantitiesCNI);
 
                                 // Disabling ticks
                                 series.ticks.template.set("visible", false);
 
-                                // Showing labels with model and quantity
+                                // Showing labels with name and quantity
                                 series.labels.template.setAll({
-                                    text: "{category}: {value}",  // Display model and quantity on the chart
+                                    text: "{category}: {value}",  // Display name and quantity on the chart
                                     visible: true,                // Ensure labels are visible
                                     radius: 20,                   // Position the labels
                                     inside: false,                // Place the labels outside the slices
@@ -486,34 +486,29 @@
                             }); // end am5.ready()
                         </script>
 
-
-
-
-
-
-
                 </div>
-                <div class="col-md-7 mb-2">
+
+                <div class="col-md-6 mb-2">
                     <div class="card card-custom">
                         <div class="card-header">
-                            <h4>OTDC CNI Data</h4>
+                            <h4>OTDC</h4>
                         </div>
                         <div class="card-body">
-                            <div id="otdcCniCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div id="otdcCarousel" class="carousel slide" data-bs-ride="carousel">
                                 <div hidden class="carousel-indicators">
-                                    @foreach ($otcdCniData as $model => $data)
-                                        <button type="button" data-bs-target="#otdcCniCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+                                    @foreach ($otcdCniData as $name => $data)
+                                        <button type="button" data-bs-target="#otdcCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
                                     @endforeach
                                 </div>
                                 <div class="carousel-inner">
-                                    @foreach ($otcdCniData as $model => $data)
+                                    @foreach ($otcdCniData as $name => $data)
                                         @php
                                             $totalPercentage = 0;
                                             $count = 0;
                                             $today = now()->format('Y-m-d');
                                             foreach ($data as $entry) {
                                                 if ($entry->date <= $today) {
-                                                    $totalPercentage += $entry->average_percentage;
+                                                    $totalPercentage += $entry->percentage_actual_vs_planned;
                                                     $count++;
                                                 }
                                             }
@@ -553,18 +548,18 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                            <p style="margin-top: -20px" class="text-center">{{ $model }}</p>
+                                            <p style="margin-top: -20px" class="text-center">{{ $name }}</p>
                                             <div style="margin-top: -20px" class="chart-container">
-                                                <div id="otdc-chart-{{ $model }}" class="chart-custom"></div>
+                                                <div id="otdc-chart-{{ $name }}" class="chart-custom"></div>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#otdcCniCarousel" data-bs-slide="prev">
+                                <button class="carousel-control-prev" type="button" data-bs-target="#otdcCarousel" data-bs-slide="prev">
                                     <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
                                     <span hidden class="visually-hidden">Previous</span>
                                 </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#otdcCniCarousel" data-bs-slide="next">
+                                <button class="carousel-control-next" type="button" data-bs-target="#otdcCarousel" data-bs-slide="next">
                                     <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
                                     <span hidden class="visually-hidden">Next</span>
                                 </button>
@@ -573,168 +568,207 @@
                     </div>
                 </div>
 
-                <script>
-                    am5.ready(function() {
-                        function createOTDCChart(model, plannedData, actualData, percentageAccuracy, endDate) {
-                            var root = am5.Root.new(`otdc-chart-${model}`);
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+    console.log('Loading OTDC CNI Charts.');
 
-                            root.setThemes([am5themes_Animated.new(root)]);
+    const otcdCniData = @json($otcdCniData);
+    console.log(otcdCniData);
 
-                            var chart = root.container.children.push(am5xy.XYChart.new(root, {
-                                panX: false,
-                                panY: false,
-                                wheelX: "none",
-                                wheelY: "none",
-                                layout: root.verticalLayout
-                            }));
+    const today = new Date().getDate();
+    const daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-                            var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-                                categoryField: "date",
-                                tooltip: am5.Tooltip.new(root, {}),
-                                renderer: am5xy.AxisRendererX.new(root, { minGridDistance: 30 })
-                            }));
+    // Iterate over each name and create a chart
+    Object.keys(otcdCniData).forEach((name) => {
+        const data = otcdCniData[name];
 
-                            xAxis.data.setAll(Array.from({ length: endDate }, (_, i) => ({ date: (i + 1).toString() })));
+        if (!data || data.length === 0) {
+            console.error(`No data found for ${name}`);
+            return;
+        }
 
-                            var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-                                min: 0,
-                                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
-                            }));
+        console.log(`Rendering chart for: ${name}`);
 
-                            var yAxisRight = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-                                min: 0,
-                                max: 120,
-                                strictMinMax: true,
-                                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
-                            }));
+        // Prepare data arrays
+        const plannedData = Array(31).fill(0);
+        const actualData = Array(31).fill(0);
+        const percentageDifference = Array(31).fill(0);
 
-                            yAxis.children.moveValue(am5.Label.new(root, {
-                                rotation: -90,
-                                text: "Quantity",
-                                y: am5.p50,
-                                centerX: am5.p50
-                            }), 0);
+        data.forEach((comparison) => {
+            const day = new Date(comparison.date).getDate() - 1;
+            plannedData[day] += parseInt(comparison.total_planned_qty);
+            actualData[day] += parseInt(comparison.total_actual_qty);
+        });
 
-                            yAxisRight.children.moveValue(am5.Label.new(root, {
-                                rotation: -90,
-                                text: "Percentage (%)",
-                                y: am5.p50,
-                                centerX: am5.p50
-                            }), 0);
+        plannedData.forEach((value, index) => {
+            if (value > 0) {
+                const percentage = Math.min((actualData[index] / value) * 100, 100);
+                percentageDifference[index] = isFinite(percentage) ? percentage : 0;
+            }
+        });
 
-                            var planSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
-                                name: "Planned Qty",
-                                xAxis: xAxis,
-                                yAxis: yAxis,
-                                valueYField: "plan",
-                                categoryXField: "date",
-                                clustered: true,
-                                tooltip: am5.Tooltip.new(root, { labelText: "{name}: {valueY}" })
-                            }));
+        // Create a unique root for each name's chart
+        var root = am5.Root.new(`otdc-chart-${name}`);
 
-                            planSeries.columns.template.setAll({ fill: am5.color("#36A2EB"), width: am5.percent(80) });
-                            planSeries.data.setAll(plannedData.slice(0, endDate).map((value, i) => ({ date: (i + 1).toString(), plan: value || 0 })));
+        // Set themes
+        root.setThemes([am5themes_Animated.new(root)]);
 
-                            var actualSeries = chart.series.push(am5xy.ColumnSeries.new(root, {
-                                name: "Actual Qty",
-                                xAxis: xAxis,
-                                yAxis: yAxis,
-                                valueYField: "actual",
-                                categoryXField: "date",
-                                clustered: true,
-                                tooltip: am5.Tooltip.new(root, { labelText: "{name}: {valueY}" })
-                            }));
+        // Create chart for each name
+        var chart = root.container.children.push(
+            am5xy.XYChart.new(root, {
+                panX: false,
+                panY: false,
+                wheelX: "none",
+                wheelY: "none",
+                paddingLeft: 0,
+                layout: root.verticalLayout
+            })
+        );
 
-                            actualSeries.columns.template.setAll({ fill: am5.color("#FF9F40"), width: am5.percent(80) });
-                            actualSeries.data.setAll(actualData.slice(0, endDate).map((value, i) => ({ date: (i + 1).toString(), actual: value || 0 })));
+        // X-axis
+        var xAxis = chart.xAxes.push(
+            am5xy.CategoryAxis.new(root, {
+                categoryField: "date",
+                tooltip: am5.Tooltip.new(root, {}),
+                renderer: am5xy.AxisRendererX.new(root, {
+                    minGridDistance: 30
+                })
+            })
+        );
+        xAxis.data.setAll(daysOfMonth.map(date => ({ date })));
 
-                            var percentageSeries = chart.series.push(am5xy.LineSeries.new(root, {
-                                name: "Percentage Accuracy",
-                                xAxis: xAxis,
-                                yAxis: yAxisRight,
-                                valueYField: "percentage",
-                                categoryXField: "date",
-                                tooltip: am5.Tooltip.new(root, { labelText: "{name}: {valueY}%" }),
-                                stroke: am5.color(0x000000),
-                                fill: am5.color(0x000000)
-                            }));
+        // Y-axis for quantity (left)
+        var yAxis = chart.yAxes.push(
+            am5xy.ValueAxis.new(root, {
+                min: 0,
+                extraMax: 0.1,
+                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
+            })
+        );
 
-                            percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
-                            percentageSeries.data.setAll(percentageAccuracy.slice(0, endDate).map((value, i) => ({ date: (i + 1).toString(), percentage: value || 0 })));
+        // Add a label to the left Y-axis
+        yAxis.children.moveValue(am5.Label.new(root, {
+            rotation: -90,
+            text: "Quantity",  // Label text for quantity
+            y: am5.p50,
+            centerX: am5.p50
+        }), 0);
 
-                            percentageSeries.bullets.push(function(root, series, dataItem) {
-                                var value = dataItem.dataContext.percentage;
-                                var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
-                                return am5.Bullet.new(root, {
-                                    sprite: am5.Circle.new(root, {
-                                        strokeWidth: 3,
-                                        stroke: series.get("stroke"),
-                                        radius: 5,
-                                        fill: bulletColor
-                                    })
-                                });
-                            });
+        // Y-axis for percentage (right)
+        var yAxisRight = chart.yAxes.push(
+            am5xy.ValueAxis.new(root, {
+                min: 0,
+                max: 120, // Cap the percentage at 120%
+                strictMinMax: true, // Ensure min and max are strictly followed
+                extraMax: 0, // Disable extra max
+                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
+            })
+        );
 
-                            var legend = chart.children.push(am5.Legend.new(root, {
-                                centerX: am5.p50,
-                                x: am5.p50
-                            }));
+        // Add a label to the right Y-axis
+        yAxisRight.children.moveValue(am5.Label.new(root, {
+            rotation: -90,
+            text: "Percentage (%)",  // Label text for percentage
+            y: am5.p50,
+            centerX: am5.p50
+        }), 0);
 
-                            legend.data.setAll(chart.series.values);
+        // Plan series
+        var planSeries = chart.series.push(
+            am5xy.ColumnSeries.new(root, {
+                name: "Planned Qty",
+                xAxis: xAxis,
+                yAxis: yAxis,
+                valueYField: "plan",
+                categoryXField: "date",
+                clustered: true,
+                tooltip: am5.Tooltip.new(root, {
+                    labelText: "{name}: {valueY}"
+                })
+            })
+        );
+        planSeries.columns.template.setAll({ fill: am5.color("#36A2EB"), width: am5.percent(80) });
+        planSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, plan: plannedData[i] })));
 
-                            var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-                                behavior: "none",
-                                xAxis: xAxis
-                            }));
+        // Actual series
+        var actualSeries = chart.series.push(
+            am5xy.ColumnSeries.new(root, {
+                name: "Actual Qty",
+                xAxis: xAxis,
+                yAxis: yAxis,
+                valueYField: "actual",
+                categoryXField: "date",
+                clustered: true,
+                tooltip: am5.Tooltip.new(root, {
+                    labelText: "{name}: {valueY}"
+                })
+            })
+        );
+        actualSeries.columns.template.setAll({ fill: am5.color("#FF9F40"), width: am5.percent(80) });
+        actualSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, actual: actualData[i] })));
 
-                            cursor.lineY.set("visible", false);
+        // Percentage series
+        var percentageSeries = chart.series.push(
+            am5xy.LineSeries.new(root, {
+                name: "Percentage Accuracy",
+                xAxis: xAxis,
+                yAxis: yAxisRight,
+                valueYField: "percentage",
+                categoryXField: "date",
+                tooltip: am5.Tooltip.new(root, {
+                    labelText: "{name}: {valueY}%"
+                }),
+                stroke: am5.color(0x000000),
+                fill: am5.color(0x000000)
+            })
+        );
+        percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
+        percentageSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, percentage: percentageDifference[i] })));
 
-                            chart.appear(1000, 100);
-                            actualSeries.appear();
-                            planSeries.appear();
-                            percentageSeries.appear();
-                        }
+        // Add bullets for the percentage series
+        percentageSeries.bullets.push(function(root, series, dataItem) {
+            var value = dataItem.dataContext.percentage;
+            var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
+            return am5.Bullet.new(root, {
+                sprite: am5.Circle.new(root, {
+                    strokeWidth: 3,
+                    stroke: series.get("stroke"),
+                    radius: 5,
+                    fill: bulletColor
+                })
+            });
+        });
 
-                        const otcdCniData = @json($otcdCniData);
-                        const today = new Date().getDate();
+        // Add legend
+        var legend = chart.children.push(
+            am5.Legend.new(root, {
+                centerX: am5.p50,
+                x: am5.p50
+            })
+        );
+        legend.data.setAll(chart.series.values);
 
-                        function initializeCharts() {
-                            Object.keys(otcdCniData).forEach(model => {
-                                const data = otcdCniData[model];
-                                const plannedData = Array(31).fill(0);
-                                const actualData = Array(31).fill(0);
-                                const percentageAccuracy = Array(31).fill(0);
-                                let totalPercentage = 0;
-                                let count = 0;
+        // Enable cursor
+        var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+            behavior: "none",
+            xAxis: xAxis
+        }));
+        cursor.lineY.set("visible", false);
 
-                                data.forEach(entry => {
-                                    const day = new Date(entry.date).getDate() - 1;
-                                    plannedData[day] = parseInt(entry.total_planned_qty, 10);
-                                    actualData[day] = parseInt(entry.total_actual_qty, 10);
-                                    if (day < today) {
-                                        const percentage = entry.total_planned_qty > 0 ? Math.min((entry.total_actual_qty / entry.total_planned_qty) * 100, 100) : 0;
-                                        percentageAccuracy[day] = isFinite(percentage) ? percentage : 0;
-                                        totalPercentage += percentageAccuracy[day];
-                                        count++;
-                                    }
-                                });
+        // Make everything animate on load
+        chart.appear(1000, 100);
+        actualSeries.appear();
+        planSeries.appear();
+        percentageSeries.appear();
+    });
+});
 
-                                createOTDCChart(model, plannedData, actualData, percentageAccuracy, 31);
-                            });
-                        }
+</script>
 
-                        $('#otdcCniCarousel').on('slid.bs.carousel', function () {
-                            const activeSlide = $(this).find('.carousel-item.active');
-                            const model = activeSlide.find('.chart-custom').attr('id').replace('otdc-chart-', '');
-                            if (!activeSlide.data('chart-initialized')) {
-                                activeSlide.data('chart-initialized', true);
-                                initializeCharts();
-                            }
-                        });
 
-                        initializeCharts(); // Initialize charts for the first slide
-                    });
-                </script>
+
+
+
 
 
                 <div class="col-12">

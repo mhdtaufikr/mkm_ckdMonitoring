@@ -221,34 +221,21 @@ class HomeController extends Controller
             ->get()
             ->groupBy('model');
 
-            // Fetch variant code quantities from the inventories table, joined with master_products
             $variantCodeQuantitiesCNI = DB::table('inventories')
-            ->join(DB::raw('(SELECT DISTINCT variantCode, model FROM master_products) as mp'), 'inventories.variantCode', '=', 'mp.variantCode')
-            ->select('inventories.variantCode', 'mp.model', DB::raw('SUM(inventories.qty) as total_qty'))
-            ->where('inventories.location_id', '6582ef8060c9390d890568d4')
-            ->whereNotNull('inventories.variantCode') // Exclude null variantCode
-            ->whereNotNull('mp.model') // Exclude null model
-            ->groupBy('inventories.variantCode', 'mp.model')
-            ->orderBy('inventories.variantCode')
-            ->get()
-            ->groupBy(function ($item) {
-                static $groupIndex = 0;
-                static $itemCount = 0;
-                if ($itemCount++ % 5 == 0) {
-                    $groupIndex++;
-                }
-                return $groupIndex;
-            });
+            ->select('name', DB::raw('SUM(qty) as total_qty'))
+            ->where('location_id', '6582ef8060c9390d890568d4')
+            ->groupBy('name')
+            ->get();
 
             $otcdCniData = DB::table('cni_otdc')
-            ->select('model', 'variantCode', 'date', DB::raw('SUM(actual_qty) as total_actual_qty'), DB::raw('SUM(planned_qty) as total_planned_qty'), DB::raw('AVG(percentage_actual_vs_planned) as average_percentage'))
-            ->whereNotNull('model')  // Mengabaikan entri yang memiliki nilai model null
-            ->groupBy('model', 'variantCode', 'date')
+            ->select('name', 'date', 'total_actual_qty', 'total_planned_qty', 'percentage_actual_vs_planned')
+            ->whereNotNull('name')  // Ignoring entries with null name
             ->orderBy('date')
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
             ->get()
-            ->groupBy('model');
+            ->groupBy('name');
+
 
 
 

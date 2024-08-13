@@ -15,7 +15,7 @@ class InventoryController extends Controller
 {
     public function index()
 {
-    $locationIds = ['5fc4b12bc329204cb00b56bf', '5f335f29a2ef087afa109156','65bd1017b4490c26c00a82d9'];
+    $locationIds = ['5fc4b12bc329204cb00b56bf', '5f335f29a2ef087afa109156','65bd1017b4490c26c00a82d9','6582ef8060c9390d890568d4'];
 
     $items = DB::table('inventories')
         ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
