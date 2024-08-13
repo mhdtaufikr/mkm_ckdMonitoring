@@ -67,7 +67,7 @@ class FetchInventoryItemData extends Command
                             $vendorName = $vendorName ?? 'MKM';
                         }
 
-                        $inventoryItem  = InventoryItem::updateOrCreate(
+                        $inventoryItem  = InventoryItem::Create(
                             ['_id' => $item['_id']],
                             [
                                 'inventory_id' => $inventory->_id,
