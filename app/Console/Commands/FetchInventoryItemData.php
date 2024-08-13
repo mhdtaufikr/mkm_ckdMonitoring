@@ -50,7 +50,7 @@ class FetchInventoryItemData extends Command
 
                 foreach ($items as $item) {
                     // Find the corresponding inventory by code
-                    $inventory = Inventory::where('code', $item['code'])->first();
+                    $inventory = Inventory::where('code', $item['code'])->where('location_id', $locationId)->first();
 
                     if ($inventory) {
                         // Extract rack_type from the first word of rack
@@ -67,7 +67,7 @@ class FetchInventoryItemData extends Command
                             $vendorName = $vendorName ?? 'MKM';
                         }
 
-                        InventoryItem::updateOrCreate(
+                        $inventoryItem  = InventoryItem::updateOrCreate(
                             ['_id' => $item['_id']],
                             [
                                 'inventory_id' => $inventory->_id,
@@ -84,7 +84,7 @@ class FetchInventoryItemData extends Command
                                 'created_at' => $item['created_at'] ?? null
                             ]
                         );
-
+                        Log::info('Inventory Item Created/Updated: ', ['inventory_item' => $inventoryItem]);
                         // Add the fetched inventory item ID to the array
                         $fetchedInventoryItemIds[] = $item['_id'];
                     }
