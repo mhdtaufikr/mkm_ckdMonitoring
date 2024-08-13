@@ -358,7 +358,7 @@
                     </div>
                     <div class="card-body">
                         <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-indicators">
+                            <div hidden class="carousel-indicators">
                                 @foreach ($itemCodeQuantities as $groupIndex => $group)
                                     <button type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
                                 @endforeach
@@ -374,12 +374,12 @@
                                 @endforeach
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
+                                <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span hidden class="visually-hidden">Previous</span>
                             </button>
                             <button class="carousel-control-next" type="button" data-bs-target="#itemCodeQuantityCarousel" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
+                                <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span hidden class="visually-hidden">Next</span>
                             </button>
                         </div>
                     </div>
@@ -405,61 +405,88 @@
 
 
                         <script>
-                            document.addEventListener('DOMContentLoaded', (event) => {
-                                console.log('Loading variant code quantities chart for CNI.');
+                            am5.ready(function() {
 
+                                // Create root element
+                                var root = am5.Root.new("variant-code-pie-chart-cni");
+
+                                // Set themes
+                                root.setThemes([
+                                    am5themes_Animated.new(root)
+                                ]);
+
+                                // Create chart
+                                var chart = root.container.children.push(am5percent.PieChart.new(root, {
+                                    radius: am5.percent(90),
+                                    innerRadius: am5.percent(50),
+                                    layout: root.horizontalLayout
+                                }));
+
+                                // Create series
+                                var series = chart.series.push(am5percent.PieSeries.new(root, {
+                                    name: "Series",
+                                    valueField: "total_qty",  // Adjusted for your data
+                                    categoryField: "model"    // Adjusted for your data
+                                }));
+
+                                // Set data (using your dynamic data from Laravel)
                                 const variantCodeQuantitiesCNI = @json($variantCodeQuantitiesCNI[1]);
+                                series.data.setAll(variantCodeQuantitiesCNI);
 
-                                console.log(variantCodeQuantitiesCNI);
+                                // Disabling ticks
+                                series.ticks.template.set("visible", false);
 
-                                if (Array.isArray(variantCodeQuantitiesCNI) && variantCodeQuantitiesCNI.length > 0) {
-                                    const combinedDataCNI = [];
+                                // Showing labels with model and quantity
+                                series.labels.template.setAll({
+                                    text: "{category}: {value}",  // Display model and quantity on the chart
+                                    visible: true,                // Ensure labels are visible
+                                    radius: 20,                   // Position the labels
+                                    inside: false,                // Place the labels outside the slices
+                                    fill: am5.color(0x000000)     // Set label color to black
+                                });
 
-                                    variantCodeQuantitiesCNI.forEach(item => {
-                                        if (item.total_qty > 0) { // Only include items with a quantity greater than 0
-                                            combinedDataCNI.push({ category: item.model, value: item.total_qty });
-                                        }
-                                    });
+                                // Adding gradients
+                                series.slices.template.set("strokeOpacity", 0);
+                                series.slices.template.set("fillGradient", am5.RadialGradient.new(root, {
+                                    stops: [{
+                                        brighten: -0.8
+                                    }, {
+                                        brighten: -0.8
+                                    }, {
+                                        brighten: -0.5
+                                    }, {
+                                        brighten: 0
+                                    }, {
+                                        brighten: -0.5
+                                    }]
+                                }));
 
-                                    // Initialize the chart
-                                    am5.ready(function() {
-                                        var root = am5.Root.new("variant-code-pie-chart-cni");
+                                // Create legend
+                                var legend = chart.children.push(am5.Legend.new(root, {
+                                    centerY: am5.percent(50),
+                                    y: am5.percent(50),
+                                    layout: root.verticalLayout
+                                }));
 
-                                        root.setThemes([am5themes_Animated.new(root)]);
+                                // Set value labels align to right
+                                legend.valueLabels.template.setAll({ textAlign: "right" });
 
-                                        var chart = root.container.children.push(
-                                            am5percent.PieChart.new(root, {
-                                                layout: root.verticalLayout,
-                                                innerRadius: am5.percent(50)
-                                            })
-                                        );
+                                // Set width and max width of labels
+                                legend.labels.template.setAll({
+                                    maxWidth: 140,
+                                    width: 140,
+                                    oversizedBehavior: "wrap"
+                                });
 
-                                        var series = chart.series.push(
-                                            am5percent.PieSeries.new(root, {
-                                                valueField: "value",
-                                                categoryField: "category"
-                                            })
-                                        );
+                                legend.data.setAll(series.dataItems);
 
-                                        series.data.setAll(combinedDataCNI);
+                                // Play initial series animation
+                                series.appear(1000, 100);
 
-                                        series.labels.template.set("text", "{category}: {value}");
-                                        series.slices.template.set("tooltipText", "{category}: {value}");
+                            }); // end am5.ready()
+                        </script>
 
-                                        var legend = chart.children.push(am5.Legend.new(root, {
-                                            centerX: am5.p50,
-                                            x: am5.p50
-                                        }));
 
-                                        legend.data.setAll(series.dataItems);
-
-                                        series.appear(1000, 100);
-                                    });
-                                } else {
-                                    console.error('variantCodeQuantitiesCNI is not an object or is empty:', variantCodeQuantitiesCNI);
-                                }
-                            });
-                            </script>
 
 
 
@@ -544,56 +571,85 @@
           });
         });
 
-        // Create the combined chart
+        // Create the combined chart using the provided template structure
         am5.ready(function() {
-          // Create root element
-          var root = am5.Root.new("variant-code-pie-chart");
+            // Create root element
+            var root = am5.Root.new("variant-code-pie-chart");
 
-          // Set themes
-          root.setThemes([am5themes_Animated.new(root)]);
+            // Set themes
+            root.setThemes([
+                am5themes_Animated.new(root)
+            ]);
 
-          // Create chart
-          var chart = root.container.children.push(
-            am5percent.PieChart.new(root, {
-              layout: root.verticalLayout,
-              innerRadius: am5.percent(50)
-            })
-          );
+            // Create chart
+            var chart = root.container.children.push(am5percent.PieChart.new(root, {
+                radius: am5.percent(70),
+                innerRadius: am5.percent(50),
+                layout: root.horizontalLayout
+            }));
 
-          // Create series
-          var series = chart.series.push(
-            am5percent.PieSeries.new(root, {
-              name: "Series",
-              valueField: "value",
-              categoryField: "category"
-            })
-          );
+            // Create series
+            var series = chart.series.push(am5percent.PieSeries.new(root, {
+                name: "Series",
+                valueField: "value",
+                categoryField: "category"
+            }));
 
-          // Set data
-          series.data.setAll(combinedData);
+            // Set data
+            series.data.setAll(combinedData);
 
-          // Configure labels
-          series.labels.template.set("text", "{category}: {value}");
+            // Disabling labels and ticks
+            series.labels.template.set("visible", true); // Show labels
+            series.labels.template.set("text", "{category}: {value}"); // Display model and quantity
+            series.ticks.template.set("visible", false);
 
-          // Configure tooltips
-          series.slices.template.set("tooltipText", "{category}: {value}");
+            // Adding gradients
+            series.slices.template.set("strokeOpacity", 0);
+            series.slices.template.set("fillGradient", am5.RadialGradient.new(root, {
+                stops: [{
+                    brighten: -0.8
+                }, {
+                    brighten: -0.8
+                }, {
+                    brighten: -0.5
+                }, {
+                    brighten: 0
+                }, {
+                    brighten: -0.5
+                }]
+            }));
 
-          // Add legend
-          var legend = chart.children.push(am5.Legend.new(root, {
-            centerX: am5.p50,
-            x: am5.p50
-          }));
+            // Configure tooltips to show model and quantity
+            series.slices.template.set("tooltipText", "{category}: {value}");
 
-          legend.data.setAll(series.dataItems);
+            // Create legend
+            var legend = chart.children.push(am5.Legend.new(root, {
+                centerY: am5.percent(50),
+                y: am5.percent(50),
+                layout: root.verticalLayout
+            }));
 
-          // Animate chart
-          series.appear(1000, 100);
+            // Set value labels align to right
+            legend.valueLabels.template.setAll({ textAlign: "right" });
+
+            // Set width and max width of labels
+            legend.labels.template.setAll({
+                maxWidth: 100,
+                width: 100,
+                oversizedBehavior: "wrap"
+            });
+
+            legend.data.setAll(series.dataItems);
+
+            // Play initial series animation
+            series.appear(1000, 100);
         }); // end am5.ready()
       } else {
         console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
       }
     });
-  </script>
+    </script>
+
 
 
 <script>
