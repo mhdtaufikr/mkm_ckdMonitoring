@@ -157,14 +157,14 @@ class HomeController extends Controller
                         return $groupIndex;
                     });
 
-                                    // Fetch variant code quantities from the inventories table, joined with master_products
+                    // Fetch variant code quantities from the inventories table, joined with master_products
                     $variantCodeQuantities = DB::table('inventories')
-                    ->join('master_products', 'inventories.variantCode', '=', 'master_products.variantCode')
-                    ->select('inventories.variantCode', 'master_products.model', DB::raw('SUM(inventories.qty) as total_qty'))
+                    ->join(DB::raw('(SELECT DISTINCT variantCode, model FROM master_products) as mp'), 'inventories.variantCode', '=', 'mp.variantCode')
+                    ->select('inventories.variantCode', 'mp.model', DB::raw('SUM(inventories.qty) as total_qty'))
                     ->where('inventories.location_id', $locationId)
                     ->whereNotNull('inventories.variantCode') // Exclude null variantCode
-                    ->whereNotNull('master_products.model') // Exclude null model
-                    ->groupBy('inventories.variantCode', 'master_products.model')
+                    ->whereNotNull('mp.model') // Exclude null model
+                    ->groupBy('inventories.variantCode', 'mp.model')
                     ->orderBy('inventories.variantCode')
                     ->get()
                     ->groupBy(function ($item) {
@@ -175,6 +175,7 @@ class HomeController extends Controller
                         }
                         return $groupIndex;
                     });
+
 
                 // Prepare data for the chart
                 $vendors = $vendorMonthlySummary->pluck('vendor_name')->toArray();
