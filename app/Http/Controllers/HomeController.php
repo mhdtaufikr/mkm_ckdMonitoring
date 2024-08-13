@@ -240,8 +240,19 @@ class HomeController extends Controller
                 return $groupIndex;
             });
 
+            $otcdCniData = DB::table('cni_otdc')
+            ->select('model', 'variantCode', 'date', DB::raw('SUM(actual_qty) as total_actual_qty'), DB::raw('SUM(planned_qty) as total_planned_qty'), DB::raw('AVG(percentage_actual_vs_planned) as average_percentage'))
+            ->whereNotNull('model')  // Mengabaikan entri yang memiliki nilai model null
+            ->groupBy('model', 'variantCode', 'date')
+            ->orderBy('date')
+            ->whereMonth('date', $currentMonth)
+            ->whereYear('date', $currentYear)
+            ->get()
+            ->groupBy('model');
 
-        return view('home.ckd', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
+
+
+        return view('home.ckd', compact('otcdCniData','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
     }
 
 
