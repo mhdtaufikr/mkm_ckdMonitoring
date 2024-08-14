@@ -354,7 +354,7 @@
                   <!-- Item Code Quantity Carousel -->
                   <div style="height: 375px" class="card card-custom">
                     <div class="card-header">
-                        <h4>Planning Supply</h4>
+                        <h4>Item Code Quantity</h4>
                     </div>
                     <div class="card-body">
                         <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -488,288 +488,214 @@
 
                 </div>
 
-                <div hidden class="col-md-6 mb-2">
-                    <div class="card card-custom">
-                        <div class="card-header">
-                            <h4>OTDC</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="otdcCarousel" class="carousel slide" data-bs-ride="carousel">
-                                <div hidden class="carousel-indicators">
-                                    @foreach ($otcdCniData as $name => $data)
-                                        <button type="button" data-bs-target="#otdcCarousel" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
-                                    @endforeach
-                                </div>
-                                <div class="carousel-inner">
-                                    @foreach ($otcdCniData as $name => $data)
-                                        @php
-                                            $totalPercentage = 0;
-                                            $count = 0;
-                                            $today = now()->format('Y-m-d');
-                                            foreach ($data as $entry) {
-                                                if ($entry->date <= $today) {
-                                                    $totalPercentage += $entry->percentage_actual_vs_planned;
-                                                    $count++;
-                                                }
-                                            }
-                                            $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                                        @endphp
-                                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <table class="indicator-table mb-4">
-                                                        <tr>
-                                                            <th>Signal Indicator</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>
-                                                                <span class="signal green px-2">G</span> ≥ 95%
-                                                                <span class="signal yellow">Y</span> ≥ 85%
-                                                                <span class="signal red">R</span> < 85%
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <table class="indicator-table mb-4">
-                                                        <tr>
-                                                            <th>Average OTDC</th>
-                                                            <th>Signal</th>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>{{ number_format($averagePercentage, 2) }}%</td>
-                                                            <td>
-                                                                <span id="signal-otdc" class="signal
-                                                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
-                                                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
-                                                                </span>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <p style="margin-top: -20px" class="text-center">{{ $name }}</p>
-                                            <div style="margin-top: -20px" class="chart-container">
-                                                <div id="otdc-chart-{{ $name }}" class="chart-custom"></div>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#otdcCarousel" data-bs-slide="prev">
-                                    <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span hidden class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#otdcCarousel" data-bs-slide="next">
-                                    <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span hidden class="visually-hidden">Next</span>
-                                </button>
+              <!-- Inventory Monitoring Carousel -->
+<div class="col-md-7 mb-2">
+    <div class="card card-custom">
+        <div class="card-header">
+            <h4>Inventory Monitoring</h4>
+        </div>
+        <div class="card-body">
+            <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                <div hidden class="carousel-indicators">
+                    @foreach ($plannedData as $itemName => $comparisons)
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+                    @endforeach
+                </div>
+                <div class="carousel-inner">
+                    @foreach ($plannedData as $itemName => $comparisons)
+
+                    @php
+                    // Fetch comparison data from the database
+                    $comparisons = DB::table('inventory_comparison')
+                        ->where('id_location', '6582ef8060c9390d890568d4')
+                        ->where('inventory_id', $comparisons[0]->inventory_id)
+                        ->get();
+
+                    // Calculate the total percentage and count entries up to today
+                    $totalPercentage = 0;
+                    $count = 0;
+                    $today = now()->format('Y-m-d');
+
+                    foreach ($comparisons as $comparison) {
+                        if ($comparison->receiving_date <= $today) {
+                            $totalPercentage += $comparison->percentage;
+                            $count++;
+                        }
+                    }
+
+                    $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                    @endphp
+
+                    <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <table class="indicator-table mb-4">
+                                    <tr>
+                                        <th>Signal Indicator</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="signal green px-2">G</span> ≥ 95%
+                                            <span class="signal yellow">Y</span> ≥ 85%
+                                            <span class="signal red">R</span> < 85%
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-4">
+                                <table class="indicator-table mb-4">
+                                    <tr>
+                                        <th>Average Inventory</th>
+                                        <th>Signal</th>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                        <td>
+                                            <span id="signal-inventory" class="signal
+                                                {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                                {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
+                        <p style="margin-top: -20px" class="text-center">{{ $itemName }}</p> <!-- Changed from itemCode to itemName -->
+                        <div style="margin-top: -20px; height: 215px; width: 100%;"class="chart-container">
+                            <canvas id="chart-{{ str_replace(' ', '_', $itemName) }}" class="chart-custom"></canvas> <!-- Changed from itemCode to itemName -->
+                        </div>
                     </div>
+                    @endforeach
                 </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                    <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span hidden class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                    <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span hidden class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('Loading OTDC CNI Charts.');
 
-    const otcdCniData = @json($otcdCniData);
-    console.log(otcdCniData);
-
+              <script>
+                document.addEventListener('DOMContentLoaded', function() {
+    const groupedPlannedData = @json($plannedData);
+    const groupedActualData = @json($actualData);
     const today = new Date().getDate();
-    const daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
 
-    // Iterate over each name and create a chart
-    Object.keys(otcdCniData).forEach((name) => {
-        const data = otcdCniData[name];
+    // Function to create Inventory Monitoring chart
+    function createInventoryMonitoringChart(itemName) {
+        const plannedComparisons = groupedPlannedData[itemName];
+        const actualComparisons = groupedActualData[itemName] || [];
 
-        if (!data || data.length === 0) {
-            console.error(`No data found for ${name}`);
-            return;
-        }
-
-        console.log(`Rendering chart for: ${name}`);
-
-        // Prepare data arrays
-        const plannedData = Array(31).fill(0);
-        const actualData = Array(31).fill(0);
+        const plannedData = Array(31).fill(null);
+        const actualData = Array(31).fill(null);
         const percentageDifference = Array(31).fill(0);
 
-        data.forEach((comparison) => {
-            const day = new Date(comparison.date).getDate() - 1;
-            plannedData[day] += parseInt(comparison.total_planned_qty);
-            actualData[day] += parseInt(comparison.total_actual_qty);
+        plannedComparisons.forEach((comparison) => {
+            const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
+            plannedData[plannedDay] = comparison.planned_qty;
+        });
+
+        actualComparisons.forEach((comparison) => {
+            const actualDay = new Date(comparison.receiving_date).getDate() - 1;
+            actualData[actualDay] = comparison.received_qty;
         });
 
         plannedData.forEach((value, index) => {
-            if (value > 0) {
+            if (value !== null && actualData[index] !== null) {
                 const percentage = Math.min((actualData[index] / value) * 100, 100);
                 percentageDifference[index] = isFinite(percentage) ? percentage : 0;
             }
         });
 
-        // Create a unique root for each name's chart
-        var root = am5.Root.new(`otdc-chart-${name}`);
-
-        // Set themes
-        root.setThemes([am5themes_Animated.new(root)]);
-
-        // Create chart for each name
-        var chart = root.container.children.push(
-            am5xy.XYChart.new(root, {
-                panX: false,
-                panY: false,
-                wheelX: "none",
-                wheelY: "none",
-                paddingLeft: 0,
-                layout: root.verticalLayout
-            })
-        );
-
-        // X-axis
-        var xAxis = chart.xAxes.push(
-            am5xy.CategoryAxis.new(root, {
-                categoryField: "date",
-                tooltip: am5.Tooltip.new(root, {}),
-                renderer: am5xy.AxisRendererX.new(root, {
-                    minGridDistance: 30
-                })
-            })
-        );
-        xAxis.data.setAll(daysOfMonth.map(date => ({ date })));
-
-        // Y-axis for quantity (left)
-        var yAxis = chart.yAxes.push(
-            am5xy.ValueAxis.new(root, {
-                min: 0,
-                extraMax: 0.1,
-                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
-            })
-        );
-
-        // Add a label to the left Y-axis
-        yAxis.children.moveValue(am5.Label.new(root, {
-            rotation: -90,
-            text: "Quantity",  // Label text for quantity
-            y: am5.p50,
-            centerX: am5.p50
-        }), 0);
-
-        // Y-axis for percentage (right)
-        var yAxisRight = chart.yAxes.push(
-            am5xy.ValueAxis.new(root, {
-                min: 0,
-                max: 120, // Cap the percentage at 120%
-                strictMinMax: true, // Ensure min and max are strictly followed
-                extraMax: 0, // Disable extra max
-                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
-            })
-        );
-
-        // Add a label to the right Y-axis
-        yAxisRight.children.moveValue(am5.Label.new(root, {
-            rotation: -90,
-            text: "Percentage (%)",  // Label text for percentage
-            y: am5.p50,
-            centerX: am5.p50
-        }), 0);
-
-        // Plan series
-        var planSeries = chart.series.push(
-            am5xy.ColumnSeries.new(root, {
-                name: "Planned Qty",
-                xAxis: xAxis,
-                yAxis: yAxis,
-                valueYField: "plan",
-                categoryXField: "date",
-                clustered: true,
-                tooltip: am5.Tooltip.new(root, {
-                    labelText: "{name}: {valueY}"
-                })
-            })
-        );
-        planSeries.columns.template.setAll({ fill: am5.color("#36A2EB"), width: am5.percent(80) });
-        planSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, plan: plannedData[i] })));
-
-        // Actual series
-        var actualSeries = chart.series.push(
-            am5xy.ColumnSeries.new(root, {
-                name: "Actual Qty",
-                xAxis: xAxis,
-                yAxis: yAxis,
-                valueYField: "actual",
-                categoryXField: "date",
-                clustered: true,
-                tooltip: am5.Tooltip.new(root, {
-                    labelText: "{name}: {valueY}"
-                })
-            })
-        );
-        actualSeries.columns.template.setAll({ fill: am5.color("#FF9F40"), width: am5.percent(80) });
-        actualSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, actual: actualData[i] })));
-
-        // Percentage series
-        var percentageSeries = chart.series.push(
-            am5xy.LineSeries.new(root, {
-                name: "Percentage Accuracy",
-                xAxis: xAxis,
-                yAxis: yAxisRight,
-                valueYField: "percentage",
-                categoryXField: "date",
-                tooltip: am5.Tooltip.new(root, {
-                    labelText: "{name}: {valueY}%"
-                }),
-                stroke: am5.color(0x000000),
-                fill: am5.color(0x000000)
-            })
-        );
-        percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
-        percentageSeries.data.setAll(daysOfMonth.map((date, i) => ({ date, percentage: percentageDifference[i] })));
-
-        // Add bullets for the percentage series
-        percentageSeries.bullets.push(function(root, series, dataItem) {
-            var value = dataItem.dataContext.percentage;
-            var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
-            return am5.Bullet.new(root, {
-                sprite: am5.Circle.new(root, {
-                    strokeWidth: 3,
-                    stroke: series.get("stroke"),
-                    radius: 5,
-                    fill: bulletColor
-                })
-            });
+        // Create the Chart.js instance
+        const ctx = document.getElementById(`chart-${itemName.replace(/\s+/g, '_')}`).getContext('2d');
+        new Chart(ctx, {
+            type: 'bar', // Bar for planned and actual, line for percentage
+            data: {
+                labels: Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // Days of the month
+                datasets: [
+                    {
+                        label: 'Planned Stock',
+                        data: plannedData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        type: 'bar',
+                        yAxisID: 'y',
+                    },
+                    {
+                        label: 'Actual Stock',
+                        data: actualData,
+                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1,
+                        type: 'bar',
+                        yAxisID: 'y',
+                    },
+                    {
+                        label: 'Percentage Accuracy',
+                        data: percentageDifference,
+                        borderColor: 'rgba(0, 0, 0, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        type: 'line',
+                        yAxisID: 'y1',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Quantity'
+                        },
+                        beginAtZero: true
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        },
+                        beginAtZero: true,
+                        max: 120
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataset.type === 'line') {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                                return `${context.dataset.label}: ${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
         });
+    }
 
-        // Add legend
-        var legend = chart.children.push(
-            am5.Legend.new(root, {
-                centerX: am5.p50,
-                x: am5.p50
-            })
-        );
-        legend.data.setAll(chart.series.values);
-
-        // Enable cursor
-        var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-            behavior: "none",
-            xAxis: xAxis
-        }));
-        cursor.lineY.set("visible", false);
-
-        // Make everything animate on load
-        chart.appear(1000, 100);
-        actualSeries.appear();
-        planSeries.appear();
-        percentageSeries.appear();
+    // Loop through each itemName to create charts
+    Object.keys(groupedPlannedData).forEach(itemName => {
+        createInventoryMonitoringChart(itemName);
     });
 });
 
-</script>
-
-
-
-
-
-
+              </script>
 
                 <div class="col-12">
                     <div class="card">
@@ -829,7 +755,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-      console.log('Loading variant code quantities chart.');
+
 
       const variantCodeQuantities = @json($variantCodeQuantities);
 
@@ -928,14 +854,14 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-        console.log('Loading item code quantities charts.');
+
 
         const itemCodeQuantities = @json($itemCodeQuantities);
         const month = new Date().toLocaleString('default', { month: 'long' });
 
         if (typeof itemCodeQuantities === 'object') {
             Object.keys(itemCodeQuantities).forEach((groupIndex) => {
-                console.log('Processing item code group:', groupIndex);
+
 
                 const group = itemCodeQuantities[groupIndex];
 
@@ -943,8 +869,6 @@
                 const quantities = group.map(item => item.qty);
                 const itemIds = group.map(item => item._id); // Add this line to get item IDs
 
-                console.log(`Item Codes for Group ${groupIndex}:`, itemCodes);
-                console.log(`Quantities for Group ${groupIndex}:`, quantities);
 
                 const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
                 const myChart = new Chart(ctx, {

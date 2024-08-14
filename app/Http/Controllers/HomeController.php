@@ -95,28 +95,35 @@ class HomeController extends Controller
 
     public function indexCkd()
     {
-        set_time_limit(300);
+                set_time_limit(300);
                 $locationId = '65a72c7fad782dc26a0626f6';
                 $currentMonth = now()->month;
                 $currentYear = now()->year;
                 $today = now()->format('Y-m-d');
 
-                // Get planned data
                 $plannedData = DB::table('planned_inventory_view')
                 ->whereMonth('planned_receiving_date', $currentMonth)
                 ->whereYear('planned_receiving_date', $currentYear)
-                ->where('location_id',$locationId)
+                ->where('location_id', '6582ef8060c9390d890568d4')
                 ->get()
-                ->groupBy('item_code');
+                ->groupBy('item_name'); // Group by item_name instead of item_code
 
                 // Get actual data
                 $actualData = DB::table('actual_inventory_view')
-                    ->whereMonth('receiving_date', $currentMonth)
-                    ->whereYear('receiving_date', $currentYear)
-                    ->whereDate('receiving_date', '<=', $today)
-                    ->where('location_id',$locationId)
-                    ->get()
-                    ->groupBy('item_code');
+                ->whereMonth('receiving_date', $currentMonth)
+                ->whereYear('receiving_date', $currentYear)
+                ->whereDate('receiving_date', '<=', $today)
+                ->where('location_id', '6582ef8060c9390d890568d4')
+                ->get()
+                ->groupBy('item_name'); // Group by item_name instead of item_code
+
+                // Get comparisons for the current month until today
+                $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
+                ->whereYear('planned_receiving_date', $currentYear)
+                ->whereDate('planned_receiving_date', '<=', $today)
+                ->where('id_location', '6582ef8060c9390d890568d4')
+                ->get();
+
 
                     $vendorData = DB::table('vendor_comparison')
                     ->select(
@@ -191,15 +198,6 @@ class HomeController extends Controller
                 ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
                 ->get();
 
-                // Get comparisons for the current month until today
-                $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
-                ->whereYear('planned_receiving_date', $currentYear)
-                ->whereDate('planned_receiving_date', '<=', $today)
-                ->where('id_location', $locationId)
-                ->get();
-
-            // Group by item_code
-            $itemCodes = $comparisons->groupBy('item_code');
             $plannedDataModel = DB::table('view_planning')
             ->where('id_location', $locationId)
             ->whereMonth('date', $currentMonth)
@@ -227,19 +225,7 @@ class HomeController extends Controller
             ->groupBy('name')
             ->get();
 
-            $otcdCniData = DB::table('cni_otdc')
-            ->select('name', 'date', 'total_actual_qty', 'total_planned_qty', 'percentage_actual_vs_planned')
-            ->whereNotNull('name')  // Ignoring entries with null name
-            ->orderBy('date')
-            ->whereMonth('date', $currentMonth)
-            ->whereYear('date', $currentYear)
-            ->get()
-            ->groupBy('name');
-
-
-
-
-        return view('home.ckd', compact('otcdCniData','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
+        return view('home.ckd', compact('comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
     }
 
 
