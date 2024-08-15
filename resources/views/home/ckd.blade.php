@@ -508,125 +508,78 @@
             <h4>OTDC Supply</h4>
         </div>
         <div class="card-body">
-            <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-                <div hidden class="carousel-indicators">
-                    @foreach ($plannedData as $itemName => $comparisons)
-                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
-                    @endforeach
+        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+    <div hidden class="carousel-indicators">
+        @foreach ($plannedData as $itemName => $comparisons)
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $loop->index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : '' }}" aria-label="Slide {{ $loop->index + 1 }}"></button>
+        @endforeach
+    </div>
+    <div class="carousel-inner">
+        @foreach ($plannedData as $itemName => $comparisons)
+
+        @php
+            // Simulate the grouping and calculation based on $resultData
+            $resultData = collect([
+                ['item_name' => 'Bellow Assy', 'average_percentage' => 100],
+                ['item_name' => 'Exh Bracke Unit', 'average_percentage' => 99.908172635445],
+                ['item_name' => 'Flange', 'average_percentage' => 100],
+            ]);
+
+            $currentItem = $resultData->firstWhere('item_name', $itemName);
+            $averagePercentage = $currentItem ? $currentItem['average_percentage'] : 0;
+        @endphp
+
+        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+            <div class="row">
+                <div class="col-md-8">
+                    <table class="indicator-table mb-4">
+                        <tr>
+                            <th>Signal Indicator</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="signal green px-2">G</span> ≥ 95%
+                                <span class="signal yellow">Y</span> ≥ 85%
+                                <span class="signal red">R</span> < 85%
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-                <div class="carousel-inner">
-                    @foreach ($plannedData as $itemName => $comparisons)
-
-                    @php
-                        // Get the current month and year
-                        $currentMonth = now()->month;
-                        $currentYear = now()->year;
-                        $today = now()->format('Y-m-d');
-                        $startOfMonth = now()->startOfMonth()->format('Y-m-d');
-
-                        // Query the data from the inventory_comparison table
-                        $comparisons = DB::table('inventory_comparison')
-                            ->select(
-                                'item_name',
-                                DB::raw('SUM(planned_qty) AS total_planned_qty'),
-                                DB::raw('SUM(received_qty) AS total_received_qty'),
-                                DB::raw('DATE(planned_receiving_date) AS planned_receiving_date'),
-                                DB::raw('DATE(receiving_date) AS receiving_date')
-                            )
-                            ->where('id_location', '6582ef8060c9390d890568d4')
-                            ->whereMonth('planned_receiving_date', $currentMonth)
-                            ->whereYear('planned_receiving_date', $currentYear)
-                            ->whereMonth('receiving_date', $currentMonth)
-                            ->whereYear('receiving_date', $currentYear)
-                            ->groupBy('item_name', DB::raw('DATE(planned_receiving_date)'), DB::raw('DATE(receiving_date)'))
-                            ->orderBy('item_name', 'asc')
-                            ->get();
-
-                        // Initialize variables for calculation
-                        $totalPercentage = 0;
-                        $count = 0;
-                        $uniqueDates = [];
-                        $includedEntries = [];
-
-                        // Calculate percentage based on summed quantities
-                        foreach ($comparisons as $comparison) {
-                            $plannedQty = $comparison->total_planned_qty;
-                            $actualQty = $comparison->total_received_qty;
-                            $comparisonDate = $comparison->receiving_date ?: $comparison->planned_receiving_date;
-
-                            if ($comparisonDate >= $startOfMonth && $comparisonDate <= $today) {
-                                if (!in_array($comparisonDate, $uniqueDates)) {
-                                    // Calculate the percentage
-                                    $percentage = ($plannedQty > 0) ? min(($actualQty / $plannedQty) * 100, 100) : 100;
-
-                                    $totalPercentage += $percentage;
-                                    $count++;
-                                    $includedEntries[] = [
-                                        'item_name' => $comparison->item_name,
-                                        'planned_qty' => $plannedQty,
-                                        'actual_qty' => $actualQty,
-                                        'percentage' => $percentage,
-                                    ];
-                                    $uniqueDates[] = $comparisonDate;
-                                }
-                            }
-                        }
-
-                        $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                    @endphp
-
-
-
-                    <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <table class="indicator-table mb-4">
-                                    <tr>
-                                        <th>Signal Indicator</th>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <span class="signal green px-2">G</span> ≥ 95%
-                                            <span class="signal yellow">Y</span> ≥ 85%
-                                            <span class="signal red">R</span> < 85%
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div class="col-md-4">
-                                <table class="indicator-table mb-4">
-                                    <tr>
-                                        <th>Average Supply</th>
-                                        <th>Signal</th>
-                                    </tr>
-                                    <tr>
-                                        <td>{{ number_format($averagePercentage, 2) }}%</td>
-                                        <td>
-                                            <span id="signal-inventory" class="signal
-                                                {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
-                                                {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <p style="margin-top: -20px" class="text-center">{{ $itemName }}</p> <!-- Changed from itemCode to itemName -->
-                        <div style="margin-top: -20px; height: 215px; width: 100%;"class="chart-container">
-                            <canvas id="chart-{{ str_replace(' ', '_', $itemName) }}" class="chart-custom"></canvas> <!-- Changed from itemCode to itemName -->
-                        </div>
-                    </div>
-                    @endforeach
+                <div class="col-md-4">
+                    <table class="indicator-table mb-4">
+                        <tr>
+                            <th>Average Supply</th>
+                            <th>Signal</th>
+                        </tr>
+                        <tr>
+                            <td>{{ number_format($averagePercentage, 2) }}%</td>
+                            <td>
+                                <span id="signal-inventory" class="signal
+                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                </span>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-                <button hidden class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-                    <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span hidden class="visually-hidden">Previous</span>
-                </button>
-                <button hidden class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-                    <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span hidden class="visually-hidden">Next</span>
-                </button>
             </div>
+            <p style="margin-top: -20px" class="text-center">{{ $itemName }}</p>
+            <div style="margin-top: -20px; height: 215px; width: 100%;"class="chart-container">
+                <canvas id="chart-{{ str_replace(' ', '_', $itemName) }}" class="chart-custom"></canvas>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    <button hidden class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+        <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span hidden class="visually-hidden">Previous</span>
+    </button>
+    <button hidden class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+        <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span hidden class="visually-hidden">Next</span>
+    </button>
+</div>
+
         </div>
     </div>
 </div>

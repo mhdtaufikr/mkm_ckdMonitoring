@@ -133,6 +133,40 @@ class HomeController extends Controller
 
                 ->get()
                 ->groupBy('item_name');
+               // Initialize an array to store the results
+    $resultData = [];
+
+    // Loop through each item in the planned data
+    foreach ($plannedData as $itemName => $plannedItems) {
+        $totalPercentage = 0;
+        $count = 0;
+
+        foreach ($plannedItems as $planned) {
+            $plannedDate = $planned->planned_receiving_date;
+            $plannedQty = $planned->planned_qty;
+
+            // Find the corresponding actual data for the same date
+            $actualQty = $actualData[$itemName]->firstWhere('receiving_date', $plannedDate)->received_qty ?? 0;
+
+            // Calculate the percentage
+            $percentage = ($plannedQty > 0) ? min(($actualQty / $plannedQty) * 100, 100) : 100;
+
+            if ($plannedDate <= $today) {
+                $totalPercentage += $percentage;
+                $count++;
+            }
+        }
+
+        // Calculate the average percentage for the item
+        $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+
+        // Store the result in the resultData array
+        $resultData[] = [
+            'item_name' => $itemName,
+            'average_percentage' => $averagePercentage,
+        ];
+    }
+
 
 
 
@@ -249,7 +283,7 @@ class HomeController extends Controller
             ->get();
 
 
-        return view('home.ckd', compact('comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
+        return view('home.ckd', compact('resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
     }
 
 
