@@ -27,8 +27,8 @@
                                                     <th>No.</th>
                                                     <th>Item Code</th>
                                                     <th>Item Name</th>
-                                                    <th>Quantity Actual</th>
-                                                    <th>Quantity Planned</th>
+                                                    <th>Quantity Planned ({{$sumplaned}})</th>
+                                                    <th>Quantity Actual ({{$sumactual}})</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -40,8 +40,8 @@
                                                         <td>{{ $no++ }}</td>
                                                         <td>{{ $data->item_code }}</td>
                                                         <td>{{ $data->item_name }}</td>
-                                                        <td>{{ $data->qty_actual ?? 0 }}</td>
                                                         <td>{{ $data->qty_plan ?? 0 }}</td>
+                                                        <td>{{ $data->qty_actual ?? 0 }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

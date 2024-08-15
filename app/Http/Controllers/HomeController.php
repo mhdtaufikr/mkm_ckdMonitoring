@@ -712,10 +712,11 @@ class HomeController extends Controller
     ->get();
 
 
-
+    $sumactual = $detailedData->sum('qty_actual');
+    $sumplaned = $detailedData->sum('qty_plan');
 
     // Return the data to a view
-    return view('inventory.detailactivity', compact('detailedData', 'fullDate'));
+    return view('inventory.detailactivity', compact('detailedData', 'fullDate','sumactual','sumplaned'));
 }
 
 
