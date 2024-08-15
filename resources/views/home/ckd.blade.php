@@ -518,37 +518,63 @@
                     @foreach ($plannedData as $itemName => $comparisons)
 
                     @php
-                    // Fetch comparison data from the database
-                    $comparisons = DB::table('inventory_comparison')
-                        ->where('id_location', '6582ef8060c9390d890568d4')
-                        ->where('inventory_id', $comparisons[0]->inventory_id)
-                        ->get();
+                        // Get the current month and year
+                        $currentMonth = now()->month;
+                        $currentYear = now()->year;
+                        $today = now()->format('Y-m-d');
+                        $startOfMonth = now()->startOfMonth()->format('Y-m-d');
 
-                    // Initialize variables for calculation
-                    $totalPercentage = 0;
-                    $count = 0;
-                    $today = now()->format('Y-m-d');
-                    $startOfMonth = now()->startOfMonth()->format('Y-m-d');
-                    $includedEntries = [];
-                    $uniqueDates = [];
+                        // Query the data from the inventory_comparison table
+                        $comparisons = DB::table('inventory_comparison')
+                            ->select(
+                                'item_name',
+                                DB::raw('SUM(planned_qty) AS total_planned_qty'),
+                                DB::raw('SUM(received_qty) AS total_received_qty'),
+                                DB::raw('DATE(planned_receiving_date) AS planned_receiving_date'),
+                                DB::raw('DATE(receiving_date) AS receiving_date')
+                            )
+                            ->where('id_location', '6582ef8060c9390d890568d4')
+                            ->whereMonth('planned_receiving_date', $currentMonth)
+                            ->whereYear('planned_receiving_date', $currentYear)
+                            ->whereMonth('receiving_date', $currentMonth)
+                            ->whereYear('receiving_date', $currentYear)
+                            ->groupBy('item_name', DB::raw('DATE(planned_receiving_date)'), DB::raw('DATE(receiving_date)'))
+                            ->orderBy('item_name', 'asc')
+                            ->get();
 
-                    foreach ($comparisons as $comparison) {
-                        if ($comparison->receiving_date >= $startOfMonth && $comparison->receiving_date <= $today) {
-                            if (!in_array($comparison->receiving_date, $uniqueDates)) {
-                                // Ensure the percentage is 100% if actual quantity exceeds or equals planned quantity
-                                if (!isset($comparison->planned_qty) || $comparison->received_qty >= $comparison->planned_qty) {
-                                    $comparison->percentage = 100;
+                        // Initialize variables for calculation
+                        $totalPercentage = 0;
+                        $count = 0;
+                        $uniqueDates = [];
+                        $includedEntries = [];
+
+                        // Calculate percentage based on summed quantities
+                        foreach ($comparisons as $comparison) {
+                            $plannedQty = $comparison->total_planned_qty;
+                            $actualQty = $comparison->total_received_qty;
+                            $comparisonDate = $comparison->receiving_date ?: $comparison->planned_receiving_date;
+
+                            if ($comparisonDate >= $startOfMonth && $comparisonDate <= $today) {
+                                if (!in_array($comparisonDate, $uniqueDates)) {
+                                    // Calculate the percentage
+                                    $percentage = ($plannedQty > 0) ? min(($actualQty / $plannedQty) * 100, 100) : 100;
+
+                                    $totalPercentage += $percentage;
+                                    $count++;
+                                    $includedEntries[] = [
+                                        'item_name' => $comparison->item_name,
+                                        'planned_qty' => $plannedQty,
+                                        'actual_qty' => $actualQty,
+                                        'percentage' => $percentage,
+                                    ];
+                                    $uniqueDates[] = $comparisonDate;
                                 }
-                                $totalPercentage += $comparison->percentage;
-                                $count++;
-                                $includedEntries[] = $comparison;
-                                $uniqueDates[] = $comparison->receiving_date;
                             }
                         }
-                    }
 
-                    $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                @endphp
+                        $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                    @endphp
+
 
 
                     <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
@@ -592,11 +618,11 @@
                     </div>
                     @endforeach
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                <button hidden class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
                     <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span hidden class="visually-hidden">Previous</span>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                <button hidden class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
                     <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span hidden class="visually-hidden">Next</span>
                 </button>
