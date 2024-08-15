@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home/cvcL404', [HomeController::class, 'cvcL404'])->name('checksheet.cvcL404');
     Route::get('/home/test', [HomeController::class, 'test']);
     Route::get('/details-page/{date}', [HomeController::class, 'detailCKD']);
+    Route::get('/details-page/cni/{date}', [HomeController::class, 'detailsCKDCNI']);
 
 
     //Dropdown Controller

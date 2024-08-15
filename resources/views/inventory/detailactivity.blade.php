@@ -47,7 +47,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <a href="{{ route('inventory.index') }}" class="btn btn-secondary btn-sm">Back to List</a>
+                                    <a href="{{ url('/home/ckd') }}" class="btn btn-secondary btn-sm">Back to List</a>
                                 </div>
                             </div>
                         </div>

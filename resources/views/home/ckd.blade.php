@@ -594,121 +594,133 @@
 </div>
 
 
-              <script>
-                document.addEventListener('DOMContentLoaded', function() {
-    const groupedPlannedData = @json($plannedData);
-    const groupedActualData = @json($actualData);
-    const today = new Date().getDate();
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const groupedPlannedData = @json($plannedData);
+        const groupedActualData = @json($actualData);
+        const today = new Date().getDate();
 
-    // Function to create Inventory Monitoring chart
-    function createInventoryMonitoringChart(itemName) {
-        const plannedComparisons = groupedPlannedData[itemName];
-        const actualComparisons = groupedActualData[itemName] || [];
+        // Function to create Inventory Monitoring chart
+        function createInventoryMonitoringChart(itemName) {
+            const plannedComparisons = groupedPlannedData[itemName];
+            const actualComparisons = groupedActualData[itemName] || [];
 
-        const plannedData = Array(31).fill(null);
-        const actualData = Array(31).fill(null);
-        const percentageDifference = Array(31).fill(0);
+            const plannedData = Array(31).fill(null);
+            const actualData = Array(31).fill(null);
+            const percentageDifference = Array(31).fill(0);
 
-        plannedComparisons.forEach((comparison) => {
-            const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
-            plannedData[plannedDay] = comparison.planned_qty;
-        });
+            plannedComparisons.forEach((comparison) => {
+                const plannedDay = new Date(comparison.planned_receiving_date).getDate() - 1;
+                plannedData[plannedDay] = comparison.planned_qty;
+            });
 
-        actualComparisons.forEach((comparison) => {
-            const actualDay = new Date(comparison.receiving_date).getDate() - 1;
-            actualData[actualDay] = comparison.received_qty;
-        });
+            actualComparisons.forEach((comparison) => {
+                const actualDay = new Date(comparison.receiving_date).getDate() - 1;
+                actualData[actualDay] = comparison.received_qty;
+            });
 
-        plannedData.forEach((value, index) => {
-            if (value !== null && actualData[index] !== null) {
-                const percentage = Math.min((actualData[index] / value) * 100, 100);
-                percentageDifference[index] = isFinite(percentage) ? percentage : 0;
-            }
-        });
+            plannedData.forEach((value, index) => {
+                if (value !== null && actualData[index] !== null) {
+                    const percentage = Math.min((actualData[index] / value) * 100, 100);
+                    percentageDifference[index] = isFinite(percentage) ? percentage : 0;
+                }
+            });
 
-        // Create the Chart.js instance
-        const ctx = document.getElementById(`chart-${itemName.replace(/\s+/g, '_')}`).getContext('2d');
-        new Chart(ctx, {
-            type: 'bar', // Bar for planned and actual, line for percentage
-            data: {
-                labels: Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // Days of the month
-                datasets: [
-                    {
-                        label: 'Planned Stock',
-                        data: plannedData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        yAxisID: 'y',
-                    },
-                    {
-                        label: 'Actual Stock',
-                        data: actualData,
-                        backgroundColor: 'rgba(255, 159, 64, 0.8)',
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1,
-                        type: 'bar',
-                        yAxisID: 'y',
-                    },
-                    {
-                        label: 'Percentage Accuracy',
-                        data: percentageDifference,
-                        borderColor: 'rgba(0, 0, 0, 1)',
-                        borderWidth: 2,
-                        fill: false,
-                        type: 'line',
-                        yAxisID: 'y1',
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        type: 'linear',
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Quantity'
+            // Create the Chart.js instance
+            const ctx = document.getElementById(`chart-${itemName.replace(/\s+/g, '_')}`).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar', // Bar for planned and actual, line for percentage
+                data: {
+                    labels: Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // Days of the month
+                    datasets: [
+                        {
+                            label: 'Planned Stock',
+                            data: plannedData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            type: 'bar',
+                            yAxisID: 'y',
                         },
-                        beginAtZero: true
-                    },
-                    y1: {
-                        type: 'linear',
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Percentage (%)'
+                        {
+                            label: 'Actual Stock',
+                            data: actualData,
+                            backgroundColor: 'rgba(255, 159, 64, 0.8)',
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1,
+                            type: 'bar',
+                            yAxisID: 'y',
                         },
-                        beginAtZero: true,
-                        max: 120
-                    }
+                        {
+                            label: 'Percentage Accuracy',
+                            data: percentageDifference,
+                            borderColor: 'rgba(0, 0, 0, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                            type: 'line',
+                            yAxisID: 'y1',
+                        }
+                    ]
                 },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataset.type === 'line') {
-                                    return `${context.dataset.label}: ${context.raw}%`;
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Quantity'
+                            },
+                            beginAtZero: true
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Percentage (%)'
+                            },
+                            beginAtZero: true,
+                            max: 120
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.type === 'line') {
+                                        return `${context.dataset.label}: ${context.raw}%`;
+                                    }
+                                    return `${context.dataset.label}: ${context.raw}`;
                                 }
-                                return `${context.dataset.label}: ${context.raw}`;
+                            }
+                        }
+                    },
+                    onClick: function(e, activeElements) {
+                        if (activeElements.length > 0) {
+                            const datasetIndex = activeElements[0].datasetIndex;
+                            const index = activeElements[0].index;
+                            const selectedDate = this.data.labels[index];
+
+                            if (datasetIndex !== undefined && index !== undefined) {
+                                const fullDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(selectedDate).padStart(2, '0')}`;
+                                window.open(`/details-page/cni/${fullDate}`, '_blank');
                             }
                         }
                     }
                 }
-            }
+            });
+        }
+
+        // Loop through each itemName to create charts
+        Object.keys(groupedPlannedData).forEach(itemName => {
+            createInventoryMonitoringChart(itemName);
         });
-    }
-
-    // Loop through each itemName to create charts
-    Object.keys(groupedPlannedData).forEach(itemName => {
-        createInventoryMonitoringChart(itemName);
     });
-});
+</script>
 
-              </script>
 
                 <div class="col-12">
                     <div class="card">
@@ -964,7 +976,7 @@
     });
 </script>
 
-<script>
+{{-- <script>
     function refreshPage() {
         setTimeout(function() {
             location.reload();
@@ -973,6 +985,6 @@
 
     // Call the function when the page loads
     refreshPage();
-</script>
+</script> --}}
 
 @endsection

@@ -719,6 +719,43 @@ class HomeController extends Controller
     return view('inventory.detailactivity', compact('detailedData', 'fullDate','sumactual','sumplaned'));
 }
 
+public function detailsCKDCNI($date)
+{
+
+    $fullDate = $date;
+
+        // Step 1: Query to InventoryComparison table based on id_location and the specific date
+    $comparisonData = DB::table('inventory_comparison')
+    ->where('id_location', '6582ef8060c9390d890568d4')
+    ->where(function ($query) use ($fullDate) {
+        $query->whereDate('receiving_date', '=', $fullDate)
+            ->orWhereDate('planned_receiving_date', '=', $fullDate);
+    })
+    ->where('item_name', '!=', 'Auto-generated')  // Exclude items with item_name "Auto-generated"
+    ->select(
+        'item_code',
+        'item_name',
+        'planned_qty as qty_plan',      // Rename column to qty_plan
+        'received_qty as qty_actual',   // Rename column to qty_actual
+        'comparison_status',
+        'percentage'
+    )
+    ->get();
+
+    // Step 2: Filter out items with `qty_actual` and `qty_plan` both equal to 0
+    $detailedData = $comparisonData->filter(function ($item) {
+    return $item->qty_actual > 0 || $item->qty_plan > 0;
+    });
+
+    // Calculate the sums
+    $sumactual = $detailedData->sum('qty_actual');
+    $sumplaned = $detailedData->sum('qty_plan');
+
+    // Return the data to the view
+    return view('inventory.detailactivity', compact('detailedData', 'fullDate', 'sumactual', 'sumplaned'));
+    }
+
+
 
 
 
