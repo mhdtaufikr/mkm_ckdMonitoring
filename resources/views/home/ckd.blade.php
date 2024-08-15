@@ -524,20 +524,32 @@
                         ->where('inventory_id', $comparisons[0]->inventory_id)
                         ->get();
 
-                    // Calculate the total percentage and count entries up to today
+                    // Initialize variables for calculation
                     $totalPercentage = 0;
                     $count = 0;
                     $today = now()->format('Y-m-d');
+                    $startOfMonth = now()->startOfMonth()->format('Y-m-d');
+                    $includedEntries = [];
+                    $uniqueDates = [];
 
                     foreach ($comparisons as $comparison) {
-                        if ($comparison->receiving_date <= $today) {
-                            $totalPercentage += $comparison->percentage;
-                            $count++;
+                        if ($comparison->receiving_date >= $startOfMonth && $comparison->receiving_date <= $today) {
+                            if (!in_array($comparison->receiving_date, $uniqueDates)) {
+                                // Ensure the percentage is 100% if actual quantity exceeds or equals planned quantity
+                                if (!isset($comparison->planned_qty) || $comparison->received_qty >= $comparison->planned_qty) {
+                                    $comparison->percentage = 100;
+                                }
+                                $totalPercentage += $comparison->percentage;
+                                $count++;
+                                $includedEntries[] = $comparison;
+                                $uniqueDates[] = $comparison->receiving_date;
+                            }
                         }
                     }
 
                     $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                    @endphp
+                @endphp
+
 
                     <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                         <div class="row">
@@ -558,7 +570,7 @@
                             <div class="col-md-4">
                                 <table class="indicator-table mb-4">
                                     <tr>
-                                        <th>Average Inventory</th>
+                                        <th>Average Supply</th>
                                         <th>Signal</th>
                                     </tr>
                                     <tr>
@@ -634,7 +646,7 @@
                     labels: Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // Days of the month
                     datasets: [
                         {
-                            label: 'Planned Stock',
+                            label: 'Planned Supply',
                             data: plannedData,
                             backgroundColor: 'rgba(54, 162, 235, 0.8)',
                             borderColor: 'rgba(54, 162, 235, 1)',
@@ -643,7 +655,7 @@
                             yAxisID: 'y',
                         },
                         {
-                            label: 'Actual Stock',
+                            label: 'Actual Supply',
                             data: actualData,
                             backgroundColor: 'rgba(255, 159, 64, 0.8)',
                             borderColor: 'rgba(255, 159, 64, 1)',
@@ -976,7 +988,7 @@
     });
 </script>
 
-{{-- <script>
+<script>
     function refreshPage() {
         setTimeout(function() {
             location.reload();
@@ -985,6 +997,6 @@
 
     // Call the function when the page loads
     refreshPage();
-</script> --}}
+</script>
 
 @endsection
