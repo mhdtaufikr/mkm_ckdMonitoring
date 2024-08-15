@@ -83,7 +83,7 @@
                 <div class="col-md-5 mb-2">
                     <div  class="card card-custom">
                         <div class="card-header">
-                            <h4>Variant Code Summary</h4>
+                            <h4>Stock Per Variant</h4>
                         </div>
                         <div class="card-body">
                             <div  id="variant-code-pie-chart" style="margin-top: 0px;
@@ -354,7 +354,7 @@
                   <!-- Item Code Quantity Carousel -->
                   <div style="height: 375px" class="card card-custom">
                     <div class="card-header">
-                        <h4>Item Code Quantity</h4>
+                        <h4>Stock of Hand</h4>
                     </div>
                     <div class="card-body">
                         <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -395,7 +395,7 @@
 
                         <div class="card card-custom">
                             <div class="card-header">
-                                <h4>Variant Code Summary CNI</h4>
+                                <h4>Stock per Part</h4>
                             </div>
                             <div class="card-body">
                                 <div id="variant-code-pie-chart-cni" style="margin-top: 0px; height: 250px; width: 100%;"></div>
@@ -492,7 +492,7 @@
 <div class="col-md-7 mb-2">
     <div class="card card-custom">
         <div class="card-header">
-            <h4>Inventory Monitoring</h4>
+            <h4>OTDC Supply</h4>
         </div>
         <div class="card-body">
             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">

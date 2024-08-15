@@ -101,21 +101,40 @@ class HomeController extends Controller
                 $currentYear = now()->year;
                 $today = now()->format('Y-m-d');
 
+                // Get planned data
                 $plannedData = DB::table('planned_inventory_view')
+                ->select(
+                    '*',
+                    DB::raw('DATE(planned_receiving_date) AS planned_receiving_date'),
+                    DB::raw('SUM(planned_qty) AS planned_qty')
+                )
+                ->where('location_id', '6582ef8060c9390d890568d4')
                 ->whereMonth('planned_receiving_date', $currentMonth)
                 ->whereYear('planned_receiving_date', $currentYear)
-                ->where('location_id', '6582ef8060c9390d890568d4')
+                ->groupBy('item_name', DB::raw('DATE(planned_receiving_date)'))
+                ->orderBy(DB::raw('DATE(planned_receiving_date)'), 'asc')
+                ->orderBy('item_name', 'asc')
                 ->get()
-                ->groupBy('item_name'); // Group by item_name instead of item_code
+                ->groupBy('item_name');
 
                 // Get actual data
                 $actualData = DB::table('actual_inventory_view')
-                ->whereMonth('receiving_date', $currentMonth)
-                ->whereYear('receiving_date', $currentYear)
-                ->whereDate('receiving_date', '<=', $today)
+                ->select(
+                    '*',
+                    DB::raw('DATE(receiving_date) AS receiving_date'),
+                    DB::raw('SUM(received_qty) AS received_qty')
+                )
                 ->where('location_id', '6582ef8060c9390d890568d4')
+                ->whereMonth('receiving_date', 8)
+                ->whereYear('receiving_date', 2024)
+                ->groupBy('item_name', DB::raw('DATE(receiving_date)'))
+                ->orderBy(DB::raw('DATE(receiving_date)'), 'asc')
+                ->orderBy('item_name', 'asc')
+
                 ->get()
-                ->groupBy('item_name'); // Group by item_name instead of item_code
+                ->groupBy('item_name');
+
+
 
                 // Get comparisons for the current month until today
                 $comparisons = InventoryComparison::whereMonth('planned_receiving_date', $currentMonth)
@@ -224,6 +243,7 @@ class HomeController extends Controller
             ->where('location_id', '6582ef8060c9390d890568d4')
             ->groupBy('name')
             ->get();
+
 
         return view('home.ckd', compact('comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
     }
