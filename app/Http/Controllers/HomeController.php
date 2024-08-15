@@ -710,7 +710,6 @@ class HomeController extends Controller
     ->groupBy('i.code', 'i.name')
     ->havingRaw('SUM(ii.qty) > 0 OR SUM(pi.planned_qty) > 0')
     ->get();
-    dd($detailedData);
 
 
 
