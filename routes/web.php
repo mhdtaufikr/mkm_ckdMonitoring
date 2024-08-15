@@ -40,6 +40,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home/l305', [HomeController::class, 'l305'])->name('checksheet.l305');
     Route::get('/home/cvcL404', [HomeController::class, 'cvcL404'])->name('checksheet.cvcL404');
     Route::get('/home/test', [HomeController::class, 'test']);
+    Route::get('/details-page/{date}', [HomeController::class, 'detailCKD']);
+
 
     //Dropdown Controller
     Route::get('/dropdown', [DropdownController::class, 'index'])->middleware(['checkRole:IT']);

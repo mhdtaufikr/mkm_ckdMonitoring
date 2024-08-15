@@ -144,21 +144,25 @@ class HomeController extends Controller
                 ->get();
 
 
-                    $vendorData = DB::table('vendor_comparison')
-                    ->select(
-                        'vendor_name',
-                        'date',
-                        DB::raw('SUM(total_actual_qty) as total_actual_qty'),
-                        DB::raw('SUM(total_planned_qty) as total_planned_qty'),
-                        DB::raw('AVG(percentage) as percentage') // Jika perlu rata-rata persentase
-                    )
-                    ->whereMonth('date', $currentMonth)
-                    ->whereYear('date', $currentYear)
-                    ->whereIn('vendor_name', ['SENOPATI'])
-                    ->where('location_id', $locationId)
-                    ->groupBy('vendor_name', 'date')
-                    ->get()
-                    ->groupBy('vendor_name');
+                $vendorData = DB::table(
+                    DB::table('vendor_comparison')
+                        ->select(
+                            'vendor_name',
+                            'date',
+                            'total_actual_qty',
+                            'total_planned_qty',
+                            'percentage'
+                        )
+                        ->distinct()
+                        ->whereMonth('date', $currentMonth)
+                        ->whereYear('date', $currentYear)
+                        ->whereIn('vendor_name', ['SENOPATI'])
+                        ->where('location_id', $locationId)
+                )
+                ->get()
+                ->groupBy('vendor_name');
+
+
 
                 // Fetch vendor monthly summary
                 $vendorMonthlySummary = DB::table('vendor_monthly_summary')
@@ -676,6 +680,47 @@ class HomeController extends Controller
 
         return view('home.test', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
+
+    public function detailCKD($date)
+{
+    // Construct the full date
+    $currentYear = now()->year;
+    $currentMonth = now()->month;
+    $fullDate = $currentYear . '-' . str_pad($currentMonth, 2, '0', STR_PAD_LEFT) . '-' . $date;
+
+    $detailedData = DB::table('inventories as i')
+    ->leftJoin('inventory_items as ii', function($join) use ($fullDate) {
+        $join->on('ii.inventory_id', '=', 'i._id')
+             ->whereDate('ii.receiving_date', '=', $fullDate)
+             ->where('ii.vendor_name', '=', 'SENOPATI');
+    })
+    ->leftJoin('planned_inventory_items as pi', function($join) use ($fullDate) {
+        $join->on('pi.inventory_id', '=', 'i._id')
+             ->whereDate('pi.planned_receiving_date', '=', $fullDate)
+             ->where('pi.vendor_name', '=', 'SENOPATI');
+    })
+    ->select(
+        'i.code as item_code',
+        'i.name as item_name',
+        DB::raw('SUM(ii.qty) as qty_actual'),
+        DB::raw('SUM(pi.planned_qty) as qty_plan')
+    )
+    ->where('i.location_id', '65a72c7fad782dc26a0626f6')
+    ->where('i.name', '!=', 'Auto-generated') // Exclude items with name "Auto-generated"
+    ->groupBy('i.code', 'i.name')
+    ->havingRaw('SUM(ii.qty) > 0 OR SUM(pi.planned_qty) > 0')
+    ->get();
+    dd($detailedData);
+
+
+
+
+    // Return the data to a view
+    return view('inventory.detailactivity', compact('detailedData', 'fullDate'));
+}
+
+
+
 
 
 }

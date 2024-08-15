@@ -306,6 +306,18 @@
                                 });
                             });
 
+                            // Add click event to actualSeries columns
+                            actualSeries.columns.template.events.on("click", function(ev) {
+                                var date = ev.target.dataItem.dataContext.date;
+                                window.open('/details-page/' + date, '_blank');
+                            });
+
+                            // Add click event to planSeries columns
+                            planSeries.columns.template.events.on("click", function(ev) {
+                                var date = ev.target.dataItem.dataContext.date;
+                                window.open('/details-page/' + date, '_blank');
+                            });
+
                             // Function to create trend line
                             function createTrendLine(data, color) {
                                 var series = chart.series.push(
@@ -346,6 +358,7 @@
                             percentageSeries.appear();
                         });
                     </script>
+
 
 
 
