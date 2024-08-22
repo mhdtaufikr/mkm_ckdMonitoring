@@ -31,7 +31,7 @@ class FetchInventoryData extends Command
                 'x-api-key' => $apiKey
             ])->get('https://api.mile.app/public/v1/warehouse/inventory', [
                 'location_id' => $locationId,
-                'stock_status' => 'normal',
+                'stock_status' => '',
                 'limit' => -1,
                 'page' => 1,
                 's' => '',
