@@ -221,12 +221,13 @@ class HomeController extends Controller
                         return $groupIndex;
                     });
 
-                    // Fetch variant code quantities from the inventories table, joined with master_products
+                   // Fetch variant code quantities from the inventories table, joined with master_products
                     $variantCodeQuantities = DB::table('inventories')
                     ->join(DB::raw('(SELECT DISTINCT variantCode, model FROM master_products) as mp'), 'inventories.variantCode', '=', 'mp.variantCode')
                     ->select('inventories.variantCode', 'mp.model', DB::raw('SUM(inventories.qty) as total_qty'))
                     ->where('inventories.location_id', $locationId)
                     ->whereNotNull('inventories.variantCode') // Exclude null variantCode
+                    ->where('inventories.variantCode', '<>', '') // Exclude empty string variantCode
                     ->whereNotNull('mp.model') // Exclude null model
                     ->groupBy('inventories.variantCode', 'mp.model')
                     ->orderBy('inventories.variantCode')
@@ -239,6 +240,7 @@ class HomeController extends Controller
                         }
                         return $groupIndex;
                     });
+
 
 
                 // Prepare data for the chart
