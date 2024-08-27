@@ -367,7 +367,7 @@
                   <!-- Item Code Quantity Carousel -->
                   <div style="height: 375px" class="card card-custom">
                     <div class="card-header">
-                        <h4>Stock of Hand</h4>
+                        <h4>Stock Accumulation</h4>
                     </div>
                     <div class="card-body">
                         <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
