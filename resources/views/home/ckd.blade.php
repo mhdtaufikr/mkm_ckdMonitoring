@@ -367,7 +367,7 @@
                   <!-- Item Code Quantity Carousel -->
                   <div style="height: 375px" class="card card-custom">
                     <div class="card-header">
-                        <h4>Stock Accumulation</h4>
+                        <h4>Stock of Hand</h4>
                     </div>
                     <div class="card-body">
                         <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -408,7 +408,7 @@
 
                         <div class="card card-custom">
                             <div class="card-header">
-                                <h4>Stock per Part</h4>
+                                <h4>Stock Accumulation</h4>
                             </div>
                             <div class="card-body">
                                 <div id="variant-code-pie-chart-cni" style="margin-top: 0px; height: 250px; width: 100%;"></div>
