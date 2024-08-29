@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RulesController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DeliveryNoteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,4 +76,12 @@ Route::middleware(['auth'])->group(function () {
     //Master Product
     Route::get('/master/product', [ProductController::class, 'index']);
 
+
+    //Delivery Note
+    Route::get('/delivery/ckd/stamping', [DeliveryNoteController::class, 'ckdStamping'])->name('delivery-note.index');
+    Route::post('/delivery-note/store', [DeliveryNoteController::class, 'ckdStampingStore']);
+    Route::get('/delivery-note/create/{id}', [DeliveryNoteController::class, 'ckdStampingCreate'])->name('delivery-note.create');
+    Route::get('/delivery-note/create/{id}', [DeliveryNoteController::class, 'ckdStampingCreate'])->name('delivery-note.create');
+    Route::post('/delivery-note-details/store', [DeliveryNoteController::class, 'ckdStampingSubmit'])->name('delivery-note-details.store');
+    Route::get('/delivery-note/pdf/{id}', [DeliveryNoteController::class, 'ckdStampingPDF'])->name('delivery-note.pdf');
 });

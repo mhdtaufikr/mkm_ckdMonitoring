@@ -33,6 +33,22 @@
                     </nav>
                 </div>
 
+                <div class="sidenav-menu-heading">Delivery Note</div>
+                 <!-- Sidenav Accordion (Master)-->
+                 <a class="nav-link collapsed" href="javascript:void(0);" data-bs-toggle="collapse" data-bs-target="#collapseDeliveryNote" aria-expanded="false" aria-controls="collapseDeliveryNote">
+                     <div class="nav-link-icon"><i class="far fa-sticky-note"></i></div>
+                     CKD Area
+                     <div class="sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                 </a>
+                 <div class="collapse" id="collapseDeliveryNote" data-bs-parent="#accordionSidenav">
+                    <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link" href="{{url('/delivery/ckd/engine')}}">CKD Engine</a>
+                     </nav>
+                     <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link" href="{{url('/delivery/ckd/stamping')}}">CKD Stamping</a>
+                     </nav>
+                 </div>
+
                 @if(\Auth::user()->role === 'Super Admin' || \Auth::user()->role === 'IT')
                  <!-- Sidenav Menu Heading (Master)-->
                  <div class="sidenav-menu-heading">Master</div>
