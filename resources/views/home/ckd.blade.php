@@ -101,71 +101,76 @@
                             <h4>OTDC</h4>
                         </div>
                         <div class="card-body">
-                            @foreach ($vendorData as $vendorName => $data)
-                                @php
-                                    $totalPercentage = 0;
-                                    $count = 0;
-                                    $today = now()->format('Y-m-d');
-                                    $startOfMonth = now()->startOfMonth()->format('Y-m-d');
-                                    $includedEntries = [];
-                                    $uniqueDates = [];
+                            @if($vendorData->isNotEmpty())
+                                @foreach ($vendorData as $vendorName => $data)
+                                    @php
+                                        $totalPercentage = 0;
+                                        $count = 0;
+                                        $today = now()->format('Y-m-d');
+                                        $startOfMonth = now()->startOfMonth()->format('Y-m-d');
+                                        $includedEntries = [];
+                                        $uniqueDates = [];
 
-                                    foreach ($data as $entry) {
-                                        if ($entry->date >= $startOfMonth && $entry->date <= $today) {
-                                            if (!in_array($entry->date, $uniqueDates)) {
-                                                if (!isset($entry->total_planned_qty) || $entry->total_actual_qty > $entry->total_planned_qty) {
-                                                    $entry->percentage = 100;
+                                        foreach ($data as $entry) {
+                                            if ($entry->date >= $startOfMonth && $entry->date <= $today) {
+                                                if (!in_array($entry->date, $uniqueDates)) {
+                                                    if (!isset($entry->total_planned_qty) || $entry->total_actual_qty > $entry->total_planned_qty) {
+                                                        $entry->percentage = 100;
+                                                    }
+                                                    $totalPercentage += $entry->percentage;
+                                                    $count++;
+                                                    $includedEntries[] = $entry;
+                                                    $uniqueDates[] = $entry->date;
                                                 }
-                                                $totalPercentage += $entry->percentage;
-                                                $count++;
-                                                $includedEntries[] = $entry;
-                                                $uniqueDates[] = $entry->date;
                                             }
                                         }
-                                    }
 
-                                    $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
-                                @endphp
-                            @endforeach
+                                        $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                                    @endphp
 
-                            <div class="row">
-                                <div class="col-md-8">
-                                    <table class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Signal Indicator</th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="signal green px-2">G</span> ≥ 95%
-                                                <span class="signal yellow">Y</span> ≥ 85%
-                                                <span class="signal red">R</span> < 85%
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-4">
-                                    <table class="indicator-table mb-4">
-                                        <tr>
-                                            <th>Average OTDC</th>
-                                            <th>Signal</th>
-                                        </tr>
-                                        <tr>
-                                            <td>{{ number_format($averagePercentage, 2) }}%</td>
-                                            <td>
-                                                <span id="signal-otdc" class="signal
-                                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
-                                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
-                            <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
-                            <div style="margin-top: -20px; width: 100%%; height: 100%%; margin-left: 0px;" class="chart-container">
-                                <div  class="chart-custom" id="chartdiv"></div>
-                            </div>
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <table class="indicator-table mb-4">
+                                                <tr>
+                                                    <th>Signal Indicator</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <span class="signal green px-2">G</span> ≥ 95%
+                                                        <span class="signal yellow">Y</span> ≥ 85%
+                                                        <span class="signal red">R</span> < 85%
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <table class="indicator-table mb-4">
+                                                <tr>
+                                                    <th>Average OTDC</th>
+                                                    <th>Signal</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                                    <td>
+                                                        <span id="signal-otdc" class="signal
+                                                            {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                                            {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
+                                    <div style="margin-top: -20px; width: 100%; height: 100%; margin-left: 0px;" class="chart-container">
+                                        <div class="chart-custom" id="chartdiv"></div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p>No data available for this period.</p>
+                            @endif
                         </div>
+
                     </div>
 
                     <script>
@@ -515,61 +520,61 @@
         @endforeach
     </div>
     <div class="carousel-inner">
-        @foreach ($plannedData as $itemName => $comparisons)
+        @if($plannedData->isNotEmpty())
+            @foreach ($plannedData as $itemName => $comparisons)
+                @php
+                    // Find the current item in the result data
+                    $currentItem = collect($resultData)->firstWhere('item_name', $itemName);
+                    $averagePercentage = $currentItem ? $currentItem['average_percentage'] : 0;
+                @endphp
 
-        @php
-            // Simulate the grouping and calculation based on $resultData
-            $resultData = collect([
-                ['item_name' => 'Bellow Assy', 'average_percentage' => 100],
-                ['item_name' => 'Exh Bracke Unit', 'average_percentage' => 99.908172635445],
-                ['item_name' => 'Flange', 'average_percentage' => 100],
-            ]);
-
-            $currentItem = $resultData->firstWhere('item_name', $itemName);
-            $averagePercentage = $currentItem ? $currentItem['average_percentage'] : 0;
-        @endphp
-
-        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-            <div class="row">
-                <div class="col-md-8">
-                    <table class="indicator-table mb-4">
-                        <tr>
-                            <th>Signal Indicator</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <span class="signal green px-2">G</span> ≥ 95%
-                                <span class="signal yellow">Y</span> ≥ 85%
-                                <span class="signal red">R</span> < 85%
-                            </td>
-                        </tr>
-                    </table>
+                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <table class="indicator-table mb-4">
+                                <tr>
+                                    <th>Signal Indicator</th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span class="signal green px-2">G</span> ≥ 95%
+                                        <span class="signal yellow">Y</span> ≥ 85%
+                                        <span class="signal red">R</span> < 85%
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-4">
+                            <table class="indicator-table mb-4">
+                                <tr>
+                                    <th>Average Supply</th>
+                                    <th>Signal</th>
+                                </tr>
+                                <tr>
+                                    <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                    <td>
+                                        <span id="signal-inventory" class="signal
+                                            {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                            {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <p style="margin-top: -20px" class="text-center">{{ $itemName }}</p>
+                    <div style="margin-top: -20px; height: 215px; width: 100%;" class="chart-container">
+                        <canvas id="chart-{{ str_replace(' ', '_', $itemName) }}" class="chart-custom"></canvas>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <table class="indicator-table mb-4">
-                        <tr>
-                            <th>Average Supply</th>
-                            <th>Signal</th>
-                        </tr>
-                        <tr>
-                            <td>{{ number_format($averagePercentage, 2) }}%</td>
-                            <td>
-                                <span id="signal-inventory" class="signal
-                                    {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
-                                    {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
-                                </span>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+            @endforeach
+        @else
+            <div class="carousel-item active">
+                <p class="text-center">No data available for this period.</p>
             </div>
-            <p style="margin-top: -20px" class="text-center">{{ $itemName }}</p>
-            <div style="margin-top: -20px; height: 215px; width: 100%;"class="chart-container">
-                <canvas id="chart-{{ str_replace(' ', '_', $itemName) }}" class="chart-custom"></canvas>
-            </div>
-        </div>
-        @endforeach
+        @endif
     </div>
+
     <button hidden class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
         <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span hidden class="visually-hidden">Previous</span>
