@@ -71,30 +71,48 @@ public function indexCKD(Request $request)
     // Execute the query
     $items = $itemsQuery->get();
 
-    // Fetch distinct inventory codes
+    // Fetch all planned items for the given locations filtered by date
+    $plannedItems = DB::table('planned_inventory_items')
+        ->join('inventories', 'planned_inventory_items.inventory_id', '=', 'inventories._id')
+        ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
+        ->whereIn('inventories.location_id', $locationIds)
+        ->when($request->has('planned_date') && $request->planned_date, function ($query) use ($request) {
+            return $query->whereDate('planned_receiving_date', $request->planned_date);
+        })
+        ->select(
+            'planned_inventory_items.*',
+            'inventories.code as product_code',
+            'inventories.name as product_name',
+            'mst_locations.name as location_name'
+        )
+        ->get();
+
+    // Other data fetching (codes, vendors, etc.)
     $inventoryCodes = DB::table('inventories')
         ->whereIn('location_id', $locationIds)
         ->select('code')
         ->distinct()
         ->get();
 
-    // Fetch vendor names for each inventory item
     $vendorNames = DB::table('inventory_items')
         ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
         ->groupBy('inventory_id')
         ->get()
         ->pluck('vendor_names', 'inventory_id');
 
-    // Fetch all planned items for the given locations
-    $plannedItems = DB::table('planned_inventory_items')
-        ->whereIn('inventory_id', function ($query) use ($locationIds) {
-            $query->select('_id')
-                  ->from('inventories')
-                  ->whereIn('location_id', $locationIds);
-        })
-        ->get();
-
     return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
+}
+
+
+public function updatePlanned(Request $request)
+{
+    foreach ($request->planned_qty as $inventoryId => $qty) {
+        DB::table('planned_inventory_items')
+            ->where('inventory_id', $inventoryId)
+            ->update(['planned_qty' => $qty]);
+    }
+
+    return redirect()->route('inventory.ckd')->with('status', 'Planned quantities updated successfully!');
 }
 
 

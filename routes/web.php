@@ -67,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::get('/inventory/ckd', [InventoryController::class, 'indexCKD'])->name('inventory.ckd');
+    Route::post('/inventory/planned/update/bulk', [InventoryController::class, 'updatePlanned'])->name('update.bulk');
     Route::get('/inventory/raw-material', [InventoryController::class, 'index'])->name('inventory.index');;
     Route::get('/inventory/{id}/details', [InventoryController::class, 'show'])->name('inventory.details');
     Route::post('/inventory/planned/upload', [InventoryController::class, 'uploadPlanned'])->name('inventory.planned.upload');
