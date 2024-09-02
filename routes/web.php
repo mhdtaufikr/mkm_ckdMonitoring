@@ -82,7 +82,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/delivery/ckd/stamping', [DeliveryNoteController::class, 'ckdStamping'])->name('delivery-note.index');
     Route::post('/delivery-note/store', [DeliveryNoteController::class, 'ckdStampingStore']);
     Route::get('/delivery-note/create/{id}', [DeliveryNoteController::class, 'ckdStampingCreate'])->name('delivery-note.create');
-    Route::get('/delivery-note/create/{id}', [DeliveryNoteController::class, 'ckdStampingCreate'])->name('delivery-note.create');
     Route::post('/delivery-note-details/store', [DeliveryNoteController::class, 'ckdStampingSubmit'])->name('delivery-note-details.store');
     Route::get('/delivery-note/pdf/{id}', [DeliveryNoteController::class, 'ckdStampingPDF'])->name('delivery-note.pdf');
 });

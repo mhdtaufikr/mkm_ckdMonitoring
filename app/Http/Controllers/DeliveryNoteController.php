@@ -99,20 +99,27 @@ class DeliveryNoteController extends Controller
     }
 
     public function ckdStampingSubmit(Request $request)
-    {
-        // Validate the request data
-        $request->validate([
-            'dn_id' => 'required|exists:delivery_notes,id',
-            'delivery_note_details.*.part_no' => 'required|string|max:50',
-            'delivery_note_details.*.part_name' => 'required|string|max:255',
-            'delivery_note_details.*.qty' => 'required|integer|min:1',
-            'delivery_note_details.*.remarks' => 'nullable|string|max:255',
-        ]);
+{
 
-        // Retrieve the Delivery Note ID
-        $dn_id = $request->input('dn_id');
 
-        // Loop through each delivery note detail and save it to the database
+    // Validate the request data
+    $request->validate([
+        'dn_id' => 'required|exists:delivery_notes,id',
+        'delivery_note_details.*.part_no' => 'required|string|max:50',
+        'delivery_note_details.*.part_name' => 'required|string|max:255',
+        'delivery_note_details.*.qty' => 'required|integer|min:1',
+        'delivery_note_details.*.remarks' => 'nullable|string|max:255',
+        'manual_delivery_note_details.*.part_no' => 'required|string|max:50',
+        'manual_delivery_note_details.*.part_name' => 'required|string|max:255',
+        'manual_delivery_note_details.*.qty' => 'required|integer|min:1',
+        'manual_delivery_note_details.*.remarks' => 'nullable|string|max:255',
+    ]);
+
+    // Retrieve the Delivery Note ID
+    $dn_id = $request->input('dn_id');
+
+    // Loop through each delivery note detail and save it to the database
+    if ($request->has('delivery_note_details')) {
         foreach ($request->input('delivery_note_details') as $detail) {
             DeliveryNoteDetail::create([
                 'dn_id' => $dn_id,
@@ -122,10 +129,25 @@ class DeliveryNoteController extends Controller
                 'remarks' => $detail['remarks'],
             ]);
         }
-
-        // Redirect back to the delivery note index with a success message
-        return redirect()->route('delivery-note.index')->with('status', 'Delivery note details added successfully!');
     }
+
+    // Loop through each manual delivery note detail and save it to the database
+    if ($request->has('manual_delivery_note_details')) {
+        foreach ($request->input('manual_delivery_note_details') as $manualDetail) {
+            DeliveryNoteDetail::create([
+                'dn_id' => $dn_id,
+                'part_no' => $manualDetail['part_no'],
+                'part_name' => $manualDetail['part_name'],
+                'qty' => $manualDetail['qty'],
+                'remarks' => $manualDetail['remarks'],
+            ]);
+        }
+    }
+
+    // Redirect back to the delivery note index with a success message
+    return redirect()->route('delivery-note.index')->with('status', 'Delivery note details added successfully!');
+}
+
 
 
 

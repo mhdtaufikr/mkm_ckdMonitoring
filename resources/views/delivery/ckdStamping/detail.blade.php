@@ -50,50 +50,87 @@
 
                                     <hr>
 
-                                    <!-- Dynamic Table for Delivery Note Details -->
-                                    <form action="{{ route('delivery-note-details.store') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="dn_id" value="{{ $getHeader->id }}">
+                                   <!-- Dynamic Table for Delivery Note Details -->
+<form action="{{ route('delivery-note-details.store') }}" method="POST">
+    @csrf
+    <input type="hidden" name="dn_id" value="{{ $getHeader->id }}">
 
-                                        <table class="table table-bordered">
-                                            <thead>
-                                                <tr>
-                                                    <th>#No</th>
-                                                    <th>Part No</th>
-                                                    <th>Part Name</th>
-                                                    <th>Quantity</th>
-                                                    <th>Remarks</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="dynamicTable">
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td>
-                                                        <select name="delivery_note_details[0][part_no]" class="form-control chosen-select part_no" required>
-                                                            <option value="">Select Part No</option>
-                                                            @foreach($accumulatedItems as $item)
-                                                                <option value="{{ $item['product']['code'] }}"
-                                                                    data-name="{{ $item['product']['name'] }}"
-                                                                    data-qty="{{ $item['qty'] }}"
-                                                                    data-remarks="{{ $item['product']['default_unit'] }}">
-                                                                    {{ $item['product']['code'] }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                    </td>
-                                                    <td><input type="text" name="delivery_note_details[0][part_name]" class="form-control part_name" readonly /></td>
-                                                    <td><input type="number" name="delivery_note_details[0][qty]" class="form-control qty" readonly /></td>
-                                                    <td><input type="text" name="delivery_note_details[0][remarks]" class="form-control remarks" readonly /></td>
-                                                    <td><button type="button" class="btn btn-danger btn-sm remove-tr">Remove</button></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                        <button type="button" name="add" id="add" class="btn btn-primary">Add</button>
-                                        <button type="submit" class="btn btn-success">Save</button>
-                                    </form>
+    <!-- Existing Table -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#No</th>
+                <th>Part No</th>
+                <th>Part Name</th>
+                <th>Quantity</th>
+                <th>Remarks</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="dynamicTable">
+            <tr>
+                <td>1</td>
+                <td>
+                    <select name="delivery_note_details[0][part_no]" class="form-control chosen-select part_no" required>
+                        <option value="">Select Part No</option>
+                        @foreach($accumulatedItems as $item)
+                            <option value="{{ $item['product']['code'] }}"
+                                data-name="{{ $item['product']['name'] }}"
+                                data-qty="{{ $item['qty'] }}"
+                                data-remarks="{{ $item['product']['default_unit'] }}">
+                                {{ $item['product']['code'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </td>
+                <td><input type="text" name="delivery_note_details[0][part_name]" class="form-control part_name" readonly /></td>
+                <td><input type="number" name="delivery_note_details[0][qty]" class="form-control qty" readonly /></td>
+                <td><input type="text" name="delivery_note_details[0][remarks]" class="form-control remarks" readonly /></td>
+                <td>
+                    <button type="button" name="add" id="add" class="btn btn-primary btn-sm">Add</button>
+                    <button type="button" class="btn btn-danger btn-sm remove-tr">Remove</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-                                    <a href="{{ route('delivery-note.index') }}" class="btn btn-secondary btn-sm mt-3">Back to List</a>
+    <!-- Divider -->
+    <hr>
+
+    <!-- Manual Entry Table -->
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#No</th>
+                <th>Part No</th>
+                <th>Part Name</th>
+                <th>Quantity</th>
+                <th>Remarks</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="manualEntryTable">
+            <tr>
+                <td>1</td>
+                <td><input type="text" name="manual_delivery_note_details[0][part_no]" class="form-control" /></td>
+                <td><input type="text" name="manual_delivery_note_details[0][part_name]" class="form-control" /></td>
+                <td><input type="number" name="manual_delivery_note_details[0][qty]" class="form-control" /></td>
+                <td><input type="text" name="manual_delivery_note_details[0][remarks]" class="form-control" /></td>
+                <td>
+                    <button type="button" id="addManual" class="btn btn-primary btn-sm">Add</button>
+                    <button type="button" class="btn btn-danger btn-sm remove-manual-tr">Remove</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+
+
+    <!-- Submit Button -->
+    <a href="{{ route('delivery-note.index') }}" class="btn btn-secondary btn-sm ">Back to List</a>
+    <button type="submit" class="btn btn-success btn-sm">Save</button>
+</form>
+
+
 
                                 </div>
                             </div>
@@ -104,6 +141,29 @@
         </div>
     </div>
 </main>
+
+<!-- Add JavaScript for Manual Entry -->
+<script type="text/javascript">
+    $(document).ready(function() {
+        var j = 0;
+
+        // Add row to Manual Entry Table
+        $("#addManual").click(function() {
+            ++j;
+            $("#manualEntryTable").append('<tr><td>'+(j+1)+'</td>'+
+                '<td><input type="text" name="manual_delivery_note_details['+j+'][part_no]" class="form-control" /></td>'+
+                '<td><input type="text" name="manual_delivery_note_details['+j+'][part_name]" class="form-control" /></td>'+
+                '<td><input type="number" name="manual_delivery_note_details['+j+'][qty]" class="form-control" /></td>'+
+                '<td><input type="text" name="manual_delivery_note_details['+j+'][remarks]" class="form-control" /></td>'+
+                '<td><button type="button" class="btn btn-danger btn-sm remove-manual-tr">Remove</button></td></tr>');
+        });
+
+        // Remove row from Manual Entry Table
+        $(document).on('click', '.remove-manual-tr', function() {
+            $(this).parents('tr').remove();
+        });
+    });
+</script>
 
 <script type="text/javascript">
     $(document).ready(function() {
