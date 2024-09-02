@@ -54,7 +54,7 @@
 <form action="{{ route('delivery-note-details.store') }}" method="POST">
     @csrf
     <input type="hidden" name="dn_id" value="{{ $getHeader->id }}">
-
+    <h3><strong>CKD Part</strong></h3>
     <!-- Existing Table -->
     <table class="table table-bordered">
         <thead>
@@ -96,12 +96,12 @@
 
     <!-- Divider -->
     <hr>
-
+<h3><strong>Additional Part</strong></h3>
     <!-- Manual Entry Table -->
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>#No</th>
+                <th>No</th>
                 <th>Part No</th>
                 <th>Part Name</th>
                 <th>Quantity</th>
