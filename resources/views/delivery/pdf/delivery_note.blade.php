@@ -67,7 +67,7 @@ $qrCode = QrCode::size(100)->margin(6)->generate("$deliveryNote->delivery_note_n
             <td><strong>Customer Number:</strong> {{ $deliveryNote->customer_number }}</td>
         </tr>
         <tr>
-            <td><strong>Driver License:</strong> {{ $deliveryNote->driver_license }}</td>
+            <td><strong>Driver Name:</strong> {{ $deliveryNote->driver_license }}</td>
             <td><strong>Destination:</strong> {{ $deliveryNote->destination }}</td>
         </tr>
         <tr>

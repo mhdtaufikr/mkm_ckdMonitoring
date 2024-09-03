@@ -57,99 +57,110 @@ class DeliveryNoteController extends Controller
 
 
     public function ckdStampingCreate($id)
-    {
-        $id = decrypt($id);
-        $getHeader = DeliveryNote::where('id', $id)->first();
+{
+    $id = decrypt($id);
+    $getHeader = DeliveryNote::where('id', $id)->first();
 
-        // Fetch data from the API
-        $response = Http::withHeaders([
-            'x-api-key' => '315f9f6eb55fd6db9f87c0c0862007e0615ea467'
-        ])->get('https://api.mile.app/public/v1/warehouse/inventory-item', [
-            'location_id' => '6582ef8060c9390d890568d4',
-            'limit' => -1,
-            'page' => 1,
-            'serial_number' => '',
-            'rack' => '',
-            'rack_type' => '',
-            'start_date' => '',
-            'end_date' => ''
-        ]);
+    // Fetch data from the API
+    $response = Http::withHeaders([
+        'x-api-key' => '315f9f6eb55fd6db9f87c0c0862007e0615ea467'
+    ])->get('https://api.mile.app/public/v1/warehouse/inventory-item', [
+        'location_id' => '6582ef8060c9390d890568d4',
+        'limit' => -1,
+        'page' => 1,
+        'serial_number' => '',
+        'rack' => '',
+        'rack_type' => '',
+        'start_date' => '',
+        'end_date' => ''
+    ]);
 
-        // Check API response and filter data by date
-        if ($response->successful()) {
-            $inventoryItems = collect($response->json()['data']);
+    // Check API response and filter data by date
+    if ($response->successful()) {
+        $inventoryItems = collect($response->json()['data']);
 
-            // Filter inventory items to match the date in the delivery_notes table
-            $filteredInventoryItems = $inventoryItems->filter(function ($item) use ($getHeader) {
-                return \Carbon\Carbon::parse($item['receive_date'])->toDateString() === $getHeader->date;
-            });
+        // Filter inventory items to match the date in the delivery_notes table
+        $filteredInventoryItems = $inventoryItems->filter(function ($item) use ($getHeader) {
+            return \Carbon\Carbon::parse($item['receive_date'])->toDateString() === $getHeader->date;
+        });
 
-            // Accumulate quantities for items with the same product code
-            $accumulatedItems = $filteredInventoryItems->groupBy('product.code')->map(function ($items, $code) {
-                $firstItem = $items->first();
-                $totalQty = $items->sum('qty'); // Sum quantities for the same product code
-                $firstItem['qty'] = $totalQty;  // Update the quantity to the accumulated value
-                return $firstItem;
-            })->values(); // Reset keys after accumulation
-        } else {
-            $accumulatedItems = collect(); // Empty collection if API fails
-        }
+        // Accumulate quantities for items with the same product code
+        $accumulatedItems = $filteredInventoryItems->groupBy('product.code')->map(function ($items, $code) {
+            $firstItem = $items->first();
+            $totalQty = $items->sum('qty'); // Sum quantities for the same product code
+            $firstItem['qty'] = $totalQty;  // Update the quantity to the accumulated value
 
-        return view('delivery.ckdStamping.detail', compact('getHeader', 'accumulatedItems'));
+            // Extract Lot No. from refNumber, e.g., "ABK-303" from "3821-KTB-PDM-VIII-2024-ABK-303-"
+            $refNumberParts = explode('-', $firstItem['refNumber']);
+            $lotNo = $refNumberParts[count($refNumberParts) - 3] . '-' . $refNumberParts[count($refNumberParts) - 2]; // Combine the last two parts to get "ABK-303"
+            $firstItem['lot_no'] = $lotNo; // Add 'lot_no' to the item
+
+            return $firstItem;
+        })->values(); // Reset keys after accumulation
+    } else {
+        $accumulatedItems = collect(); // Empty collection if API fails
     }
 
-    public function ckdStampingSubmit(Request $request)
-    {
-        // Validate the request data
-        $request->validate([
-            'dn_id' => 'required|exists:delivery_notes,id',
-            'delivery_note_details.*.part_no' => 'required|string|max:50',
-            'delivery_note_details.*.part_name' => 'required|string|max:255',
-            'delivery_note_details.*.qty' => 'required|integer|min:1',
-            'delivery_note_details.*.remarks' => 'nullable|string|max:255',
-            'manual_delivery_note_details.*.part_no' => 'nullable|string|max:50',
-            'manual_delivery_note_details.*.part_name' => 'nullable|string|max:255',
-            'manual_delivery_note_details.*.qty' => 'nullable|integer|min:1',
-            'manual_delivery_note_details.*.remarks' => 'nullable|string|max:255',
-        ]);
+    return view('delivery.ckdStamping.detail', compact('getHeader', 'accumulatedItems'));
+}
 
-        // Retrieve the Delivery Note ID
-        $dn_id = $request->input('dn_id');
 
-        // Loop through each delivery note detail and save it to the database
-        if ($request->has('delivery_note_details')) {
-            foreach ($request->input('delivery_note_details') as $detail) {
-                DeliveryNoteDetail::create([
-                    'dn_id' => $dn_id,
-                    'part_no' => $detail['part_no'],
-                    'part_name' => $detail['part_name'],
-                    'qty' => $detail['qty'],
-                    'remarks' => $detail['remarks'],
-                ]);
-            }
+
+public function ckdStampingSubmit(Request $request)
+{
+    // Validate the request data
+    $request->validate([
+        'dn_id' => 'required|exists:delivery_notes,id',
+        'delivery_note_details.*.part_no' => 'required|string|max:50',
+        'delivery_note_details.*.part_name' => 'required|string|max:255',
+        'delivery_note_details.*.qty' => 'required|integer|min:1',
+        'delivery_note_details.*.remarks' => 'nullable|string|max:255',
+        'delivery_note_details.*.lot_no' => 'nullable|string|max:50',  // Added validation for lot_no
+        'manual_delivery_note_details.*.part_no' => 'nullable|string|max:50',
+        'manual_delivery_note_details.*.part_name' => 'nullable|string|max:255',
+        'manual_delivery_note_details.*.qty' => 'nullable|integer|min:1',
+        'manual_delivery_note_details.*.remarks' => 'nullable|string|max:255',
+    ]);
+
+    // Retrieve the Delivery Note ID
+    $dn_id = $request->input('dn_id');
+
+    // Loop through each delivery note detail and save it to the database
+    if ($request->has('delivery_note_details')) {
+        foreach ($request->input('delivery_note_details') as $detail) {
+            DeliveryNoteDetail::create([
+                'dn_id' => $dn_id,
+                'part_no' => $detail['part_no'],
+                'part_name' => $detail['part_name'],
+                'group_no' => $detail['lot_no'] ?? null, // Use lot_no as group_no if it exists
+                'qty' => $detail['qty'],
+                'remarks' => $detail['remarks'],
+            ]);
         }
-
-        // Loop through each manual delivery note detail and save it to the database
-        if ($request->has('manual_delivery_note_details')) {
-            foreach ($request->input('manual_delivery_note_details') as $manualDetail) {
-                // Check if all fields are null, if so, skip this entry
-                if (is_null($manualDetail['part_no']) && is_null($manualDetail['part_name']) && is_null($manualDetail['qty']) && is_null($manualDetail['remarks'])) {
-                    continue; // Skip this iteration
-                }
-
-                DeliveryNoteDetail::create([
-                    'dn_id' => $dn_id,
-                    'part_no' => $manualDetail['part_no'],
-                    'part_name' => $manualDetail['part_name'],
-                    'qty' => $manualDetail['qty'],
-                    'remarks' => $manualDetail['remarks'],
-                ]);
-            }
-        }
-
-        // Redirect back to the delivery note index with a success message
-        return redirect()->route('delivery-note.index')->with('status', 'Delivery note details added successfully!');
     }
+
+    // Loop through each manual delivery note detail and save it to the database
+    if ($request->has('manual_delivery_note_details')) {
+        foreach ($request->input('manual_delivery_note_details') as $manualDetail) {
+            // Check if all fields are null, if so, skip this entry
+            if (is_null($manualDetail['part_no']) && is_null($manualDetail['part_name']) && is_null($manualDetail['qty']) && is_null($manualDetail['remarks'])) {
+                continue; // Skip this iteration
+            }
+
+            DeliveryNoteDetail::create([
+                'dn_id' => $dn_id,
+                'part_no' => $manualDetail['part_no'],
+                'part_name' => $manualDetail['part_name'],
+                'qty' => $manualDetail['qty'],
+                'remarks' => $manualDetail['remarks'],
+            ]);
+        }
+    }
+
+    // Redirect back to the delivery note index with a success message
+    return redirect()->route('delivery-note.index')->with('status', 'Delivery note details added successfully!');
+}
+
 
 
 
@@ -163,7 +174,7 @@ class DeliveryNoteController extends Controller
         $deliveryNoteDetails = DeliveryNoteDetail::where('dn_id', $id)->get();
 
         // Load the view and pass data to it
-        $pdf = PDF::loadView('delivery.pdf.delivery_note', compact('deliveryNote', 'deliveryNoteDetails'));
+        $pdf = PDF::loadView('delivery.pdf.delivery_note_matrix', compact('deliveryNote', 'deliveryNoteDetails'));
 
         // Generate and return the PDF
         return $pdf->download('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');

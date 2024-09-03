@@ -82,8 +82,8 @@
                                                                             <input type="text" class="form-control" id="customer_number" name="customer_number" placeholder="Enter Customer Number" required>
                                                                         </div>
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Driver License</label>
-                                                                            <input type="text" class="form-control" id="driver_license" name="driver_license" placeholder="Enter Driver License" required>
+                                                                            <label for="">Driver Name</label>
+                                                                            <input type="text" class="form-control" id="driver_license" name="driver_license" placeholder="Enter Driver Name" required>
                                                                         </div>
                                                                         <div class="form-group mb-3">
                                                                             <label for="">Destination</label>
