@@ -15,7 +15,7 @@
 
     <style>
         body {
-            background-image: url("{{ asset('assets/img/IWS Integration.png') }}");
+            background-image: url("{{ asset('assets/img/Presentation1.jpg') }}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
