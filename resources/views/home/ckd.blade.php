@@ -162,7 +162,7 @@
                                         </div>
                                     </div>
                                     <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
-                                    <div style="margin-top: -20px; width: 100%; height: 100%; margin-left: 0px;" class="chart-container">
+                                    <div style="margin-top: -20px; width: 100%; height: 80%; margin-left: 0px;" class="chart-container">
                                         <div class="chart-custom" id="chartdiv"></div>
                                     </div>
                                 @endforeach
