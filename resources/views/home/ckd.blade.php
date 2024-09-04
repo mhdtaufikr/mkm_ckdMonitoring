@@ -69,13 +69,28 @@
         <div class="container-fluid px-4">
             <div class="page-header-content pt-4">
                 <div class="row align-items-center justify-content-between">
+                    <!-- Add date range picker input -->
                     <div class="col-auto">
-                        <h1 class="page-header-title"></h1>
+                        <form action="{{ url('/home/ckd') }}" method="POST" enctype="multipart/form-data">
+                            @csrf <!-- Include the CSRF token for security -->
+                            <div class="d-flex justify-content-end align-items-end">
+                                <div class="d-flex align-items-end">
+                                    <!-- Use type="month" for month selection only, and form-control-sm for small input -->
+                                    <input type="month" id="monthPicker" name="selected_month" class="form-control form-control-sm me-2" placeholder="Select month">
+                                    <button type="submit" class="btn btn-sm btn-primary">Submit</button> <!-- Submit button -->
+                                </div>
+                            </div>
+
+                        </form>
+
+
                     </div>
+
                 </div>
             </div>
         </div>
     </header>
+
     <section class="content">
         <div class="container-fluid px-4 mt-n10">
             <div class="row">

@@ -36,7 +36,7 @@ Route::post('request/access', [AuthController::class, 'requestAccess']);
 Route::middleware(['auth'])->group(function () {
     //Home Controller
     Route::get('/home', [HomeController::class, 'index'])->name('checksheet');
-    Route::get('/home/ckd', [HomeController::class, 'indexCkd'])->name('checksheet.CKD');
+    Route::match(['get', 'post'], '/home/ckd', [HomeController::class, 'indexCkd'])->name('checksheet.CKD');
     Route::get('/home/ckd/nouba', [HomeController::class, 'indexCkdNouba'])->name('checksheet.CKDNouba');
     Route::get('/home/l305', [HomeController::class, 'l305'])->name('checksheet.l305');
     Route::get('/home/cvcL404', [HomeController::class, 'cvcL404'])->name('checksheet.cvcL404');

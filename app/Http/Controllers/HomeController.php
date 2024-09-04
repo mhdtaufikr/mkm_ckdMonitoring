@@ -93,12 +93,20 @@ class HomeController extends Controller
         return view('home.index', compact('locationId','itemCodes','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual','itemNotArrived'));
     }
 
-    public function indexCkd()
+    public function indexCkd(Request $request)
     {
                 set_time_limit(300);
                 $locationId = '65a72c7fad782dc26a0626f6';
-                $currentMonth = now()->month;
-                $currentYear = now()->year;
+               // Check if a specific month has been selected, otherwise use the current month
+                if ($request->has('selected_month')) {
+                    // Extract the year and month from the input (format is "YYYY-MM")
+                    $selectedMonth = Carbon::createFromFormat('Y-m', $request->input('selected_month'));
+                    $currentMonth = $selectedMonth->month;
+                    $currentYear = $selectedMonth->year;
+                } else {
+                    $currentMonth = now()->month;
+                    $currentYear = now()->year;
+                }
                 $today = now()->format('Y-m-d');
 
                 // Get planned data
