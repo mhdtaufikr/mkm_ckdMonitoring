@@ -13,10 +13,18 @@
                         </h1>
                     </div>
                     <div class="col-auto">
+                        @if (request()->routeIs('inventory.cni'))
+                        <form action="{{ route('inventory.cni') }}" method="GET" class="d-flex">
+                            <input type="date" name="planned_date" class="form-control" value="{{ request('planned_date') }}">
+                            <button type="submit" class="btn btn-primary ms-2">Filter by Date</button>
+                        </form>
+                    @else
                         <form action="{{ route('inventory.ckd') }}" method="GET" class="d-flex">
                             <input type="date" name="planned_date" class="form-control" value="{{ request('planned_date') }}">
                             <button type="submit" class="btn btn-primary ms-2">Filter by Date</button>
                         </form>
+                    @endif
+
                     </div>
                     <div class="col-auto">
                         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadPlannedModal">

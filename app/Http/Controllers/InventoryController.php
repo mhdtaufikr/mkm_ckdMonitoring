@@ -196,6 +196,61 @@ public function updatePlanned(Request $request)
     return redirect()->back()->with('status', 'Planned receive updated successfully.');
 }
 
+public function indexCNI(Request $request){
+    $locationIds = ['6582ef8060c9390d890568d4'];
+
+    // Initial query for items
+    $itemsQuery = DB::table('inventories')
+        ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
+        ->whereIn('inventories.location_id', $locationIds)
+        ->select('inventories.*', 'mst_locations.name as location_name')
+        ->orderBy('inventories.created_at', 'desc');
+
+    // Filter by planned date if provided
+    if ($request->has('planned_date') && $request->planned_date) {
+        $itemsQuery->whereIn('inventories._id', function ($query) use ($request) {
+            $query->select('inventory_id')
+                  ->from('planned_inventory_items')
+                  ->whereDate('planned_receiving_date', $request->planned_date);
+        });
+    }
+
+    // Execute the query
+    $items = $itemsQuery->get();
+
+    // Fetch all planned items for the given locations filtered by date
+    $plannedItems = DB::table('planned_inventory_items')
+        ->join('inventories', 'planned_inventory_items.inventory_id', '=', 'inventories._id')
+        ->join('mst_locations', 'inventories.location_id', '=', 'mst_locations._id')
+        ->whereIn('inventories.location_id', $locationIds)
+        ->when($request->has('planned_date') && $request->planned_date, function ($query) use ($request) {
+            return $query->whereDate('planned_receiving_date', $request->planned_date);
+        })
+        ->select(
+            'planned_inventory_items.*',
+            'inventories.code as product_code',
+            'inventories.name as product_name',
+            'mst_locations.name as location_name'
+        )
+        ->get();
+
+    // Other data fetching (codes, vendors, etc.)
+    $inventoryCodes = DB::table('inventories')
+        ->whereIn('location_id', $locationIds)
+        ->select('code')
+        ->distinct()
+        ->get();
+
+    $vendorNames = DB::table('inventory_items')
+        ->select('inventory_id', DB::raw('GROUP_CONCAT(DISTINCT vendor_name) as vendor_names'))
+        ->groupBy('inventory_id')
+        ->get()
+        ->pluck('vendor_names', 'inventory_id');
+
+    return view('inventory.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
+}
+
+
 
 
 

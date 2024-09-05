@@ -29,6 +29,7 @@
                 <div class="collapse" id="collapseInventory" data-bs-parent="#accordionSidenav">
                     <nav class="sidenav-menu-nested nav">
                         <a class="nav-link" href="{{ url('/inventory/ckd') }}">CKD</a>
+                        <a class="nav-link" href="{{ url('/inventory/cni') }}">CNI</a>
                         <a class="nav-link" href="{{ url('/inventory/raw-material') }}">Raw Material</a>
                     </nav>
                 </div>
