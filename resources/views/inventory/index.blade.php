@@ -265,7 +265,7 @@
                             <tr>
                                 <td>{{ $item->product_code }}</td>
                                 <td>{{ $item->product_name }}</td>
-                                <td><input type="number" name="planned_qty[{{ $item->inventory_id }}]" value="{{ $item->planned_qty }}" class="form-control"></td>
+                                <td><input type="number" name="planned_qty[{{ $item->_id }}]" value="{{ $item->planned_qty }}" class="form-control"></td>
                             </tr>
                             @endforeach
                         </tbody>

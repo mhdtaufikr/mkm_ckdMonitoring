@@ -108,7 +108,7 @@ public function updatePlanned(Request $request)
 {
     foreach ($request->planned_qty as $inventoryId => $qty) {
         DB::table('planned_inventory_items')
-            ->where('inventory_id', $inventoryId)
+            ->where('_id', $inventoryId)
             ->update(['planned_qty' => $qty]);
     }
 
