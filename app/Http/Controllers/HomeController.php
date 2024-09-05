@@ -133,7 +133,7 @@ class HomeController extends Controller
                     DB::raw('SUM(received_qty) AS received_qty')
                 )
                 ->where('location_id', '6582ef8060c9390d890568d4')
-                ->whereMonth('receiving_date', 8)
+                ->whereMonth('receiving_date', 9)
                 ->whereYear('receiving_date', 2024)
                 ->groupBy('item_name', DB::raw('DATE(receiving_date)'))
                 ->orderBy(DB::raw('DATE(receiving_date)'), 'asc')
