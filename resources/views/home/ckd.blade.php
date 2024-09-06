@@ -590,11 +590,11 @@
         @endif
     </div>
 
-    <button hidden class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+    <button  class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
         <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span hidden class="visually-hidden">Previous</span>
     </button>
-    <button hidden class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+    <button  class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
         <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
         <span hidden class="visually-hidden">Next</span>
     </button>
