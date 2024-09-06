@@ -68,7 +68,6 @@
                 @include('layouts.includes._sidebar')
                     <div id="layoutSidenav_content">
                         @yield('content')
-                        <div id="layoutSidenav_content">
                             <footer class="footer-admin mt-auto footer-light">
                                 <div class="container-xl px-4">
                                     <div class="row">
@@ -79,7 +78,6 @@
                                     </div>
                                 </div>
                             </footer>
-                        </div>
                     </div>
             </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

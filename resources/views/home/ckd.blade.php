@@ -603,9 +603,9 @@
     <style>
         .carousel-control-prev,
         .carousel-control-next {
-            width: 30px; /* Adjust the width */
-            height: 30px; /* Adjust the height */
-            padding: 5px; /* Adjust padding if needed */
+            width: 80px; /* Adjust the width */
+            height: 80px; /* Adjust the height */
+            padding: 0px; /* Adjust padding if needed */
         }
     </style>
 
