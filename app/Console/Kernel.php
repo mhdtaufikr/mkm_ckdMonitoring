@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
         Commands\FetchInventoryData::class,
         Commands\FetchInventoryItemData::class,
         Commands\FetchProducts::class,
-        Commands\GeneratePlannedItems::class,
+       /*  Commands\GeneratePlannedItems::class, */
     ];
 
     protected function schedule(Schedule $schedule)
