@@ -590,14 +590,25 @@
         @endif
     </div>
 
-    <button  class="carousel-control-prev btn-sm" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+
+    <button class="carousel-control-prev btn-sm" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
         <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span hidden class="visually-hidden">Previous</span>
     </button>
-    <button  class="carousel-control-next btn-sm" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+    <button class="carousel-control-next btn-sm" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
         <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
         <span hidden class="visually-hidden">Next</span>
     </button>
+
+    <style>
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 30px; /* Adjust the width */
+            height: 30px; /* Adjust the height */
+            padding: 5px; /* Adjust padding if needed */
+        }
+    </style>
+
 </div>
 
         </div>
