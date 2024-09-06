@@ -592,12 +592,12 @@
 
 
     <button class="carousel-control-prev btn-sm" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-        <span hidden class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span hidden class="visually-hidden">Previous</span>
+        <span  class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span  class="visually-hidden">Previous</span>
     </button>
     <button class="carousel-control-next btn-sm" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-        <span hidden class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span hidden class="visually-hidden">Next</span>
+        <span  class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span  class="visually-hidden">Next</span>
     </button>
 
     <style>
