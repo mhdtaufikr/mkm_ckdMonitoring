@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         Commands\FetchInventoryData::class,
         Commands\FetchInventoryItemData::class,
         Commands\FetchProducts::class,
+        Commands\GeneratePlannedItems::class,
     ];
 
     protected function schedule(Schedule $schedule)
@@ -24,5 +25,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('fetch:inventory')->everyTenMinutes();
         $schedule->command('fetch:inventory-item')->everyTenMinutes();
         $schedule->command('fetch:products')->dailyAt('00:00');
+        /* $schedule->command('planned:generate')->dailyAt('16:20'); */
+
     }
 }

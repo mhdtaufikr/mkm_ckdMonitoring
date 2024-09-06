@@ -98,7 +98,7 @@
                 <div class="col-md-5 mb-2">
                     <div  class="card card-custom">
                         <div class="card-header">
-                            <h4>Stock Per Variant</h4>
+                            <h4>Stock Per Variant at MKM</h4>
                         </div>
                         <div class="card-body">
                             <div  id="variant-code-pie-chart" style="margin-top: 0px;
@@ -113,7 +113,7 @@
                     <!-- OTDC Chart Carousel -->
                     <div style="height: 526px" class="card card-custom mb-2">
                         <div class="card-header">
-                            <h4>OTDC</h4>
+                            <h4>OTDC Senopati to MKM</h4>
                         </div>
                         <div class="card-body">
                             @if($vendorData->isNotEmpty())
@@ -387,7 +387,7 @@
                   <!-- Item Code Quantity Carousel -->
                   <div style="height: 375px" class="card card-custom">
                     <div class="card-header">
-                        <h4>Stock of Hand</h4>
+                        <h4>Stock of Hand All CKD at MKM</h4>
                     </div>
                     <div class="card-body">
                         <div id="itemCodeQuantityCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -428,7 +428,7 @@
 
                         <div class="card card-custom">
                             <div class="card-header">
-                                <h4>Stock Accumulation</h4>
+                                <h4>Stock Accumulation CNI / 1 Agustus 2024</h4>
                             </div>
                             <div class="card-body">
                                 <div id="variant-code-pie-chart-cni" style="margin-top: 0px; height: 250px; width: 100%;"></div>
@@ -525,7 +525,7 @@
 <div class="col-md-7 mb-2">
     <div class="card card-custom">
         <div class="card-header">
-            <h4>OTDC Supply</h4>
+            <h4>OTDC Supply to CNI</h4>
         </div>
         <div class="card-body">
         <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
