@@ -101,10 +101,30 @@
                             <h4>Flow Integrated Warehouse Systems</h4>
                         </div>
                         <div class="card-body">
-                            <video autoplay loop muted controls style="margin-top: 0px; position: relative; height: 100%; width: 100%;">
-                                <source src="{{ asset('video/DELIVERY NOTE PPT REV  -  Read-Only.mp4') }}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
+                            <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <img src="{{ asset('images/ckd/Slide1.JPG') }}" class="d-block w-100" alt="Slide 1">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="{{ asset('images/ckd/Slide2.JPG') }}" class="d-block w-100" alt="Slide 2">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="{{ asset('images/ckd/Slide3.JPG') }}" class="d-block w-100" alt="Slide 3">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="{{ asset('images/ckd/Slide4.JPG') }}" class="d-block w-100" alt="Slide 4">
+                                    </div>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
                         </div>
                         {{-- <div class="card-body">
                             <div  id="variant-code-pie-chart" style="margin-top: 0px;
