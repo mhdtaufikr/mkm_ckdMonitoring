@@ -45,7 +45,7 @@ class InventoryController extends Controller
         })
         ->get();
 
-    return view('indexRaw.index', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
+    return view('inventory.indexRaw', compact('items', 'inventoryCodes', 'plannedItems', 'vendorNames'));
 }
 
 public function indexCKD(Request $request)

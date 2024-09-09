@@ -249,44 +249,7 @@
     </div>
 </main>
 
-<!-- Modal for Bulk Editing Planned Quantities -->
-<div class="modal fade" id="bulkEditModal" tabindex="-1" aria-labelledby="bulkEditModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="bulkEditModalLabel">Bulk Edit Planned Quantities for {{ request('planned_date') }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('update.bulk') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <table id="tableUser" class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Product Code</th>
-                                <th>Name</th>
-                                <th>Planned Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($plannedItems as $item)
-                            <tr>
-                                <td>{{ $item->product_code }}</td>
-                                <td>{{ $item->product_name }}</td>
-                                <td><input type="number" name="planned_qty[{{ $item->_id }}]" value="{{ $item->planned_qty }}" class="form-control"></td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 <!-- End Modal for Bulk Editing Planned Quantities -->
 <!-- For Datatables -->
 <script>
