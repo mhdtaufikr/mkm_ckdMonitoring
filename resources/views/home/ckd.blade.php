@@ -98,13 +98,13 @@
                 <div class="col-md-5 mb-2">
                     <div  class="card card-custom">
                         <div class="card-header">
-                            <h4>Stock Per Variant at MKM</h4>
+                            <h4>Flow Integrated Warehouse Systems</h4>
                         </div>
                         <div class="card-body">
-                            <div  id="variant-code-pie-chart" style="margin-top: 0px;
-    position: relative;
-    height: 100%;
-    width: 100%;"></div>
+                            <video autoplay loop muted controls style="margin-top: 0px; position: relative; height: 100%; width: 100%;">
+                                <source src="{{ asset('video/DELIVERY NOTE PPT REV  -  Read-Only.mp4') }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
                         </div>
                     </div>
                 </div>
@@ -600,14 +600,7 @@
         <span  class="visually-hidden">Next</span>
     </button>
 
-    <style>
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 80px; /* Adjust the width */
-            height: 80px; /* Adjust the height */
-            padding: 0px; /* Adjust padding if needed */
-        }
-    </style>
+
 
 </div>
 
