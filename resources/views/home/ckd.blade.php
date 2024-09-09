@@ -106,6 +106,12 @@
                                 Your browser does not support the video tag.
                             </video>
                         </div>
+                        {{-- <div class="card-body">
+                            <div  id="variant-code-pie-chart" style="margin-top: 0px;
+    position: relative;
+    height: 100%;
+    width: 100%;"></div>
+                        </div> --}}
                     </div>
                 </div>
 
@@ -793,7 +799,7 @@
     </section>
 </main>
 
-<script>
+{{-- <script>
     document.addEventListener('DOMContentLoaded', (event) => {
 
 
@@ -888,7 +894,7 @@
         console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
       }
     });
-    </script>
+</script> --}}
 
 
 
