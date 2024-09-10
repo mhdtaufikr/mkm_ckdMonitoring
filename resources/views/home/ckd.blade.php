@@ -368,6 +368,38 @@
                             window.open('/details-page/' + date, '_blank');
                         });
 
+                        // Calculate Trend Line
+                        var trendData = data.map(function(item, index, array) {
+                            var plan = item.plan || 0;
+                            var actual = item.actual || 0;
+                            var trendValue = (plan + actual) / 2; // Simple average for trend
+                            return {
+                                date: item.date,
+                                value: trendValue
+                            };
+                        });
+
+                        // Create trend line series
+                        var trendLineSeries = chart.series.push(am5xy.LineSeries.new(root, {
+                            name: "Trend Line",
+                            xAxis: xAxis,
+                            yAxis: yAxis,
+                            valueYField: "value",
+                            categoryXField: "date",
+                            stroke: am5.color(0xff0000), // Red color for trend line
+                            strokeWidth: 3,
+                            tooltip: am5.Tooltip.new(root, {
+                                pointerOrientation: "horizontal",
+                                labelText: "Trend: {valueY}"
+                            })
+                        }));
+
+                        trendLineSeries.data.setAll(trendData);
+                        trendLineSeries.strokes.template.setAll({
+                            strokeWidth: 3,
+                            strokeDasharray: [5, 5] // Dashed trend line
+                        });
+
                         // Add cursor
                         chart.set("cursor", am5xy.XYCursor.new(root, {
                             behavior: "none"
@@ -385,6 +417,7 @@
                         actualSeries.appear();
                         planSeries.appear();
                         percentageSeries.appear();
+                        trendLineSeries.appear();
                     });
                 </script>
 
