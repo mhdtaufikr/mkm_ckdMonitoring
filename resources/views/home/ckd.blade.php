@@ -137,6 +137,254 @@
 
                 <div class="col-md-7 mb-2">
                     <!-- OTDC Chart Carousel -->
+<div style="height: 526px" class="card card-custom mb-2">
+    <div class="card-header">
+        <h4>OTDC Senopati to MKM</h4>
+    </div>
+    <div class="card-body">
+        @if($vendorData->isNotEmpty())
+            @foreach ($vendorData as $vendorName => $data)
+                @php
+                    $totalPercentage = 0;
+                    $count = 0;
+                    $today = now()->format('Y-m-d');
+                    $startOfMonth = now()->startOfMonth()->format('Y-m-d');
+                    $includedEntries = [];
+                    $uniqueDates = [];
+
+                    foreach ($data as $entry) {
+                        if ($entry->date >= $startOfMonth && $entry->date <= $today) {
+                            if (!in_array($entry->date, $uniqueDates)) {
+                                if (!isset($entry->total_planned_qty) || $entry->total_actual_qty > $entry->total_planned_qty) {
+                                    $entry->percentage = 100;
+                                }
+                                $totalPercentage += $entry->percentage;
+                                $count++;
+                                $includedEntries[] = $entry;
+                                $uniqueDates[] = $entry->date;
+                            }
+                        }
+                    }
+
+                    $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
+                @endphp
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <table class="indicator-table mb-4">
+                            <tr>
+                                <th>Signal Indicator</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="signal green px-2">G</span> ≥ 95%
+                                    <span class="signal yellow">Y</span> ≥ 85%
+                                    <span class="signal red">R</span> < 85%
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <table class="indicator-table mb-4">
+                            <tr>
+                                <th>Average OTDC</th>
+                                <th>Signal</th>
+                            </tr>
+                            <tr>
+                                <td>{{ number_format($averagePercentage, 2) }}%</td>
+                                <td>
+                                    <span id="signal-otdc" class="signal
+                                        {{ $averagePercentage >= 95 ? 'green' : ($averagePercentage >= 85 ? 'yellow' : 'red') }}">
+                                        {{ $averagePercentage >= 95 ? 'G' : ($averagePercentage >= 85 ? 'Y' : 'R') }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
+                <div style="margin-top: -20px; width: 100%; height: 80%; margin-left: 0px;" class="chart-container">
+                    <div class="chart-custom" id="chartdiv-{{ $vendorName }}"></div>
+                </div>
+
+                <script>
+                    am5.ready(function() {
+                        var root = am5.Root.new("chartdiv-{{ $vendorName }}");
+
+                        root.setThemes([am5themes_Animated.new(root)]);
+
+                        var chart = root.container.children.push(
+                            am5xy.XYChart.new(root, {
+                                panX: false,
+                                panY: false,
+                                wheelX: "none",
+                                wheelY: "none",
+                                paddingLeft: 0,
+                                layout: root.verticalLayout
+                            })
+                        );
+
+                        const vendorData = @json($vendorData);
+                        const data = vendorData["{{ $vendorName }}"].map(item => ({
+                            date: new Date(item.date).getDate().toString(),
+                            actual: parseInt(item.total_actual_qty),
+                            plan: parseInt(item.total_planned_qty),
+                            percentage: parseFloat(item.percentage)
+                        }));
+
+                        // Predefine x-axis categories to 1-31
+                        var daysOfMonth = Array.from({ length: 31 }, (_, i) => (i + 1).toString());
+
+                        var xRenderer = am5xy.AxisRendererX.new(root, {
+                            minorGridEnabled: true,
+                            minGridDistance: 30
+                        });
+
+                        var xAxis = chart.xAxes.push(
+                            am5xy.CategoryAxis.new(root, {
+                                categoryField: "date",
+                                renderer: xRenderer,
+                                tooltip: am5.Tooltip.new(root, {})
+                            })
+                        );
+
+                        xAxis.data.setAll(daysOfMonth.map(date => ({ date })));
+                        xRenderer.grid.template.setAll({ location: 1 });
+
+                        var yAxis = chart.yAxes.push(
+                            am5xy.ValueAxis.new(root, {
+                                min: 0,
+                                extraMax: 0.1,
+                                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
+                            })
+                        );
+
+                        yAxis.children.moveValue(am5.Label.new(root, {
+                            rotation: -90,
+                            text: "Quantity",
+                            y: am5.p50,
+                            centerX: am5.p50
+                        }), 0);
+
+                        var yAxisRight = chart.yAxes.push(
+                            am5xy.ValueAxis.new(root, {
+                                min: 0,
+                                max: 120,
+                                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
+                            })
+                        );
+
+                        yAxisRight.children.moveValue(am5.Label.new(root, {
+                            rotation: -90,
+                            text: "Percentage (%)",
+                            y: am5.p50,
+                            centerX: am5.p50
+                        }), 0);
+
+                        // Add layered columns
+                        var planSeries = chart.series.push(
+                            am5xy.ColumnSeries.new(root, {
+                                name: "Plan",
+                                xAxis: xAxis,
+                                yAxis: yAxis,
+                                valueYField: "plan",
+                                categoryXField: "date",
+                                clustered: false,  // Disable clustering to layer columns
+                                tooltip: am5.Tooltip.new(root, {
+                                    pointerOrientation: "horizontal",
+                                    labelText: "{name}: {valueY}"
+                                })
+                            })
+                        );
+                        planSeries.columns.template.setAll({
+                            width: am5.percent(80),
+                            tooltipY: am5.percent(10),
+                            strokeOpacity: 0,
+                            fill: am5.color("#1e81b0")
+                        });
+                        planSeries.data.setAll(data);
+
+                        var actualSeries = chart.series.push(
+                            am5xy.ColumnSeries.new(root, {
+                                name: "Actual",
+                                xAxis: xAxis,
+                                yAxis: yAxis,
+                                valueYField: "actual",
+                                categoryXField: "date",
+                                clustered: false,  // Disable clustering to layer columns
+                                tooltip: am5.Tooltip.new(root, {
+                                    pointerOrientation: "horizontal",
+                                    labelText: "{name}: {valueY}"
+                                })
+                            })
+                        );
+                        actualSeries.columns.template.setAll({
+                            width: am5.percent(50),
+                            tooltipY: am5.percent(10),
+                            strokeOpacity: 0,
+                            fill: am5.color("#fbb659")
+                        });
+                        actualSeries.data.setAll(data);
+
+                        var percentageSeries = chart.series.push(
+                            am5xy.LineSeries.new(root, {
+                                name: "Percentage",
+                                xAxis: xAxis,
+                                yAxis: yAxisRight,
+                                valueYField: "percentage",
+                                categoryXField: "date",
+                                tooltip: am5.Tooltip.new(root, {
+                                    pointerOrientation: "horizontal",
+                                    labelText: "{name}: {valueY}%"
+                                }),
+                                stroke: am5.color(0x000000),
+                                fill: am5.color(0x000000)
+                            })
+                        );
+                        percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
+                        percentageSeries.data.setAll(data);
+                        percentageSeries.bullets.push(function(root, series, dataItem) {
+                            var value = dataItem.dataContext.percentage;
+                            var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
+                            return am5.Bullet.new(root, {
+                                sprite: am5.Circle.new(root, {
+                                    strokeWidth: 3,
+                                    stroke: series.get("stroke"),
+                                    radius: 5,
+                                    fill: bulletColor
+                                })
+                            });
+                        });
+
+                        // Add cursor
+                        chart.set("cursor", am5xy.XYCursor.new(root, {
+                            behavior: "none"
+                        }));
+
+                        var legend = chart.children.push(
+                            am5.Legend.new(root, {
+                                centerX: am5.p50,
+                                x: am5.p50
+                            })
+                        );
+                        legend.data.setAll(chart.series.values);
+
+                        chart.appear(1000, 100);
+                        actualSeries.appear();
+                        planSeries.appear();
+                        percentageSeries.appear();
+                    });
+                </script>
+            @endforeach
+        @else
+            <p>No data available for this period.</p>
+        @endif
+    </div>
+</div>
+{{-- Old Code --}}
+{{--
+
+<!-- OTDC Chart Carousel -->
                     <div style="height: 526px" class="card card-custom mb-2">
                         <div class="card-header">
                             <h4>OTDC Senopati to MKM</h4>
@@ -404,7 +652,7 @@
                             percentageSeries.appear();
                         });
                     </script>
-
+--}}
 
 
 
