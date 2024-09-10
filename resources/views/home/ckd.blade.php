@@ -386,7 +386,7 @@
                             yAxis: yAxis,
                             valueYField: "value",
                             categoryXField: "date",
-                            stroke: am5.color(0xff0000), // Red color for trend line
+                            stroke: am5.color(0x008000), // Red color for trend line
                             strokeWidth: 3,
                             tooltip: am5.Tooltip.new(root, {
                                 pointerOrientation: "horizontal",
