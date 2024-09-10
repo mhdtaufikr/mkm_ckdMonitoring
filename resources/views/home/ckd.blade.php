@@ -100,7 +100,7 @@
                         <div class="card-header">
                             <h4>Flow Integrated Warehouse Systems</h4>
                         </div>
-                        <div class="card-body">
+                     {{--    <div class="card-body">
                             <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-inner">
                                     <div class="carousel-item active">
@@ -125,13 +125,13 @@
                                     <span class="visually-hidden">Next</span>
                                 </button>
                             </div>
-                        </div>
-                        {{-- <div class="card-body">
+                        </div> --}}
+                        <div class="card-body">
                             <div  id="variant-code-pie-chart" style="margin-top: 0px;
     position: relative;
     height: 100%;
     width: 100%;"></div>
-                        </div> --}}
+                        </div>
                     </div>
                 </div>
 
@@ -1234,7 +1234,7 @@ const trendData = daysOfMonth.map((date, index) => {
     </section>
 </main>
 
-{{-- <script>
+<script>
     document.addEventListener('DOMContentLoaded', (event) => {
 
 
@@ -1329,7 +1329,7 @@ const trendData = daysOfMonth.map((date, index) => {
         console.error('variantCodeQuantities is not an object:', variantCodeQuantities);
       }
     });
-</script> --}}
+</script>
 
 
 
