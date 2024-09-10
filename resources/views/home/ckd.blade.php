@@ -356,6 +356,18 @@
                             });
                         });
 
+                        // Add click event to actualSeries columns
+                        actualSeries.columns.template.events.on("click", function(ev) {
+                            var date = ev.target.dataItem.dataContext.date;
+                            window.open('/details-page/' + date, '_blank');
+                        });
+
+                        // Add click event to planSeries columns
+                        planSeries.columns.template.events.on("click", function(ev) {
+                            var date = ev.target.dataItem.dataContext.date;
+                            window.open('/details-page/' + date, '_blank');
+                        });
+
                         // Add cursor
                         chart.set("cursor", am5xy.XYCursor.new(root, {
                             behavior: "none"
@@ -375,6 +387,7 @@
                         percentageSeries.appear();
                     });
                 </script>
+
             @endforeach
         @else
             <p>No data available for this period.</p>
