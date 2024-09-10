@@ -98,7 +98,7 @@
                 <div class="col-md-5 mb-2">
                     <div  class="card card-custom">
                         <div class="card-header">
-                            <h4>Flow Integrated Warehouse Systems</h4>
+                            <h4>CKD Stock</h4>
                         </div>
                      {{--    <div class="card-body">
                             <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
