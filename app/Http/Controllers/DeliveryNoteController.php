@@ -174,7 +174,7 @@ public function ckdStampingSubmit(Request $request)
         $pdf = PDF::loadView('delivery.pdf.delivery_note_matrix', compact('deliveryNote', 'deliveryNoteDetails'));
 
         // Generate and return the PDF
-        return $pdf->stream('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
+        return $pdf->download('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
     }
 
 
