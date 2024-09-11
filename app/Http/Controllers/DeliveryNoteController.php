@@ -20,9 +20,6 @@ class DeliveryNoteController extends Controller
     {
         // Validate incoming request data
         $request->validate([
-            'customer_po_number' => 'required|string|max:50',
-            'order_number' => 'required|string|max:50',
-            'customer_number' => 'required|string|max:50',
             'driver_license' => 'required|string|max:50',
             'destination' => 'required|string|max:255',
             'date' => 'required|date',
@@ -177,7 +174,7 @@ public function ckdStampingSubmit(Request $request)
         $pdf = PDF::loadView('delivery.pdf.delivery_note_matrix', compact('deliveryNote', 'deliveryNoteDetails'));
 
         // Generate and return the PDF
-        return $pdf->download('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
+        return $pdf->stream('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
     }
 
 

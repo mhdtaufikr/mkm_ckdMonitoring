@@ -45,6 +45,18 @@
                                             <button type="button" class="btn btn-dark btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#modal-add">
                                                 Add Delivery Note <i class="fas fa-plus-square"></i>
                                             </button>
+                                            <style>
+                                                /* Mengubah warna label untuk input yang required */
+                                                .form-group label[for]:after {
+
+                                                    color: red;
+                                                }
+
+                                                /* Jika ingin field input required memiliki border berwarna merah saat belum terisi */
+                                                input:required:invalid {
+                                                    border-color: red;
+                                                }
+                                            </style>
 
                                             <!-- Modal -->
                                             <div class="modal fade" id="modal-add" tabindex="-1" aria-labelledby="modal-add-label" aria-hidden="true">
@@ -60,42 +72,43 @@
                                                                 <div class="row">
                                                                     <div class="col-md-6">
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Customer PO Number</label>
-                                                                            <input type="text" class="form-control" id="customer_po_number" name="customer_po_number" placeholder="Enter Customer PO Number" required>
+                                                                            <label for="customer_po_number">Customer PO Number</label>
+                                                                            <input type="text" class="form-control" id="customer_po_number" name="customer_po_number" placeholder="Enter Customer PO Number">
                                                                         </div>
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Order Number</label>
-                                                                            <input type="text" class="form-control" id="order_number" name="order_number" placeholder="Enter Order Number" required>
+                                                                            <label for="order_number">Order Number</label>
+                                                                            <input type="text" class="form-control" id="order_number" name="order_number" placeholder="Enter Order Number">
                                                                         </div>
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Plat No.</label>
+                                                                            <label for="plat_no">Plat No.</label>
                                                                             <input type="text" class="form-control" id="plat_no" name="plat_no" placeholder="Enter Plat No." required>
                                                                         </div>
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Transportation</label>
+                                                                            <label for="transportation">Transportation</label>
                                                                             <input type="text" class="form-control" id="transportation" name="transportation" placeholder="Enter Transportation" required>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Customer Number</label>
-                                                                            <input type="text" class="form-control" id="customer_number" name="customer_number" placeholder="Enter Customer Number" required>
+                                                                            <label for="customer_number">Customer Number</label>
+                                                                            <input type="text" class="form-control" id="customer_number" name="customer_number" placeholder="Enter Customer Number">
                                                                         </div>
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Driver Name</label>
+                                                                            <label for="driver_license">Driver Name</label>
                                                                             <input type="text" class="form-control" id="driver_license" name="driver_license" placeholder="Enter Driver Name" required>
                                                                         </div>
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Destination</label>
+                                                                            <label for="destination">Destination</label>
                                                                             <input type="text" class="form-control" id="destination" name="destination" placeholder="Enter Destination" required>
                                                                         </div>
                                                                         <div class="form-group mb-3">
-                                                                            <label for="">Date</label>
+                                                                            <label for="date">Date</label>
                                                                             <input type="date" class="form-control" id="date" name="date" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
+
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
                                                                 <button type="submit" class="btn btn-primary">Submit</button>

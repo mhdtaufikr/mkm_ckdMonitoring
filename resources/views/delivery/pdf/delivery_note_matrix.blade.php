@@ -66,7 +66,8 @@
                 <tr>
                     <td style="width: 3%;">{{ str_pad($index + 1, 3, '0', STR_PAD_LEFT) }}</td>
                     <td style="width: 20%;"> {{ $detail->part_no }}</td>
-                    <td style="width: 30%;"> {{ $detail->part_name }} @if($detail->group_no) <br> {{ $detail->group_no }} @endif</td>
+                    <td style="width: 30%;"> {{ $detail->part_name }}</td>
+                    <td style="width: 20%;">@if($detail->group_no) {{ $detail->group_no }} @endif</td>
                     <td style="width: 10%;"> {{ $detail->qty }}</td>
                     <td style="width: 10%;"> {{ $detail->remarks }}</td>
                 </tr>
