@@ -11,12 +11,38 @@ use Illuminate\Http\Request;
 
 class DeliveryNoteController extends Controller
 {
-    public function ckdStamping(){
+    public function ckdStamping()
+    {
+        // You no longer need to fetch all locations here
         $item = DeliveryNote::get();
-        $location = MstLocation::get();
 
-        return view('delivery.ckdStamping.index', compact('item','location'));
+        return view('delivery.ckdStamping.index', compact('item'));
     }
+
+    public function getLocations(Request $request)
+{
+    $search = $request->get('search');
+
+    // Debugging: Check if the search term is received correctly
+    \Log::info('Search term received: ' . $search);
+
+    // Fetch locations based on the search query
+    $locations = MstLocation::where('name', 'like', '%' . $search . '%')->limit(10)->get();
+
+    \Log::info('Locations fetched: ', $locations->toArray()); // Log the fetched locations
+
+    // Format locations for Select2
+    $formattedLocations = [];
+    foreach ($locations as $location) {
+        $formattedLocations[] = [
+            'id' => $location->_id,  // The ID that will be stored
+            'text' => strtoupper($location->name)  // The text that will be displayed
+        ];
+    }
+
+    return response()->json($formattedLocations);
+}
+
 
     public function ckdStampingStore(Request $request)
     {
