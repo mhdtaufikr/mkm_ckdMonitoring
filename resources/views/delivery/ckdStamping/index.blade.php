@@ -56,6 +56,9 @@
                                                 input:required:invalid {
                                                     border-color: red;
                                                 }
+                                                select:required:invalid {
+                                                    border-color: red;
+                                                }
                                             </style>
 
                                             <!-- Modal -->
@@ -99,8 +102,15 @@
                                                                         </div>
                                                                         <div class="form-group mb-3">
                                                                             <label for="destination">Destination</label>
-                                                                            <input type="text" class="form-control" id="destination" name="destination" placeholder="Enter Destination" required>
+                                                                            <select class="form-control" id="destination" name="destination" required>
+                                                                                <option value="">Select Destination</option>
+                                                                                @foreach ($location as $loc)
+                                                                                    <option value="{{ $loc->_id }}">{{ ucwords(strtolower($loc->name)) }}</option>
+                                                                                @endforeach
+                                                                            </select>
                                                                         </div>
+
+
                                                                         <div class="form-group mb-3">
                                                                             <label for="date">Date</label>
                                                                             <input type="date" class="form-control" id="date" name="date" required>

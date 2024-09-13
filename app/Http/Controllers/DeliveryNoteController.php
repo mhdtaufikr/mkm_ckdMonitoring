@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 use App\Models\DeliveryNote;
+use App\Models\MstLocation;
 use App\Models\DeliveryNoteDetail;
 use Illuminate\Support\Facades\Http;
 use PDF; // Ensure you import the PDF facade
@@ -12,26 +13,36 @@ class DeliveryNoteController extends Controller
 {
     public function ckdStamping(){
         $item = DeliveryNote::get();
+        $location = MstLocation::get();
 
-        return view('delivery.ckdStamping.index', compact('item'));
+        return view('delivery.ckdStamping.index', compact('item','location'));
     }
 
     public function ckdStampingStore(Request $request)
     {
+
         // Validate incoming request data
         $request->validate([
             'driver_license' => 'required|string|max:50',
-            'destination' => 'required|string|max:255',
+            'destination' => 'required|string|max:255', // Validate destination as a string, but it is an ID
             'date' => 'required|date',
             'plat_no' => 'required|string|max:50',
             'transportation' => 'required|string|max:100',
         ]);
 
-        // Generate delivery_note_number using destination, date, and time
+        // Get the location details using the ID provided in the 'destination'
+        $location = MstLocation::find($request->destination); // Here, 'destination' contains the location ID
+
+        if (!$location) {
+            // If the location is not found, return an error
+            return back()->withErrors(['destination' => 'Invalid destination selected'])->withInput();
+        }
+
+        // Generate delivery_note_number using destination code, date, and time
         $dateFormatted = \Carbon\Carbon::parse($request->date)->format('Ymd'); // Format date as YYYYMMDD
         $timeFormatted = \Carbon\Carbon::now()->format('His'); // Format time as HHMMSS (hours, minutes, seconds)
-        $destination = strtoupper(substr($request->destination, 0, 3)); // Take first 3 letters of destination
-        $deliveryNoteNumber = $destination . '-' . $dateFormatted . '-' . $timeFormatted; // Combine to make unique
+        $destinationCode = strtoupper(substr($location->code, 0, 3)); // Take the first 3 letters of the location code
+        $deliveryNoteNumber = $destinationCode . '-' . $dateFormatted . '-' . $timeFormatted; // Combine to make unique
 
         // Store the data into the delivery_notes table
         $deliveryNote = new DeliveryNote();
@@ -40,7 +51,7 @@ class DeliveryNoteController extends Controller
         $deliveryNote->order_number = $request->order_number;
         $deliveryNote->customer_number = $request->customer_number;
         $deliveryNote->driver_license = $request->driver_license;
-        $deliveryNote->destination = $request->destination;
+        $deliveryNote->destination = $location->name; // Store the code from the location
         $deliveryNote->date = $request->date;
         $deliveryNote->plat_no = $request->plat_no;
         $deliveryNote->transportation = $request->transportation;
@@ -53,16 +64,17 @@ class DeliveryNoteController extends Controller
 
 
 
+
     public function ckdStampingCreate($id)
 {
     $id = decrypt($id);
     $getHeader = DeliveryNote::where('id', $id)->first();
-
+    $location = MstLocation::where('name', $getHeader->destination)->first(); // Here, 'destination' contains the location ID
     // Fetch data from the API
     $response = Http::withHeaders([
         'x-api-key' => '315f9f6eb55fd6db9f87c0c0862007e0615ea467'
     ])->get('https://api.mile.app/public/v1/warehouse/inventory-item', [
-        'location_id' => '6582ef8060c9390d890568d4',
+        'location_id' => $location->_id,
         'limit' => -1,
         'page' => 1,
         'serial_number' => '',
