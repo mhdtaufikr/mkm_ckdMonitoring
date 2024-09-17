@@ -102,44 +102,10 @@
                             </div>
                             <div class="form-group mb-3">
                                 <label for="destination">Destination</label>
-                                <select class="form-control" id="destination" name="destination" required style="width: 100%;"></select>
+                                <select class="form-control chosen-select" id="destination" name="destination" required style="width: 100%;">
+                                    <option value="">Select a Destination</option> <!-- Placeholder option -->
+                                </select>
                             </div>
-
-                            <!-- Script for Select2 initialization and modal -->
-                            <script>
-                                $(document).ready(function () {
-                                    // Reinitialize Select2 when the modal is opened
-                                    $('#modal-add').on('shown.bs.modal', function () {
-                                        $('#destination').select2({
-                                            dropdownParent: $('#modal-add'),  // Make sure the dropdown appears within the modal
-                                            placeholder: 'Select Destination',
-                                            ajax: {
-                                                url: '{{ route('get-locations') }}',
-                                                dataType: 'json',
-                                                delay: 250,
-                                                data: function (params) {
-                                                    console.log("Search term: ", params.term); // Log search term
-                                                    return {
-                                                        search: params.term // search term
-                                                    };
-                                                },
-                                                processResults: function (data) {
-                                                    console.log("Data received from server: ", data); // Log server data
-                                                    return {
-                                                        results: data
-                                                    };
-                                                },
-                                                error: function (xhr, status, error) {
-                                                    console.error("Error during the AJAX request: ", error); // Log any errors
-                                                    console.log("Full response: ", xhr); // Log the full XHR response
-                                                },
-                                                cache: true
-                                            },
-                                            minimumInputLength: 1 // Start search after 2 characters
-                                        });
-                                    });
-                                });
-                            </script>
 
                             <div class="form-group mb-3">
                                 <label for="date">Date</label>
@@ -157,6 +123,38 @@
         </div>
     </div>
 </div>
+
+<!-- Script for Chosen initialization and modal -->
+<script>
+    $(document).ready(function () {
+        // Initialize Chosen when the modal is opened
+        $('#modal-add').on('shown.bs.modal', function () {
+            $('#destination').chosen({
+                width: "100%",
+                no_results_text: "No results found!",
+                placeholder_text_single: "Select a Destination"
+            });
+
+            // Fetch data via AJAX and update the Chosen dropdown
+            $.ajax({
+                url: '{{ route('get-locations') }}',
+                dataType: 'json',
+                success: function (data) {
+                    var $destination = $('#destination');
+                    $destination.empty(); // Clear current options
+                    $.each(data, function (key, value) {
+                        $destination.append('<option value="' + value.id + '">' + value.text + '</option>');
+                    });
+                    $destination.trigger("chosen:updated"); // Update Chosen dropdown
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error during the AJAX request:", error);
+                }
+            });
+        });
+    });
+</script>
+
 
 
                                             @if (session('status'))
