@@ -31,6 +31,7 @@
         }
     </style>
 </head>
+<br><br><br><br>
 <body>
 
     <div class="content">
@@ -58,7 +59,6 @@
             </tr>
         </table>
 
-        <br/> <br><br>
 
         <!-- Delivery Note Details -->
         @foreach ($deliveryNoteDetails as $index => $detail)
