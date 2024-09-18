@@ -86,6 +86,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/delivery-note-details/store', [DeliveryNoteController::class, 'ckdStampingSubmit'])->name('delivery-note-details.store');
     Route::get('/delivery-note/pdf/{id}', [DeliveryNoteController::class, 'ckdStampingPDF'])->name('delivery-note.pdf');
     Route::get('/get-locations', [DeliveryNoteController::class, 'getLocations'])->name('get-locations');
+    Route::get('/delivery-note/trigger-download/{id}', [DeliveryNoteController::class, 'ckdStampingTriggerDownload'])->name('delivery-note.trigger-download');
+
 
 
 });

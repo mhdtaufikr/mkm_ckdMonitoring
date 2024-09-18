@@ -116,7 +116,7 @@ class DeliveryNoteController extends Controller
 
         // Filter inventory items to match the date in the delivery_notes table
         $filteredInventoryItems = $inventoryItems->filter(function ($item) use ($getHeader) {
-            return \Carbon\Carbon::parse($item['updated_at'])->toDateString() === $getHeader->date;
+            return \Carbon\Carbon::parse($item['receive_date'])->toDateString() === $getHeader->date;
         });
 
         // Accumulate quantities for items with the same product code
@@ -177,7 +177,6 @@ public function ckdStampingSubmit(Request $request)
     // Loop through each manual delivery note detail and save it to the database
     if ($request->has('manual_delivery_note_details')) {
         foreach ($request->input('manual_delivery_note_details') as $manualDetail) {
-            // Check if all fields are null, if so, skip this entry
             if (is_null($manualDetail['part_no']) && is_null($manualDetail['part_name']) && is_null($manualDetail['qty']) && is_null($manualDetail['remarks'])) {
                 continue; // Skip this iteration
             }
@@ -192,28 +191,41 @@ public function ckdStampingSubmit(Request $request)
         }
     }
 
-    // Redirect back to the delivery note index with a success message
-    return redirect()->route('delivery-note.index')->with('status', 'Delivery note details added successfully!');
+    // Redirect to the intermediate page that will handle the download and redirect
+    return redirect()->route('delivery-note.trigger-download', ['id' => encrypt($dn_id)]);
+}
+
+
+
+public function ckdStampingTriggerDownload($id)
+{
+    $id = decrypt($id);
+
+    // Fetch the delivery note and its details
+    $deliveryNote = DeliveryNote::find($id);
+
+    return view('delivery.trigger_download', compact('deliveryNote'));
 }
 
 
 
 
+        public function ckdStampingPDF($id)
+        {
+            $id = decrypt($id);
 
+            // Fetch the delivery note and its details from the database
+            $deliveryNote = DeliveryNote::find($id);
+            $deliveryNoteDetails = DeliveryNoteDetail::where('dn_id', $id)->get();
 
-    public function ckdStampingPDF($id){
-        $id = decrypt($id);
+            // Load the view and pass data to it
+            $pdf = PDF::loadView('delivery.pdf.delivery_note_matrix', compact('deliveryNote', 'deliveryNoteDetails'))
+                    ->setPaper([0, 0, 680, 792]); // Set paper size to 24 cm wide (680 points) x 28 cm long (792 points) in portrait orientation
 
-        // Fetch the delivery note and its details from the database
-        $deliveryNote = DeliveryNote::find($id);
-        $deliveryNoteDetails = DeliveryNoteDetail::where('dn_id', $id)->get();
+            // Generate and return the PDF
+            return $pdf->download('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
+        }
 
-        // Load the view and pass data to it
-        $pdf = PDF::loadView('delivery.pdf.delivery_note_matrix', compact('deliveryNote', 'deliveryNoteDetails'));
-
-        // Generate and return the PDF
-        return $pdf->download('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
-    }
 
 
 

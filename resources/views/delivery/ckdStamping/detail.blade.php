@@ -138,7 +138,7 @@
 
                                         <!-- Submit Button -->
                                         <a href="{{ route('delivery-note.index') }}" class="btn btn-secondary btn-sm ">Back to List</a>
-                                        <button type="submit" class="btn btn-success btn-sm">Save</button>
+                                        <button type="submit" class="btn btn-success btn-sm">Save & Print</button>
                                     </form>
                                 </div>
                             </div>
