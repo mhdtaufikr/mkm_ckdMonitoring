@@ -23,7 +23,15 @@ class FetchInventoryData extends Command
             '617bd0ad83ef510374337d84',
             '5fc4b12bc329204cb00b56bf',
             '65bd1017b4490c26c00a82d9',
-            '6582ef8060c9390d890568d4'
+            '6582ef8060c9390d890568d4',
+            '66d5d753194372ca47012c40',/* CNC */
+            '66d5d710b00fe5a518005fed',/* SPI */
+            '66d5d6cb0e0eb9bba906369c', /* SGS */
+            '66d5d6770c93a64bab075c99',/* MAJ */
+            '66d5d624dbe327b3240d2316',/* IPM */
+            '66d5d5ab4027413f7b0ecb51',/* ASI */
+            '66d463589c02bcbf66000e1b',/* SS */
+
         ];
 
         foreach ($locationIds as $locationId) {
