@@ -91,4 +91,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/delivery/manual', [DeliveryNoteController::class, 'manual']);
     Route::post('/delivery-note/store/manual', [DeliveryNoteController::class, 'manualStore']);
     Route::get('/delivery-note/create/manual/{id}', [DeliveryNoteController::class, 'manualCreate'])->name('delivery-note.create.manual');
+    Route::get('/delivery-note/detail/{id}', [DeliveryNoteController::class, 'show'])->name('delivery-note.detail');
+
 });

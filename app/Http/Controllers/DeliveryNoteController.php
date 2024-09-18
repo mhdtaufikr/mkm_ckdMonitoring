@@ -285,4 +285,25 @@ public function ckdStampingTriggerDownload($id)
         return view('delivery.detail', compact('getHeader'));
     }
 
+    // DeliveryNoteController.php
+
+    public function show($id)
+    {
+        // Decrypt the ID (if needed)
+        $id = decrypt($id);
+
+        // Fetch the delivery note header and details
+        $getHeader = DeliveryNote::find($id);
+        $getDetails = DeliveryNoteDetail::where('dn_id', $id)->get();
+
+        // Check if the delivery note exists
+        if (!$getHeader) {
+            return redirect()->route('delivery-note.index')->with('error', 'Delivery Note not found.');
+        }
+
+        // Pass the data to the view
+        return view('delivery.ckdStamping.view', compact('getHeader', 'getDetails'));
+    }
+
+
 }

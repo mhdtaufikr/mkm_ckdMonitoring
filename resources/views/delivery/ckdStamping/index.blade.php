@@ -216,9 +216,10 @@
                                                                 </button>
                                                                 <ul class="dropdown-menu">
                                                                     <li>
-                                                                        <a class="dropdown-item" href="{{ url('/delivery-note/detail/{id}') }}" title="Details">
+                                                                        <a class="dropdown-item" href="{{ route('delivery-note.detail', ['id' => encrypt($data->id)]) }}" title="Details">
                                                                             <i class="fas fa-info-circle" style="margin-right: 5px;"></i> Details
                                                                         </a>
+
                                                                     </li>
                                                                     <li>
                                                                         <a href="{{ route('delivery-note.pdf', ['id' => encrypt($data->id)]) }}" class="dropdown-item" title="Generate PDF">
