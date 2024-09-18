@@ -227,8 +227,62 @@ public function ckdStampingTriggerDownload($id)
         }
 
 
+        public function manual()
+    {
+        // You no longer need to fetch all locations here
+        $item = DeliveryNote::get();
+
+        return view('delivery.index', compact('item'));
+    }
+
+
+    public function manualStore(Request $request)
+    {
+
+        // Validate incoming request data
+        $request->validate([
+            'driver_license' => 'required|string|max:50',
+            'destination' => 'required|string|max:255', // Validate destination as a string, but it is an ID
+            'date' => 'required|date',
+            'plat_no' => 'required|string|max:50',
+            'transportation' => 'required|string|max:100',
+        ]);
 
 
 
+
+
+        // Generate delivery_note_number using destination code, date, and time
+        $dateFormatted = \Carbon\Carbon::parse($request->date)->format('Ymd'); // Format date as YYYYMMDD
+        $timeFormatted = \Carbon\Carbon::now()->format('His'); // Format time as HHMMSS (hours, minutes, seconds)
+        $destinationCode = strtoupper(substr($request->destination, 0, 3)); // Take the first 3 letters of the location code
+        $deliveryNoteNumber = $destinationCode . '-' . $dateFormatted . '-' . $timeFormatted; // Combine to make unique
+
+        // Store the data into the delivery_notes table
+        $deliveryNote = new DeliveryNote();
+        $deliveryNote->delivery_note_number = $deliveryNoteNumber;
+        $deliveryNote->customer_po_number = $request->customer_po_number;
+        $deliveryNote->order_number = $request->order_number;
+        $deliveryNote->customer_number = $request->customer_number;
+        $deliveryNote->driver_license = $request->driver_license;
+        $deliveryNote->destination = $request->destination; // Store the code from the location
+        $deliveryNote->date = $request->date;
+        $deliveryNote->plat_no = $request->plat_no;
+        $deliveryNote->transportation = $request->transportation;
+        $deliveryNote->save();
+
+        // Redirect to the create page with the newly created delivery note's ID
+        return redirect()->route('delivery-note.create.manual', ['id' => encrypt($deliveryNote->id)])
+                        ->with('status', 'Delivery note added successfully!');
+    }
+
+    public function manualCreate($id)
+    {
+        $id = decrypt($id);
+        $getHeader = DeliveryNote::where('id', $id)->first();
+
+
+        return view('delivery.detail', compact('getHeader'));
+    }
 
 }

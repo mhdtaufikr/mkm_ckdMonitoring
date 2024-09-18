@@ -48,6 +48,9 @@
                      <nav class="sidenav-menu-nested nav">
                         <a class="nav-link" href="{{url('/delivery/ckd/stamping')}}">CKD Stamping</a>
                      </nav>
+                     <nav class="sidenav-menu-nested nav">
+                        <a class="nav-link" href="{{url('/delivery/manual')}}">Free Entry</a>
+                     </nav>
                  </div>
 
                 @if(\Auth::user()->role === 'Super Admin' || \Auth::user()->role === 'IT')
