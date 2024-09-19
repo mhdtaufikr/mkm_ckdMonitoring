@@ -31,23 +31,23 @@
         }
     </style>
 </head>
-<br><br><br><br>
+<br><br>
 <body>
 
     <div class="content">
-        <table style="margin-left: -1.2cm;">
+        <table style="margin-left: -0.5cm;">
             <!-- Delivery Note Information -->
             <tr>
                 <td style="width: 30%;"></td>
-                <td style="width: 65%;"> {{ $deliveryNote->customer_po_number }}</td>
-                <td style="width: 30%;"> {{ \Carbon\Carbon::parse($deliveryNote->date)->format('d-m-Y') }}</td>
+                <td style="width: 65%;"> {{ $deliveryNote->delivery_note_number }}</td>
+                <td style="width: 40%;"> {{ \Carbon\Carbon::parse($deliveryNote->date)->format('d-m-Y') }}</td>
                 <td style="width: 30%;"> {{ now()->format('H:i:s') }}</td>
             </tr> <br> <br>
             <tr>
                 <td style="width: 30%;"></td>
                 <td> {{ $deliveryNote->driver_license }}   <br>{{ $deliveryNote->destination }}</td>
-                <td>{{ $deliveryNote->transportation }}</td>
-                <td>{{ $deliveryNote->plat_no }}</td>
+                <td><br>{{ $deliveryNote->transportation }}</td>
+                <td><br>{{ $deliveryNote->plat_no }}</td>
                 <td></td>
             </tr>
             <br><br>
@@ -59,7 +59,7 @@
             </tr>
         </table>
 
-
+<br>
         <!-- Delivery Note Details -->
         @foreach ($deliveryNoteDetails as $index => $detail)
         <table style="margin-left: -1.35cm;">
