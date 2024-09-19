@@ -35,8 +35,15 @@ class AuthController extends Controller
                     'login_counter' => $user->login_counter + 1,
                 ]);
 
-                // Redirect to the intended route after login
+                // Check if the authenticated user is 'suparman'
+                if (Auth::user()->name == 'suparman') {
+                    // Redirect to /delivery/manual for user 'suparman'
+                    return redirect('/delivery/manual');
+                }
+
+                // Redirect to the intended route after login for all other users
                 return redirect()->intended('/home/ckd');
+
             } else {
                 return redirect('/')->with('statusLogin', 'Give Access First to User');
             }
