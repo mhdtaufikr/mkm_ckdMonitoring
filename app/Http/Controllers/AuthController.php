@@ -36,13 +36,19 @@ class AuthController extends Controller
                 ]);
 
                 // Check if the authenticated user is 'suparman'
-                if (Auth::user()->name == 'suparman') {
-                    // Redirect to /delivery/manual for user 'suparman'
-                    return redirect('/delivery/manual');
-                }
+                    if (Auth::user()->name == 'suparman') {
+                        // Redirect to /delivery/manual for user 'suparman'
+                        return redirect('/delivery/manual');
+                    }
+                    // Check if the authenticated user is 'devi'
+                    else if (Auth::user()->name == 'devi') {
+                        // Redirect to /delivery/ckd/stamping for user 'devi'
+                        return redirect('/delivery/ckd/stamping');
+                    }
 
-                // Redirect to the intended route after login for all other users
-                return redirect()->intended('/home/ckd');
+                    // Redirect to the intended route after login for all other users
+                    return redirect()->intended('/home/ckd');
+
 
             } else {
                 return redirect('/')->with('statusLogin', 'Give Access First to User');
