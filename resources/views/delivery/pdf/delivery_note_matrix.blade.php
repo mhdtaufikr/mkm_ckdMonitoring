@@ -39,10 +39,10 @@
             <!-- Delivery Note Information -->
             <tr>
                 <td style="width: 30%;"></td>
-                <td style="width: 65%;"> {{ $deliveryNote->delivery_note_number }}</td>
+                <td style="width: 65%;"> {{ $deliveryNote->delivery_note_number }} <br>{{ $deliveryNote->order_number }}</td>
                 <td style="width: 40%;"> {{ \Carbon\Carbon::parse($deliveryNote->date)->format('d-m-Y') }}</td>
                 <td style="width: 30%;"> {{ now()->format('H:i:s') }}</td>
-            </tr> <br> <br>
+            </tr> <br>
             <tr>
                 <td style="width: 30%;"></td>
                 <td> {{ $deliveryNote->driver_license }}   <br>{{ $deliveryNote->destination }}</td>

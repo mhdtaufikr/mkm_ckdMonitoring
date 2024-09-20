@@ -223,7 +223,7 @@ public function ckdStampingTriggerDownload($id)
                     ->setPaper([0, 0, 680, 792]); // Set paper size to 24 cm wide (680 points) x 28 cm long (792 points) in portrait orientation
 
             // Generate and return the PDF
-            return $pdf->download('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
+            return $pdf->stream('DeliveryNote_' . $deliveryNote->delivery_note_number . '.pdf');
         }
 
 
