@@ -12,7 +12,7 @@
 
             // After the download, redirect to the CKD stamping index page
             setTimeout(function() {
-                window.location.href = "{{ route('delivery-note.index') }}";
+                window.location.href = "{{ route('delivery-note.index.manual') }}";
             }, 5000); // Delay the redirect slightly to allow the download to start
         };
     </script>
