@@ -184,7 +184,7 @@
                                                                 </button>
                                                                 <ul class="dropdown-menu">
                                                                     <li>
-                                                                        <a class="dropdown-item" href="{{ url('/delivery-note/detail/{id}') }}" title="Details">
+                                                                        <a class="dropdown-item" href="{{ url('/delivery-note/detail/' . encrypt($data->id)) }}" title="Details">
                                                                             <i class="fas fa-info-circle" style="margin-right: 5px;"></i> Details
                                                                         </a>
                                                                     </li>
@@ -192,6 +192,11 @@
                                                                         <a href="{{ route('delivery-note.pdf', ['id' => encrypt($data->id)]) }}" class="dropdown-item" title="Generate PDF">
                                                                             <i class="fas fa-file-pdf" style="margin-right: 5px;"></i> Generate PDF
                                                                         </a>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#modal-delete{{ $data->id }}">
+                                                                            <i class="fas fa-trash-alt" style="margin-right: 5px;"></i> Delete
+                                                                        </button>
                                                                     </li>
                                                                 </ul>
                                                             </div>
@@ -212,6 +217,31 @@
         </div>
     </div>
 </main>
+@foreach ($item as $data)
+<!-- Delete Modal -->
+<div class="modal fade" id="modal-delete{{ $data->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $data->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ $data->id }}">Delete Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the delivery note <strong>{{ $data->delivery_note_number }}</strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ route('delivery-note.destroy', $data->id) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
 <!-- For Datatables -->
 <script>
     $(document).ready(function() {

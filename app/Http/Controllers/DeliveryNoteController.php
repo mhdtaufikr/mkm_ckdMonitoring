@@ -288,22 +288,39 @@ public function ckdStampingTriggerDownload($id)
     // DeliveryNoteController.php
 
     public function show($id)
-    {
-        // Decrypt the ID (if needed)
+{
+    try {
+        // Decrypt the ID
         $id = decrypt($id);
-
-        // Fetch the delivery note header and details
-        $getHeader = DeliveryNote::find($id);
-        $getDetails = DeliveryNoteDetail::where('dn_id', $id)->get();
-
-        // Check if the delivery note exists
-        if (!$getHeader) {
-            return redirect()->route('delivery-note.index')->with('error', 'Delivery Note not found.');
-        }
-
-        // Pass the data to the view
-        return view('delivery.ckdStamping.view', compact('getHeader', 'getDetails'));
+    } catch (DecryptException $e) {
+        return redirect()->route('delivery-note.index')->with('error', 'Invalid ID.');
     }
+
+    // Fetch the delivery note header and details
+    $getHeader = DeliveryNote::find($id);
+    $getDetails = DeliveryNoteDetail::where('dn_id', $id)->get();
+
+    // Check if the delivery note exists
+    if (!$getHeader) {
+        return redirect()->route('delivery-note.index')->with('error', 'Delivery Note not found.');
+    }
+
+    // Pass the data to the view
+    return view('delivery.ckdStamping.view', compact('getHeader', 'getDetails'));
+}
+
+public function destroy($id)
+{
+    try {
+        // Find the delivery note by ID and delete it
+        $deliveryNote = DeliveryNote::findOrFail($id);
+        $deliveryNote->delete();
+
+        return redirect()->route('delivery-note.index')->with('status', 'Delivery note deleted successfully.');
+    } catch (ModelNotFoundException $e) {
+        return redirect()->route('delivery-note.index')->with('failed', 'Delivery note not found.');
+    }
+}
 
 
 }
