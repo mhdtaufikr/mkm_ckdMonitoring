@@ -27,7 +27,7 @@ class DeliveryNoteController extends Controller
     \Log::info('Search term received: ' . $search);
 
     // Fetch locations based on the search query
-    $locations = MstLocation::where('name', 'like', '%' . $search . '%')->limit(10)->get();
+    $locations = MstLocation::where('name', 'like', '%' . $search . '%')->get();
 
     \Log::info('Locations fetched: ', $locations->toArray()); // Log the fetched locations
 
