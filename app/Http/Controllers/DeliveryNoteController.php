@@ -116,7 +116,7 @@ class DeliveryNoteController extends Controller
 
         // Filter inventory items to match the date in the delivery_notes table
         $filteredInventoryItems = $inventoryItems->filter(function ($item) use ($getHeader) {
-            return \Carbon\Carbon::parse($item['receive_date'])->toDateString() === $getHeader->date;
+            return \Carbon\Carbon::parse($item['updated_at'])->toDateString() === $getHeader->date;
         });
 
         // Accumulate quantities for items with the same product code
