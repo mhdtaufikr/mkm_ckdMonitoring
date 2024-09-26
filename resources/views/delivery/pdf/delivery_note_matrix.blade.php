@@ -39,7 +39,7 @@
             <!-- Delivery Note Information -->
             <tr>
                 <td style="width: 30%;"></td>
-                <td style="width: 65%;"> {{ $deliveryNote->delivery_note_number }} <br>{{ $deliveryNote->order_number }}</td>
+                <td style="width: 65%;">{{ $deliveryNote->order_number }}   <br>{{ $deliveryNote->delivery_note_number }}</td>
                 <td style="width: 40%;"> {{ \Carbon\Carbon::parse($deliveryNote->date)->format('d-m-Y') }}</td>
                 <td style="width: 30%;"> {{ now()->format('H:i:s') }}</td>
             </tr> <br>
@@ -68,7 +68,7 @@
                     <td style="width: 4cm;"> {{ $detail->part_no }}</td>
                     <td style="width: 5cm;"> {{ $detail->part_name }}</td>
                     <td style="width: 5cm;">@if($detail->group_no) {{ $detail->group_no }} @endif</td>
-                    <td style="width: 3cm;"> {{ $detail->qty }}</td>
+                    <td style="width: 1.5cm;"> {{ $detail->qty }}</td>
                     <td style="width: 5cm;"> {{ $detail->remarks }}</td>
                 </tr>
             </table>
