@@ -31,6 +31,7 @@ class FetchInventoryData extends Command
             '66d5d624dbe327b3240d2316',/* IPM */
             '66d5d5ab4027413f7b0ecb51',/* ASI */
             '66d463589c02bcbf66000e1b',/* SS */
+            '65a73aafeccffe1b9c08290c'/* KRM Assy */
 
         ];
 

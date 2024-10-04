@@ -286,11 +286,28 @@ $variantCodeQuantities = DB::table('inventories')
             ->get()
             ->groupBy('model');
 
-            $variantCodeQuantitiesCNI = DB::table('inventories')
+            $krmReciving =  DB::table('inventory_items')
+            ->where('inventory_id', '662778516313de134a06c159')
+            ->where('receiving_date', '>=', Carbon::create(2024, 8, 1))
+            ->sum('qty');
+
+        $variantCodeQuantitiesCNI = DB::table('inventories')
             ->select('name', DB::raw('SUM(qty) as total_qty'))
             ->where('location_id', '6582ef8060c9390d890568d4')
             ->groupBy('name')
             ->get();
+
+        // Apply the logic based on the item name
+        $adjustedQuantities = $variantCodeQuantitiesCNI->map(function ($item) use ($krmReciving) {
+            if ($item->name == "Bellow Assy" || $item->name == "Exh Bracke Unit") {
+                // Subtract $krmReciving directly
+                $item->total_qty -= $krmReciving;
+            } elseif ($item->name == "Flange") {
+                // Subtract $krmReciving * 2
+                $item->total_qty -= ($krmReciving * 2);
+            }
+            return $item;
+        });
 
 
         return view('home.ckd', compact('resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));

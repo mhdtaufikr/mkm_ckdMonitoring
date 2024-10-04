@@ -22,7 +22,8 @@ class FetchInventoryItemData extends Command
             '617bd0ad83ef510374337d84',
             '5fc4b12bc329204cb00b56bf',
             '65bd1017b4490c26c00a82d9',
-            '6582ef8060c9390d890568d4'
+            '6582ef8060c9390d890568d4',
+            '65a73aafeccffe1b9c08290c'
         ];
 
         foreach ($locationIds as $locationId) {
@@ -123,6 +124,10 @@ class FetchInventoryItemData extends Command
 
         if ($locationId == '6582ef8060c9390d890568d4') {
             return $vendorName ?? 'MKM';
+        }
+
+        if ($locationId == '65a73aafeccffe1b9c08290c') {
+            return $vendorName ?? 'KRM';
         }
 
         return $vendorName;
