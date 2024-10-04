@@ -68,7 +68,7 @@
                     <td style="width: 4cm;"> {{ $detail->part_no }}</td>
                     <td style="width: 5cm;"> {{ $detail->part_name }}</td>
                     <td style="width: 5cm;">@if($detail->group_no) {{ $detail->group_no }} @endif</td>
-                    <td style="width: 1.5cm;"> {{ $detail->qty }}</td>
+                    <td style="width: 1cm;"> {{ $detail->qty }}</td>
                     <td style="width: 5cm;"> {{ $detail->remarks }}</td>
                 </tr>
             </table>

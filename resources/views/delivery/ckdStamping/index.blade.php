@@ -227,9 +227,9 @@
                                                                         </a>
                                                                     </li>
                                                                     <li>
-                                                                        <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#modal-delete{{ $data->id }}">
+                                                                       <!--  <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#modal-delete{{ $data->id }}">
                                                                             <i class="fas fa-trash-alt" style="margin-right: 5px;"></i> Delete
-                                                                        </button>
+                                                                        </button> -->
                                                                     </li>
                                                                 </ul>
                                                             </div>
