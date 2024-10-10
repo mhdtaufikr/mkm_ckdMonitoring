@@ -433,7 +433,7 @@ $variantCodeQuantities = DB::table('inventories')
             ->get()
             ->groupBy('model');
 
-        return view('home.cdknouba', compact('comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
+        return view('home.cdknouba', compact('krmReciving','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemCodes','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities'));
     }
 
     public function l305()

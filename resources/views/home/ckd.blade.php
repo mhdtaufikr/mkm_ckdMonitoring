@@ -748,7 +748,7 @@
 
                         <div class="card card-custom">
                             <div class="card-header">
-                                <h4>Supply CNI</h4>
+                                <h4>Supply CNI (KRM Receiving {{$krmReciving}} )</h4>
                             </div>
                             <div class="card-body">
                                 <div id="variant-code-pie-chart-cni" style="margin-top: 0px; height: 250px; width: 100%;"></div>
