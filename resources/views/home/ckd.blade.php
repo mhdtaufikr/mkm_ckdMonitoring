@@ -950,7 +950,7 @@
 
             // Collect actual data and find max quantity
             actualComparisons.forEach((comparison) => {
-                const actualDay = new Date(comparison.receiving_date).getDate() - 1;
+                const actualDay = new Date(comparison.updated_at).getDate() - 1;
                 const actualQty = comparison.received_qty;
                 actualData[actualDay] = actualQty;
                 if (actualQty > maxQuantity) {
