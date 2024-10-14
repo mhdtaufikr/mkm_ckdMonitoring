@@ -125,10 +125,20 @@ class DeliveryNoteController extends Controller
             $totalQty = $items->sum('qty'); // Sum quantities for the same product code
             $firstItem['qty'] = $totalQty;  // Update the quantity to the accumulated value
 
-            // Extract Lot No. from refNumber, e.g., "ABK-303" from "3821-KTB-PDM-VIII-2024-ABK-303-"
-            $refNumberParts = explode('-', $firstItem['refNumber']);
-            $lotNo = $refNumberParts[count($refNumberParts) - 3] . '-' . $refNumberParts[count($refNumberParts) - 2]; // Combine the last two parts to get "ABK-303"
-            $firstItem['lot_no'] = $lotNo; // Add 'lot_no' to the item
+           // Extract "AAG" from the 'code', e.g., "ME412734-AAG"
+            $codeParts = explode('-', $firstItem['code']);
+
+            // Ensure that there's a part after the hyphen
+            if (count($codeParts) >= 2) {
+                $lotNo = $codeParts[1]; // "AAG" is the part after the hyphen
+            } else {
+                // Handle cases where the code doesn't have a hyphen
+                $lotNo = 'Unknown'; // Set a default value if the code doesn't match the expected format
+            }
+
+            // Add 'lot_no' to the item
+            $firstItem['lot_no'] = $lotNo; // Add 'lot_no' as "AAG"
+
 
             return $firstItem;
         })->values(); // Reset keys after accumulation

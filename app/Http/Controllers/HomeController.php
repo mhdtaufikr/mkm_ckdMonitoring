@@ -144,7 +144,7 @@ class HomeController extends Controller
                // Initialize an array to store the results
     $resultData = [];
 
-    // Loop through each item in the planned data
+   // Loop through each item in the planned data
     foreach ($plannedData as $itemName => $plannedItems) {
         $totalPercentage = 0;
         $count = 0;
@@ -153,8 +153,11 @@ class HomeController extends Controller
             $plannedDate = $planned->planned_receiving_date;
             $plannedQty = $planned->planned_qty;
 
-            // Find the corresponding actual data for the same date
-            $actualQty = $actualData[$itemName]->firstWhere('receiving_date', $plannedDate)->received_qty ?? 0;
+            // Convert updated_at to a date format (ignoring time) for comparison
+            $actualQty = $actualData[$itemName]
+                ->first(function ($actual) use ($plannedDate) {
+                    return Carbon::parse($actual->updated_at)->toDateString() == $plannedDate;
+                })->received_qty ?? 0;
 
             // Calculate the percentage
             $percentage = ($plannedQty > 0) ? min(($actualQty / $plannedQty) * 100, 100) : 100;
@@ -165,6 +168,7 @@ class HomeController extends Controller
             }
         }
 
+
         // Calculate the average percentage for the item
         $averagePercentage = ($count > 0) ? $totalPercentage / $count : 0;
 
@@ -174,6 +178,7 @@ class HomeController extends Controller
             'average_percentage' => $averagePercentage,
         ];
     }
+
 
 
 
@@ -310,7 +315,7 @@ $variantCodeQuantities = DB::table('inventories')
         });
 
 
-        return view('home.ckd', compact('resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
+        return view('home.ckd', compact('krmReciving','resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
     }
 
 
