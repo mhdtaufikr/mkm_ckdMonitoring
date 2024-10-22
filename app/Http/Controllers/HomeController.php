@@ -233,16 +233,20 @@ class HomeController extends Controller
                         }
                         return $groupIndex;
                     });
-// Fetch variant code quantities from the inventories table, joined with master_products
-$variantCodeQuantities = DB::table('inventories')
-    ->join(DB::raw('(SELECT DISTINCT variantCode, model FROM master_products) as mp'), 'inventories.variantCode', '=', 'mp.variantCode')
-    ->select('mp.model', DB::raw('MAX(inventories.variantCode) as variantCode'), DB::raw('SUM(inventories.qty) as total_qty'))
-    ->where('inventories.location_id', $locationId)
-    ->whereNotNull('inventories.variantCode') // Exclude null variantCode
-    ->where('inventories.variantCode', '<>', '') // Exclude empty string variantCode
-    ->whereNotNull('mp.model') // Exclude null model
-    ->groupBy('mp.model') // Group by model, not variantCode
-    ->orderBy('mp.model')
+// Fetch variant code quantities from the inventories table, using code's last 3 characters as model
+$variantCodeQuantities = DB::table('inventories as i')
+    ->select(
+        DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
+        DB::raw('MIN(i.variantCode) as variantCode'),    // Get the first variantCode (or MAX if you prefer)
+        DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
+    )
+    ->where('i.location_id', $locationId)               // Filter by location_id
+    ->whereNotNull('i.variantCode')                     // Exclude rows with NULL variantCode
+    ->where('i.variantCode', '<>', '')                  // Exclude rows with empty variantCode
+    ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
+    ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
+    ->groupBy(DB::raw('RIGHT(i.code, 3)'))              // Group by the derived model (last 3 characters of code)
+    ->orderBy(DB::raw('RIGHT(i.code, 3)'))              // Order by the derived model
     ->get()
     ->groupBy(function ($item) {
         static $groupIndex = 0;
@@ -252,8 +256,6 @@ $variantCodeQuantities = DB::table('inventories')
         }
         return $groupIndex;
     });
-
-
 
 
                 // Prepare data for the chart
