@@ -234,47 +234,50 @@ class HomeController extends Controller
                         return $groupIndex;
                     });
                     // Fetch variant code quantities from the inventories table, using code's last 3 characters as model
-                    $variantCodeQuantities = DB::table('inventories as i')
-                    ->select(
-                        DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
-                        DB::raw('COALESCE(NULLIF(i.variantCode, ""), "no_variant_code") as variantCode'), // If variantCode is NULL/empty, use 'no_variant_code'
-                        DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
-                    )
-                    ->where('i.location_id', $locationId)               // Filter by location_id
-                    ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
-                    ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
-                    ->groupBy(DB::raw('RIGHT(i.code, 3)'), 'variantCode')              // Group by the derived model (last 3 characters of code) and variantCode
-                    ->orderBy(DB::raw('RIGHT(i.code, 3)'))              // Order by the derived model
-                    ->get();
+// Fetch variant code quantities from the inventories table, using code's last 3 characters as model (including mixed alphanumeric sequences)
+$variantCodeQuantities = DB::table('inventories as i')
+    ->select(
+        DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
+        DB::raw('COALESCE(NULLIF(i.variantCode, ""), "no_variant_code") as variantCode'), // If variantCode is NULL/empty, use 'no_variant_code'
+        DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
+    )
+    ->where('i.location_id', $locationId)               // Filter by location_id
+    ->whereRaw('RIGHT(i.code, 3) REGEXP "[A-Za-z]"')    // Only select records where at least one of the last 3 characters is a letter
+    ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
+    ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
+    ->groupBy(DB::raw('RIGHT(i.code, 3)'), 'variantCode')              // Group by the derived model (last 3 characters of code) and variantCode
+    ->orderBy(DB::raw('RIGHT(i.code, 3)'))              // Order by the derived model
+    ->get();
 
-                    // Replace the model value from master_products table using the variantCode
-                    $modifiedVariantCodeQuantities = $variantCodeQuantities->map(function ($item) {
-                    // If variantCode is not 'no_variant_code', query the master_products table to get the model for the current variantCode
-                    if ($item->variantCode !== 'no_variant_code') {
-                        $masterProduct = DB::table('master_products')
-                            ->where('variantCode', $item->variantCode)
-                            ->whereNotNull('model')  // Ensure we only get a non-null model
-                            ->first();  // Get the first result
+// Replace the model value from master_products table using the variantCode
+$modifiedVariantCodeQuantities = $variantCodeQuantities->map(function ($item) {
+    // If variantCode is not 'no_variant_code', query the master_products table to get the model for the current variantCode
+    if ($item->variantCode !== 'no_variant_code') {
+        $masterProduct = DB::table('master_products')
+            ->where('variantCode', $item->variantCode)
+            ->whereNotNull('model')  // Ensure we only get a non-null model
+            ->first();  // Get the first result
 
-                        // If a model is found in master_products, use it as the new model
-                        if ($masterProduct && $masterProduct->model) {
-                            $item->model = $masterProduct->model;  // Replace the model with the one from master_products
-                        }
-                    }
+        // If a model is found in master_products, use it as the new model
+        if ($masterProduct && $masterProduct->model) {
+            $item->model = $masterProduct->model;  // Replace the model with the one from master_products
+        }
+    }
 
-                    // Return the modified item
-                    return $item;
-                    });
+    // Return the modified item
+    return $item;
+});
 
-                    // Group the modified results just like in the original layout
-                    $groupedVariantCodeQuantities = $modifiedVariantCodeQuantities->groupBy(function ($item) {
-                    static $groupIndex = 0;
-                    static $itemCount = 0;
-                    if ($itemCount++ % 5 == 0) {
-                        $groupIndex++;
-                    }
-                    return $groupIndex;
-                    });
+// Group the modified results just like in the original layout
+$groupedVariantCodeQuantities = $modifiedVariantCodeQuantities->groupBy(function ($item) {
+    static $groupIndex = 0;
+    static $itemCount = 0;
+    if ($itemCount++ % 5 == 0) {
+        $groupIndex++;
+    }
+    return $groupIndex;
+});
+
 
 
 
