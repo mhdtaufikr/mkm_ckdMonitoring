@@ -234,7 +234,7 @@ class HomeController extends Controller
                         return $groupIndex;
                     });
                     // Fetch variant code quantities from the inventories table, using code's last 3 characters as model
-// Fetch variant code quantities from the inventories table, using code's last 3 characters as model (including mixed alphanumeric sequences)
+// Fetch variant code quantities from the inventories table, using code's last 3 characters as model (fully alphabetic)
 $variantCodeQuantities = DB::table('inventories as i')
     ->select(
         DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
@@ -242,7 +242,7 @@ $variantCodeQuantities = DB::table('inventories as i')
         DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
     )
     ->where('i.location_id', $locationId)               // Filter by location_id
-    ->whereRaw('RIGHT(i.code, 3) REGEXP "[A-Za-z]"')    // Only select records where at least one of the last 3 characters is a letter
+    ->whereRaw('RIGHT(i.code, 3) REGEXP "^[A-Za-z]{3}$"') // Only select records where the last 3 characters are fully alphabetic (no numbers)
     ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
     ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
     ->groupBy(DB::raw('RIGHT(i.code, 3)'), 'variantCode')              // Group by the derived model (last 3 characters of code) and variantCode
