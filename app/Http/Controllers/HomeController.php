@@ -235,23 +235,22 @@ class HomeController extends Controller
                     });
                     // Fetch variant code quantities from the inventories table, using code's last 3 characters as model
                     $variantCodeQuantities = DB::table('inventories as i')
-                        ->select(
-                            DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
-                            DB::raw('MIN(i.variantCode) as variantCode'),    // Get the first variantCode
-                            DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
-                        )
-                        ->where('i.location_id', $locationId)               // Filter by location_id
-                        ->whereNotNull('i.variantCode')                     // Exclude rows with NULL variantCode
-                        ->where('i.variantCode', '<>', '')                  // Exclude rows with empty variantCode
-                        ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
-                        ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
-                        ->groupBy(DB::raw('RIGHT(i.code, 3)'))              // Group by the derived model (last 3 characters of code)
-                        ->orderBy(DB::raw('RIGHT(i.code, 3)'))              // Order by the derived model
-                        ->get();
+                    ->select(
+                        DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
+                        DB::raw('COALESCE(NULLIF(i.variantCode, ""), "no_variant_code") as variantCode'), // If variantCode is NULL/empty, use 'no_variant_code'
+                        DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
+                    )
+                    ->where('i.location_id', $locationId)               // Filter by location_id
+                    ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
+                    ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
+                    ->groupBy(DB::raw('RIGHT(i.code, 3)'), 'variantCode')              // Group by the derived model (last 3 characters of code) and variantCode
+                    ->orderBy(DB::raw('RIGHT(i.code, 3)'))              // Order by the derived model
+                    ->get();
 
                     // Replace the model value from master_products table using the variantCode
                     $modifiedVariantCodeQuantities = $variantCodeQuantities->map(function ($item) {
-                        // Query the master_products table to get the model for the current variantCode
+                    // If variantCode is not 'no_variant_code', query the master_products table to get the model for the current variantCode
+                    if ($item->variantCode !== 'no_variant_code') {
                         $masterProduct = DB::table('master_products')
                             ->where('variantCode', $item->variantCode)
                             ->whereNotNull('model')  // Ensure we only get a non-null model
@@ -261,19 +260,22 @@ class HomeController extends Controller
                         if ($masterProduct && $masterProduct->model) {
                             $item->model = $masterProduct->model;  // Replace the model with the one from master_products
                         }
+                    }
 
-                        return $item;  // Return the modified item
+                    // Return the modified item
+                    return $item;
                     });
 
                     // Group the modified results just like in the original layout
                     $groupedVariantCodeQuantities = $modifiedVariantCodeQuantities->groupBy(function ($item) {
-                        static $groupIndex = 0;
-                        static $itemCount = 0;
-                        if ($itemCount++ % 5 == 0) {
-                            $groupIndex++;
-                        }
-                        return $groupIndex;
+                    static $groupIndex = 0;
+                    static $itemCount = 0;
+                    if ($itemCount++ % 5 == 0) {
+                        $groupIndex++;
+                    }
+                    return $groupIndex;
                     });
+
 
 
 
