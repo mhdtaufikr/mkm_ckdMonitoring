@@ -233,29 +233,48 @@ class HomeController extends Controller
                         }
                         return $groupIndex;
                     });
-// Fetch variant code quantities from the inventories table, using code's last 3 characters as model
-$variantCodeQuantities = DB::table('inventories as i')
-    ->select(
-        DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
-        DB::raw('MIN(i.variantCode) as variantCode'),    // Get the first variantCode (or MAX if you prefer)
-        DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
-    )
-    ->where('i.location_id', $locationId)               // Filter by location_id
-    ->whereNotNull('i.variantCode')                     // Exclude rows with NULL variantCode
-    ->where('i.variantCode', '<>', '')                  // Exclude rows with empty variantCode
-    ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
-    ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
-    ->groupBy(DB::raw('RIGHT(i.code, 3)'))              // Group by the derived model (last 3 characters of code)
-    ->orderBy(DB::raw('RIGHT(i.code, 3)'))              // Order by the derived model
-    ->get()
-    ->groupBy(function ($item) {
-        static $groupIndex = 0;
-        static $itemCount = 0;
-        if ($itemCount++ % 5 == 0) {
-            $groupIndex++;
-        }
-        return $groupIndex;
-    });
+                    // Fetch variant code quantities from the inventories table, using code's last 3 characters as model
+                    $variantCodeQuantities = DB::table('inventories as i')
+                        ->select(
+                            DB::raw('RIGHT(i.code, 3) as model'),            // Get the last 3 characters from the code as model
+                            DB::raw('MIN(i.variantCode) as variantCode'),    // Get the first variantCode
+                            DB::raw('SUM(i.qty) as total_qty')               // Sum the qty for the current month and year
+                        )
+                        ->where('i.location_id', $locationId)               // Filter by location_id
+                        ->whereNotNull('i.variantCode')                     // Exclude rows with NULL variantCode
+                        ->where('i.variantCode', '<>', '')                  // Exclude rows with empty variantCode
+                        ->whereRaw('MONTH(i.updated_at) = MONTH(CURDATE())')// Filter for the current month
+                        ->whereRaw('YEAR(i.updated_at) = YEAR(CURDATE())')  // Filter for the current year
+                        ->groupBy(DB::raw('RIGHT(i.code, 3)'))              // Group by the derived model (last 3 characters of code)
+                        ->orderBy(DB::raw('RIGHT(i.code, 3)'))              // Order by the derived model
+                        ->get();
+
+                    // Replace the model value from master_products table using the variantCode
+                    $modifiedVariantCodeQuantities = $variantCodeQuantities->map(function ($item) {
+                        // Query the master_products table to get the model for the current variantCode
+                        $masterProduct = DB::table('master_products')
+                            ->where('variantCode', $item->variantCode)
+                            ->whereNotNull('model')  // Ensure we only get a non-null model
+                            ->first();  // Get the first result
+
+                        // If a model is found in master_products, use it as the new model
+                        if ($masterProduct && $masterProduct->model) {
+                            $item->model = $masterProduct->model;  // Replace the model with the one from master_products
+                        }
+
+                        return $item;  // Return the modified item
+                    });
+
+                    // Group the modified results just like in the original layout
+                    $groupedVariantCodeQuantities = $modifiedVariantCodeQuantities->groupBy(function ($item) {
+                        static $groupIndex = 0;
+                        static $itemCount = 0;
+                        if ($itemCount++ % 5 == 0) {
+                            $groupIndex++;
+                        }
+                        return $groupIndex;
+                    });
+
 
 
                 // Prepare data for the chart
@@ -317,7 +336,7 @@ $variantCodeQuantities = DB::table('inventories as i')
         });
 
 
-        return view('home.ckd', compact('krmReciving','resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'variantCodeQuantities','variantCodeQuantitiesCNI'));
+        return view('home.ckd', compact('krmReciving','resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'groupedVariantCodeQuantities','variantCodeQuantitiesCNI'));
     }
 
 

@@ -1237,12 +1237,13 @@ const trendData = daysOfMonth.map((date, index) => {
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
 
-
-      const variantCodeQuantities = @json($variantCodeQuantities);
+      // Replace the reference to variantCodeQuantities with modifiedVariantCodeQuantities
+      const variantCodeQuantities = @json($groupedVariantCodeQuantities);
 
       if (typeof variantCodeQuantities === 'object') {
         const combinedData = [];
 
+        // Loop through the modified data structure
         Object.keys(variantCodeQuantities).forEach((groupIndex) => {
           const group = variantCodeQuantities[groupIndex];
           group.forEach(item => {
@@ -1276,18 +1277,18 @@ const trendData = daysOfMonth.map((date, index) => {
                 categoryField: "category"
             }));
 
-            // Set data
+            // Set data for the chart
             series.data.setAll(combinedData);
 
-            // Disabling labels and ticks
+            // Configure labels and ticks
             series.labels.template.set("visible", true); // Show labels
             series.labels.template.set("text", "{category}: {value}"); // Display model and quantity
             series.ticks.template.set("visible", false);
 
-            // Adding gradients
+            // Add gradients to slices
             series.slices.template.set("strokeOpacity", 0);
             series.slices.template.set("fillGradient", am5.RadialGradient.new(root, {
-                stops: [{
+                stops: [ {
                     brighten: -0.8
                 }, {
                     brighten: -0.8
@@ -1297,7 +1298,7 @@ const trendData = daysOfMonth.map((date, index) => {
                     brighten: 0
                 }, {
                     brighten: -0.5
-                }]
+                } ]
             }));
 
             // Configure tooltips to show model and quantity
@@ -1330,6 +1331,7 @@ const trendData = daysOfMonth.map((date, index) => {
       }
     });
 </script>
+
 
 
 
