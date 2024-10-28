@@ -173,28 +173,36 @@ public function updatePlanned(Request $request)
         return Carbon::parse($item->planned_receiving_date)->format('Y-m-d');
     });
 
-    // Delete existing planned receive items for this inventory
-    PlannedInventoryItem::where('inventory_id', $inventoryId)->delete();
-
     // Check if there are planned dates provided in the request
     if ($plannedDates) {
-        // Insert new planned receive items
+        // Loop through planned dates and create or update items
         foreach ($plannedDates as $index => $date) {
             $existingItem = $existingItemsMap->get($date);
 
-            PlannedInventoryItem::create([
-                '_id' => uniqid(),
-                'inventory_id' => $inventoryId,
-                'planned_receiving_date' => $date,
-                'planned_qty' => $plannedQtys[$index],
-                'vendor_name' => $vendorNames[$index] ?? ($existingItem ? $existingItem->vendor_name : null),
-                'status' => $statuses[$index] ?? ($existingItem ? $existingItem->status : 'Pending'), // Set a default status if not available
-            ]);
+            if ($existingItem) {
+                // Update existing item
+                $existingItem->update([
+                    'planned_qty' => $plannedQtys[$index],
+                    'vendor_name' => $vendorNames[$index] ?? $existingItem->vendor_name,
+                    'status' => $statuses[$index] ?? $existingItem->status,
+                ]);
+            } else {
+                // Create new item if it doesn't exist for the date
+                PlannedInventoryItem::create([
+                    '_id' => uniqid(),
+                    'inventory_id' => $inventoryId,
+                    'planned_receiving_date' => $date,
+                    'planned_qty' => $plannedQtys[$index],
+                    'vendor_name' => $vendorNames[$index] ?? null,
+                    'status' => $statuses[$index] ?? 'Pending', // Set a default status if not available
+                ]);
+            }
         }
     }
 
     return redirect()->back()->with('status', 'Planned receive updated successfully.');
 }
+
 
 public function indexCNI(Request $request){
     $locationIds = ['6582ef8060c9390d890568d4'];
