@@ -16,7 +16,8 @@ class PlannedInventoryItemsImport implements ToModel, WithHeadingRow
         try {
             // Khusus untuk location_id tertentu
             $specialLocationIds = ['617bd0ad83ef510374337d84', '65a72c7fad782dc26a0626f6'];
-            $currentMonth = '2024-10';
+            $currentMonth = now()->format('Y-m');
+
 
             if (in_array($row['location_id'], $specialLocationIds)) {
                 // Ambil 3 huruf belakang dari kode produk

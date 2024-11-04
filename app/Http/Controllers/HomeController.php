@@ -144,29 +144,33 @@ class HomeController extends Controller
                // Initialize an array to store the results
     $resultData = [];
 
-   // Loop through each item in the planned data
-    foreach ($plannedData as $itemName => $plannedItems) {
-        $totalPercentage = 0;
-        $count = 0;
+             // Loop through each item in the planned data
+            foreach ($plannedData as $itemName => $plannedItems) {
+                $totalPercentage = 0;
+                $count = 0;
 
-        foreach ($plannedItems as $planned) {
-            $plannedDate = $planned->planned_receiving_date;
-            $plannedQty = $planned->planned_qty;
+                foreach ($plannedItems as $planned) {
+                    $plannedDate = $planned->planned_receiving_date;
+                    $plannedQty = $planned->planned_qty;
 
-            // Convert updated_at to a date format (ignoring time) for comparison
-            $actualQty = $actualData[$itemName]
-                ->first(function ($actual) use ($plannedDate) {
-                    return Carbon::parse($actual->updated_at)->toDateString() == $plannedDate;
-                })->received_qty ?? 0;
+                    // Check if the actual data for the item exists
+                    $actualQty = isset($actualData[$itemName])
+                        ? $actualData[$itemName]->first(function ($actual) use ($plannedDate) {
+                            return Carbon::parse($actual->updated_at)->toDateString() == $plannedDate;
+                        })->received_qty ?? 0
+                        : 0;
 
-            // Calculate the percentage
-            $percentage = ($plannedQty > 0) ? min(($actualQty / $plannedQty) * 100, 100) : 100;
+                    // Calculate the percentage
+                    $percentage = ($plannedQty > 0) ? min(($actualQty / $plannedQty) * 100, 100) : 100;
 
-            if ($plannedDate <= $today) {
-                $totalPercentage += $percentage;
-                $count++;
-            }
-        }
+                    if ($plannedDate <= $today) {
+                        $totalPercentage += $percentage;
+                        $count++;
+                    }
+                }
+
+    // You can add further processing for $totalPercentage and $count if needed
+
 
 
         // Calculate the average percentage for the item
