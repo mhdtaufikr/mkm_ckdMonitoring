@@ -125,19 +125,19 @@ class HomeController extends Controller
                 ->get()
                 ->groupBy('item_name');
 
-                // Get actual data
-                $actualData = DB::table('actual_inventory_view')
-                ->select(
-                    '*',
-                    DB::raw('DATE(receiving_date) AS receiving_date'),
-                    DB::raw('SUM(received_qty) AS received_qty')
-                )
-                ->where('location_id', '6582ef8060c9390d890568d4')
-                ->whereMonth('receiving_date', $currentMonth)
-                ->whereYear('receiving_date', $currentYear)
-                ->groupBy('item_name', DB::raw('DATE(receiving_date)'))
-                ->orderBy(DB::raw('DATE(receiving_date)'), 'asc')
-                ->orderBy('item_name', 'asc')
+                 // Get actual data
+                 $actualData = DB::table('actual_inventory_view')
+                 ->select(
+                     '*',
+                     DB::raw('DATE(updated_at) AS receiving_date'),
+                     DB::raw('SUM(received_qty) AS received_qty')
+                 )
+                 ->where('location_id', '6582ef8060c9390d890568d4')
+                 ->whereMonth('updated_at', $currentMonth)
+                 ->whereYear('updated_at', $currentYear)
+                 ->groupBy('item_name', DB::raw('DATE(updated_at)'))
+                 ->orderBy(DB::raw('DATE(updated_at)'), 'asc')
+                 ->orderBy('item_name', 'asc')
 
                 ->get()
                 ->groupBy('item_name');
