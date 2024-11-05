@@ -19,18 +19,18 @@ class HomeController extends Controller
 
         // Get planned data
         $plannedData = DB::table('planned_inventory_view')
+        ->where('location_id',$locationId)
         ->whereMonth('planned_receiving_date', $currentMonth)
         ->whereYear('planned_receiving_date', $currentYear)
-        ->where('location_id',$locationId)
         ->get()
         ->groupBy('item_code');
 
         // Get actual data
         $actualData = DB::table('actual_inventory_view')
+            ->where('location_id',$locationId)
             ->whereMonth('receiving_date', $currentMonth)
             ->whereYear('receiving_date', $currentYear)
             ->whereDate('receiving_date', '<=', $today)
-            ->where('location_id',$locationId)
             ->get()
             ->groupBy('item_code');
 
@@ -46,25 +46,25 @@ class HomeController extends Controller
 
         // Fetch the sum of planned and actual quantities grouped by vendor name and date for the current month until today
         $vendorData = DB::table('vendor_comparison')
+            ->where('location_id', $locationId)
             ->whereMonth('date', $currentMonth)
             ->whereYear('date', $currentYear)
             ->whereIn('vendor_name', ['MOSSI', 'SCI', 'USC', 'AAP'])
-            ->where('location_id', $locationId)
             ->get()
             ->groupBy('vendor_name');
 
         // Fetch vendor monthly summary
         $vendorMonthlySummary = DB::table('vendor_monthly_summary')
+            ->where('location_id', $locationId)
             ->select('vendor_name', 'total_planned_qty', 'total_actual_qty')
             ->where('year', $currentYear)
             ->where('month', $currentMonth)
-            ->where('location_id', $locationId)
             ->get();
 
         // Fetch item code quantities from the inventories table
         $itemCodeQuantities = DB::table('inventories')
-        ->select('_id', 'code', 'qty') // Ensure 'id' is selected
         ->where('location_id', $locationId)
+        ->select('_id', 'code', 'qty') // Ensure 'id' is selected
         ->get()
         ->groupBy(function ($item) {
             static $groupIndex = 0;
@@ -82,10 +82,10 @@ class HomeController extends Controller
         $totalActual = $vendorMonthlySummary->pluck('total_actual_qty')->toArray();
         // Fetch vendor monthly summary
         $itemNotArrived = DB::table('items_not_arrived')
+        ->where('location_id', $locationId)
         ->whereMonth('planned_receiving_date', now()->month)
         ->whereYear('planned_receiving_date', now()->year)
         ->whereDate('planned_receiving_date', '<=', now()->toDateString())
-        ->where('location_id', $locationId)
         ->orderBy('planned_receiving_date', 'desc') // Sort by newest data
         ->get();
 
