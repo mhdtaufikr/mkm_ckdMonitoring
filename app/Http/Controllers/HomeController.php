@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\InventoryComparison;
+use App\Models\Rule;
 
 class HomeController extends Controller
 {
@@ -342,8 +343,8 @@ class HomeController extends Controller
             return $item;
         });
 
-
-        return view('home.ckd', compact('krmReciving','resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'groupedVariantCodeQuantities','variantCodeQuantitiesCNI'));
+$note = Rule::where('rule_name','noted')->first();
+        return view('home.ckd', compact('note','krmReciving','resultData','comparisons','comparisonDataModel','actualDataModel','plannedDataModel','locationId','itemNotArrived','plannedData', 'actualData', 'vendorData', 'itemCodeQuantities', 'vendors', 'totalPlanned', 'totalActual', 'groupedVariantCodeQuantities','variantCodeQuantitiesCNI'));
     }
 
 

@@ -203,12 +203,40 @@
                     </div>
                 </div>
                 <p style="margin-top: -20px" class="text-center">{{ $vendorName }}</p>
-                <div style="margin-top: -20px; width: 100%; height: 80%; margin-left: 0px;" class="chart-container">
-                    <div class="chart-custom" id="chartdiv-{{ $vendorName }}"></div>
+                <div class="row">
+                    <div class="col-md-9">
+                        <div style="margin-top: -20px; width: 100%; height: 120%; margin-left: 0px;" class="chart-container">
+                            <div class="chart-custom" id="chartdiv-{{ $vendorName }}"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="remarks-container" style="margin-left: 10px; margin-top: -20px;">
+                            <p style="font-weight: bold; font-size: 16px;">Remarks</p>
+                            <textarea
+                                disabled
+                                cols="30"
+                                rows="10"
+                                style="
+                                    width: 100%;
+                                    max-width: 100%;
+                                    height: auto;
+                                    min-height: 150px;
+                                    border-radius: 8px;
+                                    border: 2px solid #007bff;
+                                    padding: 10px;
+                                    resize: vertical;
+                                    font-family: Arial, sans-serif;
+                                    font-size: 14px;
+                                    background-color: #f9f9f9;"
+                            >{{$note->rule_value}}</textarea>
+                        </div>
+                    </div>
+
                 </div>
 
+
                 <script>
-                    am5.ready(function () {
+                    am5.ready(function() {
                         var root = am5.Root.new("chartdiv-{{ $vendorName }}");
 
                         root.setThemes([am5themes_Animated.new(root)]);
@@ -220,16 +248,16 @@
                                 wheelX: "none",
                                 wheelY: "none",
                                 paddingLeft: 0,
-                                layout: root.verticalLayout,
+                                layout: root.verticalLayout
                             })
                         );
 
                         const vendorData = @json($vendorData);
-                        const data = vendorData["{{ $vendorName }}"].map((item) => ({
+                        const data = vendorData["{{ $vendorName }}"].map(item => ({
                             date: new Date(item.date).getDate().toString(),
                             actual: parseInt(item.total_actual_qty),
                             plan: parseInt(item.total_planned_qty),
-                            percentage: parseFloat(item.percentage),
+                            percentage: parseFloat(item.percentage)
                         }));
 
                         // Predefine x-axis categories to 1-31
@@ -237,55 +265,49 @@
 
                         var xRenderer = am5xy.AxisRendererX.new(root, {
                             minorGridEnabled: true,
-                            minGridDistance: 30,
+                            minGridDistance: 30
                         });
 
                         var xAxis = chart.xAxes.push(
                             am5xy.CategoryAxis.new(root, {
                                 categoryField: "date",
                                 renderer: xRenderer,
-                                tooltip: am5.Tooltip.new(root, {}),
+                                tooltip: am5.Tooltip.new(root, {})
                             })
                         );
 
-                        xAxis.data.setAll(daysOfMonth.map((date) => ({ date })));
+                        xAxis.data.setAll(daysOfMonth.map(date => ({ date })));
                         xRenderer.grid.template.setAll({ location: 1 });
 
                         var yAxis = chart.yAxes.push(
                             am5xy.ValueAxis.new(root, {
                                 min: 0,
                                 extraMax: 0.1,
-                                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 }),
+                                renderer: am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 })
                             })
                         );
 
-                        yAxis.children.moveValue(
-                            am5.Label.new(root, {
-                                rotation: -90,
-                                text: "Quantity",
-                                y: am5.p50,
-                                centerX: am5.p50,
-                            }),
-                            0
-                        );
+                        yAxis.children.moveValue(am5.Label.new(root, {
+                            rotation: -90,
+                            text: "Quantity",
+                            y: am5.p50,
+                            centerX: am5.p50
+                        }), 0);
 
                         var yAxisRight = chart.yAxes.push(
                             am5xy.ValueAxis.new(root, {
                                 min: 0,
                                 max: 120,
-                                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 }),
+                                renderer: am5xy.AxisRendererY.new(root, { opposite: true, strokeOpacity: 0.1 })
                             })
                         );
 
-                        yAxisRight.children.moveValue(
-                            am5.Label.new(root, {
-                                rotation: -90,
-                                text: "Percentage (%)",
-                                y: am5.p50,
-                                centerX: am5.p50,
-                            }),
-                            0
-                        );
+                        yAxisRight.children.moveValue(am5.Label.new(root, {
+                            rotation: -90,
+                            text: "Percentage (%)",
+                            y: am5.p50,
+                            centerX: am5.p50
+                        }), 0);
 
                         // Add layered columns
                         var planSeries = chart.series.push(
@@ -295,15 +317,18 @@
                                 yAxis: yAxis,
                                 valueYField: "plan",
                                 categoryXField: "date",
-                                clustered: false,
-                                tooltip: am5.Tooltip.new(root, { pointerOrientation: "horizontal", labelText: "{name}: {valueY}" }),
+                                clustered: false,  // Disable clustering to layer columns
+                                tooltip: am5.Tooltip.new(root, {
+                                    pointerOrientation: "horizontal",
+                                    labelText: "{name}: {valueY}"
+                                })
                             })
                         );
                         planSeries.columns.template.setAll({
                             width: am5.percent(80),
                             tooltipY: am5.percent(10),
                             strokeOpacity: 0,
-                            fill: am5.color("#1e81b0"),
+                            fill: am5.color("#1e81b0")
                         });
                         planSeries.data.setAll(data);
 
@@ -314,15 +339,18 @@
                                 yAxis: yAxis,
                                 valueYField: "actual",
                                 categoryXField: "date",
-                                clustered: false,
-                                tooltip: am5.Tooltip.new(root, { pointerOrientation: "horizontal", labelText: "{name}: {valueY}" }),
+                                clustered: false,  // Disable clustering to layer columns
+                                tooltip: am5.Tooltip.new(root, {
+                                    pointerOrientation: "horizontal",
+                                    labelText: "{name}: {valueY}"
+                                })
                             })
                         );
                         actualSeries.columns.template.setAll({
                             width: am5.percent(50),
                             tooltipY: am5.percent(10),
                             strokeOpacity: 0,
-                            fill: am5.color("#fbb659"),
+                            fill: am5.color("#fbb659")
                         });
                         actualSeries.data.setAll(data);
 
@@ -333,14 +361,17 @@
                                 yAxis: yAxisRight,
                                 valueYField: "percentage",
                                 categoryXField: "date",
-                                tooltip: am5.Tooltip.new(root, { pointerOrientation: "horizontal", labelText: "{name}: {valueY}%" }),
+                                tooltip: am5.Tooltip.new(root, {
+                                    pointerOrientation: "horizontal",
+                                    labelText: "{name}: {valueY}%"
+                                }),
                                 stroke: am5.color(0x000000),
-                                fill: am5.color(0x000000),
+                                fill: am5.color(0x000000)
                             })
                         );
                         percentageSeries.strokes.template.setAll({ strokeWidth: 3 });
                         percentageSeries.data.setAll(data);
-                        percentageSeries.bullets.push(function (root, series, dataItem) {
+                        percentageSeries.bullets.push(function(root, series, dataItem) {
                             var value = dataItem.dataContext.percentage;
                             var bulletColor = value < 100 ? am5.color(0xff0000) : am5.color(0x00ff00);
                             return am5.Bullet.new(root, {
@@ -348,11 +379,10 @@
                                     strokeWidth: 3,
                                     stroke: series.get("stroke"),
                                     radius: 5,
-                                    fill: bulletColor,
-                                }),
+                                    fill: bulletColor
+                                })
                             });
                         });
-
 
                         // Add click event to actualSeries columns
                         actualSeries.columns.template.events.on("click", function(ev) {
@@ -366,89 +396,47 @@
                             window.open('/details-page/' + date, '_blank');
                         });
 
-                        // Add Exporting and Annotation Plugins
-                        try {
-                            var exporting = am5plugins_exporting.Exporting.new(root, {
-                                menu: am5plugins_exporting.ExportingMenu.new(root, {}),
-                            });
+                        // Calculate Trend Line
+                        var trendData = data.map(function(item, index, array) {
+                            var plan = item.plan || 0;
+                            var actual = item.actual || 0;
+                            var trendValue = (plan + actual) / 2; // Simple average for trend
+                            return {
+                                date: item.date,
+                                value: trendValue
+                            };
+                        });
 
-                            var annotator = am5plugins_exporting.Annotator.new(root, {});
-
-                            var menuItems = exporting.get("menu").get("items");
-                            menuItems.push({ type: "separator" });
-                            menuItems.push({
-                                type: "custom",
-                                label: "Annotate",
-                                callback: function () {
-                                    this.close();
-                                    annotator.toggle();
-                                },
-                            });
-
-                            menuItems.push({
-                                type: "custom",
-                                label: "Save Annotation",
-                                callback: function () {
-                                    const annotationData = annotator.export ? annotator.export() : annotator.get("annotations"); // Get annotation data
-                                    const chartId = "chartdiv-{{ $vendorName }}"; // Unique chart ID
-
-                                    // Send annotation data to the server
-                                    fetch('/save-annotation', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                        },
-                                        body: JSON.stringify({
-                                            chart_id: chartId,
-                                            annotation_data: JSON.stringify(annotationData),
-                                        }),
-                                    })
-                                        .then((response) => response.json())
-                                        .then((data) => {
-                                            if (data.success) {
-                                                alert('Annotation saved successfully!');
-                                            } else {
-                                                alert('Failed to save annotation.');
-                                            }
-                                        })
-                                        .catch((error) => {
-                                            console.error('Error saving annotation:', error);
-                                        });
-                                },
-                            });
-
-                            exporting.set("menu", am5plugins_exporting.ExportingMenu.new(root, { items: menuItems }));
-
-                            // Load annotations from the server
-                            fetch('/get-annotation', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                },
-                                body: JSON.stringify({ chart_id: "chartdiv-{{ $vendorName }}" }),
+                        // Create trend line series
+                        var trendLineSeries = chart.series.push(am5xy.LineSeries.new(root, {
+                            name: "Trend Line",
+                            xAxis: xAxis,
+                            yAxis: yAxis,
+                            valueYField: "value",
+                            categoryXField: "date",
+                            stroke: am5.color(0x008000), // Red color for trend line
+                            strokeWidth: 3,
+                            tooltip: am5.Tooltip.new(root, {
+                                pointerOrientation: "horizontal",
+                                labelText: "Trend: {valueY}"
                             })
-                                .then((response) => response.json())
-                                .then((data) => {
-                                    if (data.success && data.annotation_data) {
-                                        annotator.import(JSON.parse(data.annotation_data)); // Load annotations into the chart
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error('Error loading annotation:', error);
-                                });
+                        }));
 
-                            console.log("Exporting and annotation tools initialized successfully for chart");
-                        } catch (error) {
-                            console.error("Error initializing Exporting or Annotator for chart:", error);
-                        }
+                        trendLineSeries.data.setAll(trendData);
+                        trendLineSeries.strokes.template.setAll({
+                            strokeWidth: 3,
+                            strokeDasharray: [5, 5] // Dashed trend line
+                        });
 
-                        // Add legend
+                        // Add cursor
+                        chart.set("cursor", am5xy.XYCursor.new(root, {
+                            behavior: "none"
+                        }));
+
                         var legend = chart.children.push(
                             am5.Legend.new(root, {
                                 centerX: am5.p50,
-                                x: am5.p50,
+                                x: am5.p50
                             })
                         );
                         legend.data.setAll(chart.series.values);
@@ -457,9 +445,9 @@
                         actualSeries.appear();
                         planSeries.appear();
                         percentageSeries.appear();
+                        trendLineSeries.appear();
                     });
                 </script>
-
 
             @endforeach
         @else
