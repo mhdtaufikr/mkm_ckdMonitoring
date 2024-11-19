@@ -72,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inventory/raw-material', [InventoryController::class, 'index'])->name('inventory.index');;
     Route::get('/inventory/{id}/details', [InventoryController::class, 'show'])->name('inventory.details');
     Route::post('/inventory/planned/upload', [InventoryController::class, 'uploadPlanned'])->name('inventory.planned.upload');
+    Route::post('/inventory/planned/upload/ckd', [InventoryController::class, 'uploadPlannedCKD'])->name('inventory.planned.upload.ckd');
     Route::get('/download/excel/format/planned', [InventoryController::class, 'downloadPlannedTemplate'])->name('inventory.planned.template');
     Route::post('/inventory/planned/update', [InventoryController::class, 'updatePlannedReceive'])->name('inventory.planned.update');
 

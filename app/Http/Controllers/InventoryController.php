@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\PlannedInventoryItemsImport;
 use App\Exports\PlannedInventoryItemsExport;
+use App\Imports\PlannedInventoryItemsImportCKD;
 use Carbon\Carbon;
 
 class InventoryController extends Controller
@@ -142,6 +143,22 @@ public function updatePlanned(Request $request)
         return redirect()->route('inventory.index')->with('error', 'Failed to upload planned receiving items: ' . $e->getMessage());
     }
 }
+public function uploadPlannedCKD(Request $request)
+{
+    $request->validate([
+        'excel-file' => 'required|mimes:xlsx,csv',
+    ]);
+
+    try {
+        $file = $request->file('excel-file');
+        Excel::import(new PlannedInventoryItemsImportCKD, $file);
+
+        return redirect()->route('inventory.index')->with('status', 'Planned CKD items uploaded successfully.');
+    } catch (Exception $e) {
+        return redirect()->route('inventory.index')->with('error', 'Failed to upload planned CKD items: ' . $e->getMessage());
+    }
+}
+
 
 
 

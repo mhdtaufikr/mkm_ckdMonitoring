@@ -30,6 +30,9 @@
                         <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadPlannedModal">
                             <i class="fas fa-file-excel"></i> Upload Planned Received Item
                         </button>
+                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadPlannedModalCKD">
+                            <i class="fas fa-file-excel"></i> Upload Planned Received Item CKD
+                        </button>
                     </div>
 
 
@@ -170,6 +173,37 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <form action="{{ url('/inventory/planned/upload') }}" method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <input type="file" class="form-control" id="csvFile" name="excel-file" accept=".csv, .xlsx">
+                                                    <p class="text-danger">*file must be .xlsx or .csv</p>
+                                                </div>
+                                                @error('excel-file')
+                                                    <div class="alert alert-danger" role="alert">
+                                                        {{ $message }}
+                                                    </div>
+                                                @enderror
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="{{ route('inventory.planned.template') }}" class="btn btn-link">
+                                                    Download Excel Format
+                                                </a>
+                                                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="uploadPlannedModalCKD" tabindex="-1" aria-labelledby="modal-add-label" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="modal-add-label">Upload Planned Received Items</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <form action="{{ url('/inventory/planned/upload/ckd') }}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                             <div class="modal-body">
                                                 <div class="mb-3">
