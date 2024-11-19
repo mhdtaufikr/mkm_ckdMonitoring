@@ -19,7 +19,7 @@
         </div>
     </header>
 <!-- Main page content-->
-<div class="container-xl px-4 mt-n10">       
+<div class="container-xl px-4 mt-n10">
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -42,15 +42,15 @@
               <div class="card-header">
                 <h3 class="card-title">List of Rule</h3>
               </div>
-              
+
               <!-- /.card-header -->
               <div class="card-body">
                 <div class="row">
                     <div class="mb-3 col-sm-12">
                         <button type="button" class="btn btn-dark btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#modal-add">
-                            <i class="fas fa-plus-square"></i> 
+                            <i class="fas fa-plus-square"></i>
                           </button>
-                          
+
                           <!-- Modal -->
                           <div class="modal fade" id="modal-add" tabindex="-1" aria-labelledby="modal-add-label" aria-hidden="true">
                             <div class="modal-dialog">
@@ -78,23 +78,23 @@
                               </div>
                             </div>
                           </div>
-                          
+
 
                       <!--alert success -->
                       @if (session('status'))
                       <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <strong>{{ session('status') }}</strong>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                      </div> 
+                      </div>
                     @endif
 
                     @if (session('failed'))
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                       <strong>{{ session('failed') }}</strong>
                       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div> 
+                    </div>
                   @endif
-                    
+
                       <!--alert success -->
                       <!--validasi form-->
                         @if (count($errors)>0)
@@ -110,7 +110,7 @@
                         @endif
                       <!--end validasi form-->
                 </div>
-                <div class="table-responsive"> 
+                <div class="table-responsive">
                 <table id="tableUser" class="table table-bordered table-striped">
                   <thead>
                   <tr>
@@ -135,7 +135,7 @@
                               </button>
                             <button title="Delete Rule" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modal-delete{{ $data->id }}">
                                 <i class="fas fa-trash-alt"></i>
-                              </button>   
+                              </button>
                         </td>
                     </tr>
 
@@ -157,7 +157,13 @@
                                 </div>
                                 <br>
                                 <div class="form-group">
-                                  <input type="text" class="form-control" id="rule_value" name="rule_value" placeholder="Enter Rule Value" value="{{ $data->rule_value }}">
+                                    <textarea
+                                    class="form-control"
+                                    id="rule_value"
+                                    name="rule_value"
+                                    placeholder="Enter Rule Value"
+                                    rows="4">{{ $data->rule_value }}</textarea>
+
                                 </div>
                               </div>
                               <div class="modal-footer">
@@ -209,7 +215,7 @@
                           <form action="{{ url('') }}" enctype="multipart/form-data" method="GET">
                           @csrf
                           <div class="modal-body">
-                            
+
                           </div>
                           <div class="modal-footer justify-content-between">
                             <button type="button" class="btn btn-dark btn-default" data-dismiss="modal">Close</button>
@@ -243,14 +249,14 @@
   <!-- /.content-wrapper -->
 </div>
 
-     
+
 </main>
 <!-- For Datatables -->
 <script>
     $(document).ready(function() {
       var table = $("#tableUser").DataTable({
-        "responsive": true, 
-        "lengthChange": false, 
+        "responsive": true,
+        "lengthChange": false,
         "autoWidth": false,
         // "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
       });
