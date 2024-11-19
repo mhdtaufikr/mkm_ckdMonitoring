@@ -5,6 +5,7 @@
         <meta name="theme-color" content="#6777ef"/>
         <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
         <meta charset="utf-8" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
@@ -56,13 +57,13 @@
         <!-- Include Chosen JS -->
         <script src="{{asset('chosen/chosen.jquery.min.js')}}"></script>
 
-            <!-- Include cdn.amcharts -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Resources -->
         <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline"></script>
         <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/radar.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/plugins/exporting.js"></script>
     </head>
 
     <body class="nav-fixed sidenav-toggled">
