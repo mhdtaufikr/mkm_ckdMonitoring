@@ -318,10 +318,11 @@ class HomeController extends Controller
             ->get()
             ->groupBy('model');
 
-            $krmReciving =  DB::table('inventory_items')
-            ->where('inventory_id', '662778516313de134a06c159')
-            ->where('receiving_date', '>=', Carbon::create(2024, 8, 1))
-            ->sum('qty');
+            $krmReciving = DB::table('rules')
+            ->where('rule_name', 'krmCNI')
+            ->value('rule_value'); // Use `value` to fetch a single column directly as a scalar value
+
+        $krmReciving = (int) $krmReciving;
 
         $variantCodeQuantitiesCNI = DB::table('inventories')
             ->select('name', DB::raw('SUM(qty) as total_qty'))
@@ -821,7 +822,7 @@ public function detailsCKDCNI($date)
     $comparisonData = DB::table('inventory_comparison')
     ->where('id_location', '6582ef8060c9390d890568d4')
     ->where(function ($query) use ($fullDate) {
-        $query->whereDate('receiving_date', '=', $fullDate)
+        $query->whereDate('updated_at', '=', $fullDate)
             ->orWhereDate('planned_receiving_date', '=', $fullDate);
     })
     ->where('item_name', '!=', 'Auto-generated')  // Exclude items with item_name "Auto-generated"

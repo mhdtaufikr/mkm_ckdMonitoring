@@ -78,10 +78,11 @@
                                                                 <option value="{{ $item['product']['code'] }}"
                                                                     data-name="{{ $item['product']['name'] }}"
                                                                     data-qty="{{ $item['qty'] }}"
-                                                                    data-remarks="{{ $item['product']['default_unit'] }}">
+                                                                    data-remarks="{{ $item['product']['default_unit'] ?? 'pcs' }}">
                                                                     {{ $item['product']['code'] }}
                                                                 </option>
                                                             @endforeach
+
                                                         </select>
                                                     </td>
                                                     <td><input type="text" name="delivery_note_details[0][part_name]" class="form-control part_name" readonly /></td>
@@ -211,7 +212,12 @@
             '<td><select name="delivery_note_details['+i+'][part_no]" class="form-control chosen-select part_no" required>'+
             '<option value="">Select Part No</option>'+
             '@foreach($accumulatedItems as $item)'+
-            '<option value="{{ $item['product']['code'] }}" data-name="{{ $item['product']['name'] }}" data-qty="{{ $item['qty'] }}" data-lotno="{{ $item['lot_no'] }}" data-remarks="{{ $item['product']['default_unit'] }}">{{ $item['product']['code'] }}</option>'+
+            '<option value="{{ $item['product']['code'] }}" ' +
+'data-name="{{ $item['product']['name'] }}" ' +
+'data-qty="{{ $item['qty'] }}" ' +
+'data-lotno="{{ $item['lot_no'] }}" ' +
+'data-remarks="{{ $item['product']['default_unit'] ?? 'pcs' }}">' +
+'{{ $item['product']['code'] }}</option>'+
             '@endforeach'+
             '</select></td>'+
             '<td><input type="text" name="delivery_note_details['+i+'][part_name]" class="form-control part_name" readonly /></td>'+

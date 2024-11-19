@@ -153,19 +153,7 @@ class DeliveryNoteController extends Controller
 
 public function ckdStampingSubmit(Request $request)
 {
-    // Validate the request data
-    $request->validate([
-        'dn_id' => 'required|exists:delivery_notes,id',
-        'delivery_note_details.*.part_no' => 'required|string|max:50',
-        'delivery_note_details.*.part_name' => 'required|string|max:255',
-        'delivery_note_details.*.qty' => 'required|integer|min:1',
-        'delivery_note_details.*.remarks' => 'nullable|string|max:255',
-        'delivery_note_details.*.lot_no' => 'nullable|string|max:50',  // Added validation for lot_no
-        'manual_delivery_note_details.*.part_no' => 'nullable|string|max:50',
-        'manual_delivery_note_details.*.part_name' => 'nullable|string|max:255',
-        'manual_delivery_note_details.*.qty' => 'nullable|integer|min:1',
-        'manual_delivery_note_details.*.remarks' => 'nullable|string|max:255',
-    ]);
+
 
     // Retrieve the Delivery Note ID
     $dn_id = $request->input('dn_id');
