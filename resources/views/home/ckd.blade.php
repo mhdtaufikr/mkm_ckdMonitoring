@@ -1365,21 +1365,20 @@ const trendData = daysOfMonth.map((date, index) => {
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
-
-
         const itemCodeQuantities = @json($itemCodeQuantities);
         const month = new Date().toLocaleString('default', { month: 'long' });
 
         if (typeof itemCodeQuantities === 'object') {
             Object.keys(itemCodeQuantities).forEach((groupIndex) => {
-
-
                 const group = itemCodeQuantities[groupIndex];
 
                 const itemCodes = group.map(item => item.code);
                 const quantities = group.map(item => item.qty);
                 const itemIds = group.map(item => item._id); // Add this line to get item IDs
 
+                console.log("Item Codes:", itemCodes);
+                console.log("Quantities:", quantities);
+                console.log("Item IDs:", itemIds); // Ensure these arrays are correctly populated
 
                 const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
                 const myChart = new Chart(ctx, {
@@ -1432,14 +1431,24 @@ const trendData = daysOfMonth.map((date, index) => {
                             }
                         },
                         onClick: (e, elements) => {
-
                             if (elements.length > 0) {
                                 const chart = elements[0].chart;
-                                const index = elements[0].index;
-                                const itemId = itemIds[index]; // Get the item ID for the clicked bar
-                                const url = `/inventory/${itemId}/details`;
-                                window.open(url, '_blank');
 
+                                // Access the correct index value
+                                const index = elements[0]._index;  // Use _index instead of index
+
+                                console.log("Clicked element _index:", index); // Log the correct index value
+                                console.log("Clicked element details:", elements[0]); // Log the clicked element's data
+
+                                // Ensure that the index is valid for itemIds array
+                                if (index >= 0 && index < itemIds.length) {
+                                    const itemId = itemIds[index]; // Get the item ID for the clicked bar
+                                    console.log("Item ID:", itemId); // Log the itemId for debugging
+                                    const url = `/inventory/${itemId}/details`;
+                                    window.open(url, '_blank');
+                                } else {
+                                    console.error("Invalid index:", index, "Item IDs length:", itemIds.length);
+                                }
                             }
                         }
                     }
@@ -1450,6 +1459,7 @@ const trendData = daysOfMonth.map((date, index) => {
         }
     });
 </script>
+
 
 
 <script>
