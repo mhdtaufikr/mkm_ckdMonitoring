@@ -1375,6 +1375,10 @@ const trendData = daysOfMonth.map((date, index) => {
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
+        // Laravel route dynamically generated with a placeholder for item ID
+        const inventoryDetailsRoute = "{{ route('inventory.details', ['id' => ':id']) }}";
+
+        // Retrieve itemCodeQuantities data passed from the controller
         const itemCodeQuantities = @json($itemCodeQuantities);
         const month = new Date().toLocaleString('default', { month: 'long' });
 
@@ -1384,12 +1388,13 @@ const trendData = daysOfMonth.map((date, index) => {
 
                 const itemCodes = group.map(item => item.code);
                 const quantities = group.map(item => item.qty);
-                const itemIds = group.map(item => item._id); // Add this line to get item IDs
+                const itemIds = group.map(item => item._id); // Array of item IDs
 
                 console.log("Item Codes:", itemCodes);
                 console.log("Quantities:", quantities);
-                console.log("Item IDs:", itemIds); // Ensure these arrays are correctly populated
+                console.log("Item IDs:", itemIds);
 
+                // Create the chart
                 const ctx = document.getElementById(`item-code-quantity-chart-${groupIndex}`).getContext('2d');
                 const myChart = new Chart(ctx, {
                     type: 'bar',
@@ -1398,7 +1403,7 @@ const trendData = daysOfMonth.map((date, index) => {
                         datasets: [{
                             label: 'Quantity',
                             data: quantities,
-                            backgroundColor: 'rgba(54, 162, 235, 0.8)', // Increase opacity
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
                             borderColor: 'rgba(54, 162, 235, 1)',
                             borderWidth: 1
                         }]
@@ -1440,34 +1445,30 @@ const trendData = daysOfMonth.map((date, index) => {
                                 }
                             }
                         },
-                         // Pass the Laravel route with a placeholder to JavaScript
-
-
-                        // Event listener for chart bar click
                         onClick: (e, elements) => {
                             if (elements.length > 0) {
-                                const inventoryDetailsRoute = "{{ route('inventory.details', ['id' => ':id']) }}";
-                                const chart = elements[0].chart;
-
-                                // Access the correct index value
+                                // Access the clicked bar index
                                 const index = elements[0]._index;
 
-                                console.log("Clicked element _index:", index); // Log the correct index value
-                                console.log("Clicked element details:", elements[0]); // Log the clicked element's data
+                                console.log("Clicked element _index:", index);
+                                console.log("Clicked element details:", elements[0]);
 
-                                // Ensure that the index is valid for itemIds array
+                                // Ensure that the index is valid for the itemIds array
                                 if (index >= 0 && index < itemIds.length) {
-                                    const itemId = itemIds[index]; // Get the item ID for the clicked bar
-                                    console.log("Item ID:", itemId); // Log the itemId for debugging
+                                    const itemId = itemIds[index]; // Get the corresponding item ID
+                                    console.log("Item ID:", itemId);
 
                                     // Replace the placeholder with the actual itemId
                                     const url = inventoryDetailsRoute.replace(':id', itemId);
-                                    window.open(url, '_blank'); // Open the dynamically generated URL
+                                    console.log("Redirect URL:", url);
+
+                                    // Open the dynamically generated URL in a new tab
+                                    window.open(url, '_blank');
                                 } else {
                                     console.error("Invalid index:", index, "Item IDs length:", itemIds.length);
                                 }
                             }
-                        };
+                        }
                     }
                 });
             });
@@ -1476,6 +1477,7 @@ const trendData = daysOfMonth.map((date, index) => {
         }
     });
 </script>
+
 
 
 
