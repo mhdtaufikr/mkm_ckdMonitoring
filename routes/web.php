@@ -41,8 +41,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home/l305', [HomeController::class, 'l305'])->name('checksheet.l305');
     Route::get('/home/cvcL404', [HomeController::class, 'cvcL404'])->name('checksheet.cvcL404');
     Route::get('/home/test', [HomeController::class, 'test']);
-    Route::get('/details-page/{date}', [HomeController::class, 'detailCKD']);
-    Route::get('/details-page/cni/{date}', [HomeController::class, 'detailsCKDCNI']);
+    Route::get('/details-page/{date}', [HomeController::class, 'detailCKD'])->name('details-page');
+    Route::get('/details-page/cni/{date}', [HomeController::class, 'detailsCKDCNI'])->name('detailsCKDCNI');
+
 
 
     //Dropdown Controller
@@ -69,7 +70,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inventory/ckd', [InventoryController::class, 'indexCKD'])->name('inventory.ckd');
     Route::get('/inventory/cni', [InventoryController::class, 'indexCNI'])->name('inventory.cni');
     Route::post('/inventory/planned/update/bulk', [InventoryController::class, 'updatePlanned'])->name('update.bulk');
-    Route::get('/inventory/raw-material', [InventoryController::class, 'index'])->name('inventory.index');;
+    Route::get('/inventory/raw-material', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/{id}/details', [InventoryController::class, 'show'])->name('inventory.details');
     Route::post('/inventory/planned/upload', [InventoryController::class, 'uploadPlanned'])->name('inventory.planned.upload');
     Route::post('/inventory/planned/upload/ckd', [InventoryController::class, 'uploadPlannedCKD'])->name('inventory.planned.upload.ckd');

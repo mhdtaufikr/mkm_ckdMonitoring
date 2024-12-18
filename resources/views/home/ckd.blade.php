@@ -384,16 +384,21 @@
                             });
                         });
 
+                        // Pass the route URL from Blade to JavaScript using route name
+                            var detailsPageRoute = "{{ route('details-page', ['date' => ':date']) }}";
+
                         // Add click event to actualSeries columns
                         actualSeries.columns.template.events.on("click", function(ev) {
                             var date = ev.target.dataItem.dataContext.date;
-                            window.open('/details-page/' + date, '_blank');
+                            var url = detailsPageRoute.replace(':date', date); // Replace placeholder with actual date
+                            window.open(url, '_blank');
                         });
 
                         // Add click event to planSeries columns
                         planSeries.columns.template.events.on("click", function(ev) {
                             var date = ev.target.dataItem.dataContext.date;
-                            window.open('/details-page/' + date, '_blank');
+                            var url = detailsPageRoute.replace(':date', date); // Replace placeholder with actual date
+                            window.open(url, '_blank');
                         });
 
                         // Calculate Trend Line
@@ -1162,17 +1167,22 @@ const trendData = daysOfMonth.map((date, index) => {
             trendLineSeries.data.setAll(trendData);
             trendLineSeries.strokes.template.setAll({ strokeWidth: 3, strokeDasharray: [5, 5] });
 
+            // Generate the route dynamically from Blade
+            const detailsPageRouteCNI = "{{ route('detailsCKDCNI', ['date' => ':date']) }}";
+
             // Add click events for actual and plan series
             actualSeries.columns.template.events.on("click", function(ev) {
                 const date = ev.target.dataItem.dataContext.date;
                 const fullDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                window.open(`/details-page/cni/${fullDate}`, '_blank');
+                const url = detailsPageRouteCNI.replace(':date', fullDate); // Replace placeholder with full date
+                window.open(url, '_blank');
             });
 
             planSeries.columns.template.events.on("click", function(ev) {
                 const date = ev.target.dataItem.dataContext.date;
                 const fullDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-                window.open(`/details-page/cni/${fullDate}`, '_blank');
+                const url = detailsPageRouteCNI.replace(':date', fullDate); // Replace placeholder with full date
+                window.open(url, '_blank');
             });
 
             chart.set("cursor", am5xy.XYCursor.new(root, {
@@ -1430,12 +1440,17 @@ const trendData = daysOfMonth.map((date, index) => {
                                 }
                             }
                         },
+                         // Pass the Laravel route with a placeholder to JavaScript
+
+
+                        // Event listener for chart bar click
                         onClick: (e, elements) => {
                             if (elements.length > 0) {
+                                const inventoryDetailsRoute = "{{ route('inventory.details', ['id' => ':id']) }}";
                                 const chart = elements[0].chart;
 
                                 // Access the correct index value
-                                const index = elements[0]._index;  // Use _index instead of index
+                                const index = elements[0]._index;
 
                                 console.log("Clicked element _index:", index); // Log the correct index value
                                 console.log("Clicked element details:", elements[0]); // Log the clicked element's data
@@ -1444,13 +1459,15 @@ const trendData = daysOfMonth.map((date, index) => {
                                 if (index >= 0 && index < itemIds.length) {
                                     const itemId = itemIds[index]; // Get the item ID for the clicked bar
                                     console.log("Item ID:", itemId); // Log the itemId for debugging
-                                    const url = `/inventory/${itemId}/details`;
-                                    window.open(url, '_blank');
+
+                                    // Replace the placeholder with the actual itemId
+                                    const url = inventoryDetailsRoute.replace(':id', itemId);
+                                    window.open(url, '_blank'); // Open the dynamically generated URL
                                 } else {
                                     console.error("Invalid index:", index, "Item IDs length:", itemIds.length);
                                 }
                             }
-                        }
+                        };
                     }
                 });
             });
