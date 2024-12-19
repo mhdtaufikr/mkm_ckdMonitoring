@@ -127,7 +127,10 @@ class DeliveryNoteController extends Controller
 
            // Extract "AAG" from the 'code', e.g., "ME412734-AAG"
             $codeParts = explode('-', $firstItem['code']);
+            if (preg_match('/([A-Z]{3}-\d{2})(?=-\d+$)/', $firstItem['serial_number'], $matches)) {
+                $result = $matches[0]; // Menangkap "AAH-73"
 
+            }
             // Ensure that there's a part after the hyphen
             if (count($codeParts) >= 2) {
                 $lotNo = $codeParts[1]; // "AAG" is the part after the hyphen
@@ -137,7 +140,7 @@ class DeliveryNoteController extends Controller
             }
 
             // Add 'lot_no' to the item
-            $firstItem['lot_no'] = $lotNo; // Add 'lot_no' as "AAG"
+            $firstItem['lot_no'] = $result; // Add 'lot_no' as "AAG"
 
 
             return $firstItem;
@@ -145,7 +148,6 @@ class DeliveryNoteController extends Controller
     } else {
         $accumulatedItems = collect(); // Empty collection if API fails
     }
-
     return view('delivery.ckdStamping.detail', compact('getHeader', 'accumulatedItems'));
 }
 
