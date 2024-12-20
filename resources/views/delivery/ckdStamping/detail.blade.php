@@ -75,7 +75,7 @@
                                                         <select name="delivery_note_details[0][part_no]" class="form-control chosen-select part_no" required>
                                                             <option value="">Select Part No</option>
                                                             @foreach($accumulatedItems as $item)
-                                                                <option value="{{ $item['product']['code'] }}"
+                                                                <option value="{{ $item['unique_id'] }}"
                                                                     data-name="{{ $item['product']['name'] }}"
                                                                     data-qty="{{ $item['qty'] }}"
                                                                     data-lotno="{{ $item['lot_no'] }}"
@@ -84,6 +84,7 @@
                                                                 </option>
                                                             @endforeach
                                                         </select>
+
 
                                                     </td>
                                                     <td><input type="text" name="delivery_note_details[0][part_name]" class="form-control part_name" readonly /></td>
@@ -152,145 +153,128 @@
     </div>
 </main>
 
-<!-- JavaScript to Handle Form Validation and Checkbox Logic -->
 <script type="text/javascript">
-   $(document).ready(function() {
-    var j = 0;
+    $(document).ready(function() {
+        let selectedUniqueIds = new Set(); // Track selected unique IDs
+        var i = 0;
 
-    // Add row to Manual Entry Table
-    $("#addManual").click(function() {
-        ++j;
-        $("#manualEntryTable").append('<tr><td>'+(j+1)+'</td>'+
-            '<td><input type="text" name="manual_delivery_note_details['+j+'][part_no]" class="form-control part_no_manual" /></td>'+
-            '<td><input type="text" name="manual_delivery_note_details['+j+'][part_name]" class="form-control part_name_manual" /></td>'+
-            '<td><input type="number" name="manual_delivery_note_details['+j+'][qty]" class="form-control qty_manual" /></td>'+
-            '<td><input type="text" name="manual_delivery_note_details['+j+'][remarks]" class="form-control remarks_manual" /></td>'+
-            '<td><input type="text" name="manual_delivery_note_details['+j+'][lot_no]" class="form-control lot_no_manual" readonly /></td>'+
-            '<td><button type="button" class="btn btn-danger btn-sm remove-manual-tr">Remove</button></td></tr>');
-    });
-
-    // Remove row from Manual Entry Table
-    $(document).on('click', '.remove-manual-tr', function() {
-        $(this).parents('tr').remove();
-    });
-
-    // Initialize Chosen
-    $('.chosen-select').chosen({ width: "100%" });
-
-    var i = 0;
-
-    function updatePartNoOptions() {
-        // Get all selected part numbers
-        let selectedPartNos = [];
-        $('.part_no').each(function() {
-            if ($(this).val()) {
-                selectedPartNos.push($(this).val());
-            }
-        });
-
-        // Update each select element's options
-        $('.part_no').each(function() {
-            var currentSelect = $(this);
-            currentSelect.find('option').each(function() {
-                var optionValue = $(this).val();
-                if (optionValue && selectedPartNos.includes(optionValue)) {
-                    if (currentSelect.val() === optionValue) {
-                        $(this).prop('disabled', false); // Keep selected option enabled
-                    } else {
-                        $(this).prop('disabled', true); // Disable selected options in other selects
-                    }
-                } else {
-                    $(this).prop('disabled', false); // Enable all other options
-                }
-            });
-            currentSelect.trigger("chosen:updated"); // Update Chosen with the new disabled options
-        });
-    }
-
-    $("#add").click(function() {
-        ++i;
-        $("#dynamicTable").append('<tr><td>'+(i+1)+'</td>'+
-            '<td><select name="delivery_note_details['+i+'][part_no]" class="form-control chosen-select part_no" required>'+
-            '<option value="">Select Part No</option>'+
-            '@foreach($accumulatedItems as $item)'+
-            '<option value="{{ $item['product']['code'] }}" ' +
-            'data-name="{{ $item['product']['name'] }}" ' +
-            'data-qty="{{ $item['qty'] }}" ' +
-            'data-lotno="{{ $item['lot_no'] }}" ' +
-            'data-remarks="{{ $item['product']['default_unit'] ?? 'pcs' }}">' +
-            '{{ $item['product']['code'] }}</option>'+
-            '@endforeach'+
-            '</select></td>'+
-            '<td><input type="text" name="delivery_note_details['+i+'][part_name]" class="form-control part_name" readonly /></td>'+
-            '<td><input type="text" name="delivery_note_details['+i+'][lot_no]" class="form-control lot_no" readonly /></td>'+ // Added Lot No field
-            '<td><input type="number" name="delivery_note_details['+i+'][qty]" class="form-control qty" readonly /></td>'+
-            '<td><input type="text" name="delivery_note_details['+i+'][remarks]" class="form-control remarks" readonly /></td>'+
-            '<td><button type="button" class="btn btn-danger btn-sm remove-tr">Remove</button></td></tr>');
-
-        // Reinitialize Chosen for the new element
+        // Initialize Chosen for the first row
         $('.chosen-select').chosen({ width: "100%" });
 
-        updatePartNoOptions(); // Update options after adding a new row
-    });
+        // Function to update dropdown options dynamically
+        function updatePartNoOptions() {
+            selectedUniqueIds.clear(); // Reset the Set
 
-    $(document).on('click', '.remove-tr', function() {
-        $(this).parents('tr').remove();
-        updatePartNoOptions(); // Update options after removing a row
-    });
-
-    $(document).on('change', '.part_no', function() {
-        var partNo = $(this).val();
-        var row = $(this).closest('tr');
-        var partName = $(this).find(':selected').data('name');
-        var qty = $(this).find(':selected').data('qty');
-        var lotNo = $(this).find(':selected').data('lotno'); // Get lot_no data attribute
-        var remarks = $(this).find(':selected').data('remarks');
-
-        row.find('.part_name').val(partName);
-        row.find('.qty').val(qty);
-        row.find('.lot_no').val(lotNo); // Set lot_no input value
-        row.find('.remarks').val(remarks);
-
-        updatePartNoOptions(); // Update options after changing selection
-    });
-
-    // Handle Checkbox Logic for Additional Parts
-    $('#addAdditionalParts').change(function() {
-        if ($(this).is(':checked')) {
-            $('#additionalPartsSection').show(); // Show the table
-            $('#manualEntryTable .part_no_manual, #manualEntryTable .part_name_manual, #manualEntryTable .qty_manual, #manualEntryTable .remarks_manual').prop('required', true);
-        } else {
-            $('#additionalPartsSection').hide(); // Hide the table
-            $('#manualEntryTable .part_no_manual, #manualEntryTable .part_name_manual, #manualEntryTable .qty_manual, #manualEntryTable .remarks_manual').prop('required', false);
-        }
-    });
-
-    $('#deliveryNoteForm').submit(function(event) {
-        var isValid = true;
-
-        // Check if "Add Additional Parts?" checkbox is checked
-        if ($('#addAdditionalParts').is(':checked')) {
-            // If checkbox is checked, ensure all fields are filled
-            $('#manualEntryTable .part_no_manual').each(function() {
-                if ($(this).val() != '') {
-                    // If part number is filled, check if other fields in the same row are filled
-                    var row = $(this).closest('tr');
-                    row.find('.part_name_manual, .qty_manual, .remarks_manual').each(function() {
-                        if ($(this).val() == '') {
-                            isValid = false;
-                        }
-                    });
+            // Collect all selected unique IDs
+            $(".part_no").each(function() {
+                let uniqueId = $(this).val();
+                if (uniqueId) {
+                    selectedUniqueIds.add(uniqueId);
                 }
             });
 
-            if (!isValid) {
-                event.preventDefault(); // Prevent form submission
-                alert('Please fill out all fields in the Additional Part section.'); // Show alert
-            }
+            // Disable already selected unique IDs in all dropdowns
+            $(".part_no").each(function() {
+                let currentSelect = $(this);
+                currentSelect.find("option").each(function() {
+                    let optionValue = $(this).val();
+                    if (selectedUniqueIds.has(optionValue) && currentSelect.val() !== optionValue) {
+                        $(this).prop("disabled", true); // Disable if already selected elsewhere
+                    } else {
+                        $(this).prop("disabled", false); // Enable otherwise
+                    }
+                });
+                currentSelect.trigger("chosen:updated"); // Update Chosen UI
+            });
         }
-    });
-});
 
+        // Add new row to the table
+        $("#add").click(function() {
+            ++i;
+            $("#dynamicTable").append('<tr><td>' + (i + 1) + '</td>' +
+                '<td><select name="delivery_note_details[' + i + '][part_no]" class="form-control chosen-select part_no" required>' +
+                '<option value="">Select Part No</option>' +
+                '@foreach($accumulatedItems as $item)' +
+                '<option value="{{ $item["unique_id"] }}" ' +
+                'data-name="{{ $item["product"]["name"] }}" ' +
+                'data-qty="{{ $item["qty"] }}" ' +
+                'data-lotno="{{ $item["lot_no"] }}" ' +
+                'data-remarks="{{ $item["product"]["default_unit"] ?? "pcs" }}">' +
+                '{{ $item["product"]["code"] }}</option>' +
+                '@endforeach' +
+                '</select></td>' +
+                '<td><input type="text" name="delivery_note_details[' + i + '][part_name]" class="form-control part_name" readonly /></td>' +
+                '<td><input type="text" name="delivery_note_details[' + i + '][lot_no]" class="form-control lot_no" readonly /></td>' +
+                '<td><input type="number" name="delivery_note_details[' + i + '][qty]" class="form-control qty" readonly /></td>' +
+                '<td><input type="text" name="delivery_note_details[' + i + '][remarks]" class="form-control remarks" readonly /></td>' +
+                '<td><button type="button" class="btn btn-danger btn-sm remove-tr">Remove</button></td></tr>');
+
+            // Reinitialize Chosen for the new dropdown
+            $('.chosen-select').chosen({ width: "100%" });
+
+            updatePartNoOptions(); // Update options after adding a new row
+        });
+
+        // Handle row removal
+        $(document).on('click', '.remove-tr', function() {
+            $(this).closest("tr").remove();
+            updatePartNoOptions(); // Recalculate options after row removal
+        });
+
+        // Handle dropdown change event
+        $(document).on('change', '.part_no', function() {
+            let selectedOption = $(this).find(":selected");
+            let row = $(this).closest("tr");
+
+            row.find(".part_name").val(selectedOption.data("name"));
+            row.find(".qty").val(selectedOption.data("qty"));
+            row.find(".lot_no").val(selectedOption.data("lotno"));
+            row.find(".remarks").val(selectedOption.data("remarks"));
+
+            updatePartNoOptions(); // Recalculate options after selection
+        });
+
+        // Ensure initial row dropdown updates
+        updatePartNoOptions();
+
+        // Handle Checkbox Logic for Additional Parts
+        $('#addAdditionalParts').change(function() {
+            if ($(this).is(':checked')) {
+                $('#additionalPartsSection').show(); // Show the table
+                $('#manualEntryTable .part_no_manual, #manualEntryTable .part_name_manual, #manualEntryTable .qty_manual, #manualEntryTable .remarks_manual').prop('required', true);
+            } else {
+                $('#additionalPartsSection').hide(); // Hide the table
+                $('#manualEntryTable .part_no_manual, #manualEntryTable .part_name_manual, #manualEntryTable .qty_manual, #manualEntryTable .remarks_manual').prop('required', false);
+            }
+        });
+
+        $('#deliveryNoteForm').submit(function(event) {
+            var isValid = true;
+
+            // Check if "Add Additional Parts?" checkbox is checked
+            if ($('#addAdditionalParts').is(':checked')) {
+                // If checkbox is checked, ensure all fields are filled
+                $('#manualEntryTable .part_no_manual').each(function() {
+                    if ($(this).val() != '') {
+                        // If part number is filled, check if other fields in the same row are filled
+                        var row = $(this).closest('tr');
+                        row.find('.part_name_manual, .qty_manual, .remarks_manual').each(function() {
+                            if ($(this).val() == '') {
+                                isValid = false;
+                            }
+                        });
+                    }
+                });
+
+                if (!isValid) {
+                    event.preventDefault(); // Prevent form submission
+                    alert('Please fill out all fields in the Additional Part section.'); // Show alert
+                }
+            }
+        });
+    });
 </script>
+
+
 
 @endsection

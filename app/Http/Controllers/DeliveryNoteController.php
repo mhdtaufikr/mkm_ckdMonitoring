@@ -119,52 +119,40 @@ class DeliveryNoteController extends Controller
             return \Carbon\Carbon::parse($item['updated_at'])->toDateString() === $getHeader->date;
         });
 
-        // Accumulate quantities for items with the same product code
-        $accumulatedItems = $filteredInventoryItems->groupBy('product.code')->map(function ($items, $code) {
-            $firstItem = $items->first();
-            $totalQty = $items->sum('qty'); // Sum quantities for the same product code
-            $firstItem['qty'] = $totalQty;  // Update the quantity to the accumulated value
+        // Process inventory items without grouping by product code
+        $accumulatedItems = $filteredInventoryItems->map(function ($item, $index) {
+            // Extract "AAG" from the 'code', e.g., "ME412734-AAG"
+            $codeParts = explode('-', $item['code']);
 
-           // Extract "AAG" from the 'code', e.g., "ME412734-AAG"
-           $codeParts = explode('-', $firstItem['code']);
-
-           // Enhanced regex to match only the correct pattern
-           if (preg_match('/([A-Z]{3}-\d{3})(?=-\d+$)/', $firstItem['serial_number'], $matches)) {
-
-               $result = $matches[0]; // Captures "ACL-452"
-
-           } else {
-            if (preg_match('/([A-Z]{3}-\d{2})(?=-\d+$)/', $firstItem['serial_number'], $matches)) {
-                $result = $matches[0]; // Menangkap "AAH-73"
-
-            }
-            // Ensure that there's a part after the hyphen
-            if (count($codeParts) >= 2) {
-                $lotNo = $codeParts[1]; // "AAG" is the part after the hyphen
+            // Enhanced regex to match only the correct pattern
+            if (preg_match('/([A-Z]{3}-\d{3})(?=-\d+$)/', $item['serial_number'], $matches)) {
+                $result = $matches[0]; // Captures "ACL-452"
+            } elseif (preg_match('/([A-Z]{3}-\d{2})(?=-\d+$)/', $item['serial_number'], $matches)) {
+                $result = $matches[0]; // Captures "AAH-73"
             } else {
-                // Handle cases where the code doesn't have a hyphen
-                $lotNo = 'Unknown'; // Set a default value if the code doesn't match the expected format
+                $result = 'Unknown'; // Set default value if no match
             }
-
-           }
 
             // Ensure that there's a part after the hyphen
             if (count($codeParts) >= 2) {
                 $lotNo = $codeParts[1]; // "AAG" is the part after the hyphen
             } else {
-                // Handle cases where the code doesn't have a hyphen
                 $lotNo = 'Unknown'; // Set a default value if the code doesn't match the expected format
             }
 
             // Add 'lot_no' to the item
-            $firstItem['lot_no'] = $result; // Add 'lot_no' as "AAG"
+            $item['lot_no'] = $result; // Assign the matched result or "Unknown"
 
+            // Generate a unique ID for each item (use an incrementing index or UUID)
+            $item['unique_id'] = uniqid(); // Generate a unique identifier for the item
 
-            return $firstItem;
-        })->values(); // Reset keys after accumulation
+            return $item;
+        })->values();
+ // Reset keys after accumulation
     } else {
         $accumulatedItems = collect(); // Empty collection if API fails
     }
+
     return view('delivery.ckdStamping.detail', compact('getHeader', 'accumulatedItems'));
 }
 
