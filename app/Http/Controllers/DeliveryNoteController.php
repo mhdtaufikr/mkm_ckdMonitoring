@@ -119,34 +119,37 @@ class DeliveryNoteController extends Controller
             return \Carbon\Carbon::parse($item['updated_at'])->toDateString() === $getHeader->date;
         });
 
-        // Process inventory items without grouping by product code
-        $accumulatedItems = $filteredInventoryItems->map(function ($item, $index) {
-            // Extract "AAG" from the 'code', e.g., "ME412734-AAG"
-            $codeParts = explode('-', $item['code']);
-
-            // Enhanced regex to match only the correct pattern
+        // Process inventory items, grouping by part_no and extracted result
+        $accumulatedItems = $filteredInventoryItems->map(function ($item) {
+            // Extract "AAG" or similar from the serial_number, e.g., "ACL-452"
             if (preg_match('/([A-Z]{3}-\d{3})(?=-\d+$)/', $item['serial_number'], $matches)) {
-                $result = $matches[0]; // Captures "ACL-452"
+                $result = $matches[0];
             } elseif (preg_match('/([A-Z]{3}-\d{2})(?=-\d+$)/', $item['serial_number'], $matches)) {
-                $result = $matches[0]; // Captures "AAH-73"
+                $result = $matches[0];
             } else {
-                $result = 'Unknown'; // Set default value if no match
+                $result = 'Unknown';
             }
 
-            // Ensure that there's a part after the hyphen
-            if (count($codeParts) >= 2) {
-                $lotNo = $codeParts[1]; // "AAG" is the part after the hyphen
-            } else {
-                $lotNo = 'Unknown'; // Set a default value if the code doesn't match the expected format
-            }
+            // Ensure lot_no exists or set a default value
+            $item['lot_no'] = $item['lot_no'] ?? $result;
 
-            // Add 'lot_no' to the item
-            $item['lot_no'] = $result; // Assign the matched result or "Unknown"
-
-            // Generate a unique ID for each item (use an incrementing index or UUID)
-            $item['unique_id'] = uniqid(); // Generate a unique identifier for the item
+            // Add extracted result as a property
+            $item['extracted_result'] = $result;
 
             return $item;
+        })->groupBy(function ($item) {
+            return $item['code'] . '-' . $item['extracted_result']; // Group by part_no and extracted result
+        })->map(function ($groupedItems) {
+            $firstItem = $groupedItems->first();
+
+            // Sum quantities for items with the same part_no and extracted result
+            $totalQty = $groupedItems->sum('qty');
+            $firstItem['qty'] = $totalQty;
+
+            // Generate a unique ID for each item
+            $firstItem['unique_id'] = uniqid();
+
+            return $firstItem;
         })->values();
  // Reset keys after accumulation
     } else {
