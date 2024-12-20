@@ -126,11 +126,28 @@ class DeliveryNoteController extends Controller
             $firstItem['qty'] = $totalQty;  // Update the quantity to the accumulated value
 
            // Extract "AAG" from the 'code', e.g., "ME412734-AAG"
-            $codeParts = explode('-', $firstItem['code']);
+           $codeParts = explode('-', $firstItem['code']);
+
+           // Enhanced regex to match only the correct pattern
+           if (preg_match('/([A-Z]{3}-\d{3})(?=-\d+$)/', $firstItem['serial_number'], $matches)) {
+
+               $result = $matches[0]; // Captures "ACL-452"
+
+           } else {
             if (preg_match('/([A-Z]{3}-\d{2})(?=-\d+$)/', $firstItem['serial_number'], $matches)) {
                 $result = $matches[0]; // Menangkap "AAH-73"
 
             }
+            // Ensure that there's a part after the hyphen
+            if (count($codeParts) >= 2) {
+                $lotNo = $codeParts[1]; // "AAG" is the part after the hyphen
+            } else {
+                // Handle cases where the code doesn't have a hyphen
+                $lotNo = 'Unknown'; // Set a default value if the code doesn't match the expected format
+            }
+
+           }
+
             // Ensure that there's a part after the hyphen
             if (count($codeParts) >= 2) {
                 $lotNo = $codeParts[1]; // "AAG" is the part after the hyphen
