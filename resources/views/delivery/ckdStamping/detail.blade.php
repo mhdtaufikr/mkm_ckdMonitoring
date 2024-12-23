@@ -286,7 +286,77 @@ $("#add").click(function () {
         });
     });
 </script>
+<script>
+    $(document).ready(function () {
+    let j = 0;
 
+    // Add row to Manual Entry Table
+    $("#manualEntryTable").on("click", "#addManual", function () {
+        ++j;
+        $("#manualEntryTable").append('<tr>' +
+            '<td>' + (j + 1) + '</td>' +
+            '<td><input type="text" name="manual_delivery_note_details[' + j + '][part_no]" class="form-control part_no_manual" /></td>' +
+            '<td><input type="text" name="manual_delivery_note_details[' + j + '][part_name]" class="form-control part_name_manual" /></td>' +
+            '<td><input type="number" name="manual_delivery_note_details[' + j + '][qty]" class="form-control qty_manual" /></td>' +
+            '<td><input type="text" name="manual_delivery_note_details[' + j + '][remarks]" class="form-control remarks_manual" /></td>' +
+            '<td>' +
+            '<button type="button" class="btn btn-primary btn-sm add-row">Add</button>' +
+            '<button type="button" class="btn btn-danger btn-sm remove-manual-tr">Remove</button>' +
+            '</td>' +
+            '</tr>');
+    });
+
+    // Remove row from Manual Entry Table
+    $("#manualEntryTable").on("click", ".remove-manual-tr", function () {
+        $(this).closest("tr").remove();
+        renumberRows(); // Update row numbers after deletion
+    });
+
+    // Function to renumber rows
+    function renumberRows() {
+        $("#manualEntryTable tr").each(function (index) {
+            $(this).find("td:first").text(index + 1);
+        });
+    }
+
+    // Handle Checkbox Logic for Additional Parts
+    $("#addAdditionalParts").change(function () {
+        if ($(this).is(":checked")) {
+            $("#additionalPartsSection").show(); // Show the table
+            $("#manualEntryTable .part_no_manual, #manualEntryTable .part_name_manual, #manualEntryTable .qty_manual, #manualEntryTable .remarks_manual").prop("required", true);
+        } else {
+            $("#additionalPartsSection").hide(); // Hide the table
+            $("#manualEntryTable .part_no_manual, #manualEntryTable .part_name_manual, #manualEntryTable .qty_manual, #manualEntryTable .remarks_manual").prop("required", false);
+        }
+    });
+
+    $("#deliveryNoteForm").submit(function (event) {
+        let isValid = true;
+
+        // Check if "Add Additional Parts?" checkbox is checked
+        if ($("#addAdditionalParts").is(":checked")) {
+            // If checkbox is checked, ensure all fields are filled
+            $("#manualEntryTable .part_no_manual").each(function () {
+                if ($(this).val() != "") {
+                    // If part number is filled, check if other fields in the same row are filled
+                    let row = $(this).closest("tr");
+                    row.find(".part_name_manual, .qty_manual, .remarks_manual").each(function () {
+                        if ($(this).val() == "") {
+                            isValid = false;
+                        }
+                    });
+                }
+            });
+
+            if (!isValid) {
+                event.preventDefault(); // Prevent form submission
+                alert("Please fill out all fields in the Additional Part section."); // Show alert
+            }
+        }
+    });
+});
+
+</script>
 
 
 @endsection
