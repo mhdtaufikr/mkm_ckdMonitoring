@@ -164,7 +164,6 @@ class DeliveryNoteController extends Controller
 public function ckdStampingSubmit(Request $request)
 {
 
-
     // Retrieve the Delivery Note ID
     $dn_id = $request->input('dn_id');
 

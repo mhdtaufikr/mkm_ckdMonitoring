@@ -71,26 +71,30 @@
                                             <tbody id="dynamicTable">
                                                 <tr>
                                                     <td>1</td>
-                                                    <td>
-                                                        <select name="delivery_note_details[0][part_no]" class="form-control chosen-select part_no" required>
-                                                            <option value="">Select Part No</option>
-                                                            @foreach($accumulatedItems as $item)
-                                                                <option value="{{ $item['unique_id'] }}"
-                                                                    data-name="{{ $item['product']['name'] }}"
-                                                                    data-qty="{{ $item['qty'] }}"
-                                                                    data-lotno="{{ $item['lot_no'] }}"
-                                                                    data-remarks="{{ $item['product']['default_unit'] ?? 'pcs' }}">
-                                                                    {{ $item['product']['code'] }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
+
+                                                        <td>
+                                                            <select name="delivery_note_details[0][part_no_id]" class="form-control chosen-select part_no" required>
+                                                                <option value="">Select Part No</option>
+                                                                @foreach($accumulatedItems as $item)
+                                                                    <option value="{{ $item['unique_id'] }}"
+                                                                        data-code="{{ $item['code'] }}"
+                                                                        data-name="{{ $item['product']['name'] }}"
+                                                                        data-qty="{{ $item['qty'] }}"
+                                                                        data-lotno="{{ $item['lot_no'] }}"
+                                                                        data-remarks="{{ $item['product']['default_unit'] ?? 'pcs' }}">
+                                                                        {{ $item['code'] }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            <!-- Hidden input to store the actual code -->
+                                                            <input type="hidden" name="delivery_note_details[0][part_no]" class="hidden-part-no" value="">
+                                                        </td>
 
 
-                                                    </td>
-                                                    <td><input type="text" name="delivery_note_details[0][part_name]" class="form-control part_name" readonly /></td>
-                                                    <td><input type="text" name="delivery_note_details[0][qty]" class="form-control lot_no" readonly /></td>
-                                                    <td><input type="number" name="delivery_note_details[0][qty]" class="form-control qty" readonly /></td>
-                                                    <td><input type="text" name="delivery_note_details[0][remarks]" class="form-control remarks" readonly /></td>
+                                                        <td><input type="text" name="delivery_note_details[0][part_name]" class="form-control part_name" readonly /></td>
+                                                        <td><input type="text" name="delivery_note_details[0][lot_no]" class="form-control lot_no" readonly /></td>
+                                                        <td><input type="number" name="delivery_note_details[0][qty]" class="form-control qty" readonly /></td>
+                                                        <td><input type="text" name="delivery_note_details[0][remarks]" class="form-control remarks" readonly /></td>
                                                     <td>
                                                         <button type="button" name="add" id="add" class="btn btn-primary btn-sm">Add</button>
                                                         <button type="button" class="btn btn-danger btn-sm remove-tr">Remove</button>
@@ -187,33 +191,37 @@
                 currentSelect.trigger("chosen:updated"); // Update Chosen UI
             });
         }
+// Add new row to the table
+$("#add").click(function () {
+    ++i;
+    $("#dynamicTable").append('<tr><td>' + (i + 1) + '</td>' +
+        '<td>' +
+        '<select name="delivery_note_details[' + i + '][part_no_id]" class="form-control chosen-select part_no" required>' +
+        '<option value="">Select Part No</option>' +
+        '@foreach($accumulatedItems as $item)' +
+        '<option value="{{ $item["unique_id"] }}" ' +
+        'data-code="{{ $item["code"] }}" ' +
+        'data-name="{{ $item["product"]["name"] }}" ' +
+        'data-qty="{{ $item["qty"] }}" ' +
+        'data-lotno="{{ $item["lot_no"] }}" ' +
+        'data-remarks="{{ $item["product"]["default_unit"] ?? "pcs" }}">' +
+        '{{ $item["product"]["code"] }}</option>' +
+        '@endforeach' +
+        '</select>' +
+        '<input type="hidden" name="delivery_note_details[' + i + '][part_no]" class="hidden-part-no" value="">' +
+        '</td>' +
+        '<td><input type="text" name="delivery_note_details[' + i + '][part_name]" class="form-control part_name" readonly /></td>' +
+        '<td><input type="text" name="delivery_note_details[' + i + '][lot_no]" class="form-control lot_no" readonly /></td>' +
+        '<td><input type="number" name="delivery_note_details[' + i + '][qty]" class="form-control qty" readonly /></td>' +
+        '<td><input type="text" name="delivery_note_details[' + i + '][remarks]" class="form-control remarks" readonly /></td>' +
+        '<td><button type="button" class="btn btn-danger btn-sm remove-tr">Remove</button></td></tr>');
 
-        // Add new row to the table
-        $("#add").click(function() {
-            ++i;
-            $("#dynamicTable").append('<tr><td>' + (i + 1) + '</td>' +
-                '<td><select name="delivery_note_details[' + i + '][part_no]" class="form-control chosen-select part_no" required>' +
-                '<option value="">Select Part No</option>' +
-                '@foreach($accumulatedItems as $item)' +
-                '<option value="{{ $item["unique_id"] }}" ' +
-                'data-name="{{ $item["product"]["name"] }}" ' +
-                'data-qty="{{ $item["qty"] }}" ' +
-                'data-lotno="{{ $item["lot_no"] }}" ' +
-                'data-remarks="{{ $item["product"]["default_unit"] ?? "pcs" }}">' +
-                '{{ $item["product"]["code"] }}</option>' +
-                '@endforeach' +
-                '</select></td>' +
-                '<td><input type="text" name="delivery_note_details[' + i + '][part_name]" class="form-control part_name" readonly /></td>' +
-                '<td><input type="text" name="delivery_note_details[' + i + '][lot_no]" class="form-control lot_no" readonly /></td>' +
-                '<td><input type="number" name="delivery_note_details[' + i + '][qty]" class="form-control qty" readonly /></td>' +
-                '<td><input type="text" name="delivery_note_details[' + i + '][remarks]" class="form-control remarks" readonly /></td>' +
-                '<td><button type="button" class="btn btn-danger btn-sm remove-tr">Remove</button></td></tr>');
+    // Reinitialize Chosen for the new dropdown
+    $('.chosen-select').chosen({ width: "100%" });
 
-            // Reinitialize Chosen for the new dropdown
-            $('.chosen-select').chosen({ width: "100%" });
+    updatePartNoOptions(); // Update options after adding a new row
+});
 
-            updatePartNoOptions(); // Update options after adding a new row
-        });
 
         // Handle row removal
         $(document).on('click', '.remove-tr', function() {
@@ -221,18 +229,22 @@
             updatePartNoOptions(); // Recalculate options after row removal
         });
 
-        // Handle dropdown change event
-        $(document).on('change', '.part_no', function() {
-            let selectedOption = $(this).find(":selected");
-            let row = $(this).closest("tr");
+        $(document).on('change', '.part_no', function () {
+    let selectedOption = $(this).find(":selected");
+    let row = $(this).closest("tr");
 
-            row.find(".part_name").val(selectedOption.data("name"));
-            row.find(".qty").val(selectedOption.data("qty"));
-            row.find(".lot_no").val(selectedOption.data("lotno"));
-            row.find(".remarks").val(selectedOption.data("remarks"));
+    // Populate corresponding fields in the row
+    row.find(".part_name").val(selectedOption.data("name"));
+    row.find(".qty").val(selectedOption.data("qty"));
+    row.find(".lot_no").val(selectedOption.data("lotno"));
+    row.find(".remarks").val(selectedOption.data("remarks"));
 
-            updatePartNoOptions(); // Recalculate options after selection
-        });
+    // Populate the hidden input with the actual part_no (code)
+    row.find(".hidden-part-no").val(selectedOption.data("code"));
+
+    updatePartNoOptions(); // Recalculate options after selection
+});
+
 
         // Ensure initial row dropdown updates
         updatePartNoOptions();
