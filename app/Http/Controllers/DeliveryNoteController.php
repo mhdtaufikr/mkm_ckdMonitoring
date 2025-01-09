@@ -6,18 +6,27 @@ use App\Models\MstLocation;
 use App\Models\DeliveryNoteDetail;
 use Illuminate\Support\Facades\Http;
 use PDF; // Ensure you import the PDF facade
+use Yajra\DataTables\Facades\DataTables;
 
 use Illuminate\Http\Request;
 
 class DeliveryNoteController extends Controller
 {
-    public function ckdStamping()
-    {
-        // You no longer need to fetch all locations here
-        $item = DeliveryNote::get();
+    public function ckdStamping(Request $request)
+{
+    if ($request->ajax()) {
+        $data = DeliveryNote::query()->orderBy('date', 'desc');
 
-        return view('delivery.ckdStamping.index', compact('item'));
+        return DataTables::of($data)
+            ->addColumn('actions', function ($row) {
+                return view('partials.actions', compact('row'))->render();
+            })
+            ->rawColumns(['actions'])
+            ->make(true);
     }
+
+    return view('delivery.ckdStamping.index');
+}
 
     public function getLocations(Request $request)
 {

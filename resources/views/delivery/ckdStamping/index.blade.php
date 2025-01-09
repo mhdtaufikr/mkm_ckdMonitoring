@@ -192,52 +192,37 @@
                                                         <th>Driver License</th>
                                                         <th>Destination</th>
                                                         <th>Date</th>
-                                                        <th>ID Card No</th>
                                                         <th>Transportation</th>
-                                                        <th>Action</th>
+                                                        <th>Actions</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
-                                                    @foreach ($item as $data)
-                                                        <tr>
-                                                            <td>{{ $data->delivery_note_number }}</td>
-                                                            <td>{{ $data->customer_po_number }}</td>
-                                                            <td>{{ $data->order_number }}</td>
-                                                            <td>{{ $data->customer_number }}</td>
-                                                            <td>{{ $data->driver_license }}</td>
-                                                            <td>{{ $data->destination }}</td>
-                                                            <td>{{ $data->date }}</td>
-                                                            <td>{{ $data->id_card_no }}</td>
-                                                            <td>{{ $data->transportation }}</td>
-                                                            <td>
-                                                                 <div class="btn-group">
-                                                                <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                    Actions
-                                                                </button>
-                                                                <ul class="dropdown-menu">
-                                                                    <li>
-                                                                        <a class="dropdown-item" href="{{ route('delivery-note.detail', ['id' => encrypt($data->id)]) }}" title="Details">
-                                                                            <i class="fas fa-info-circle" style="margin-right: 5px;"></i> Details
-                                                                        </a>
-
-                                                                    </li>
-                                                                    <li>
-                                                                        <a href="{{ route('delivery-note.pdf', ['id' => encrypt($data->id)]) }}" class="dropdown-item" title="Generate PDF">
-                                                                            <i class="fas fa-file-pdf" style="margin-right: 5px;"></i> Generate PDF
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                       <!--  <button class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#modal-delete{{ $data->id }}">
-                                                                            <i class="fas fa-trash-alt" style="margin-right: 5px;"></i> Delete
-                                                                        </button> -->
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
+                                                <tbody></tbody>
                                             </table>
+
+                                            <script>
+                                                $(document).ready(function() {
+                                                    $("#tableProduct").DataTable({
+                                                        processing: true,
+                                                        serverSide: true,
+                                                        responsive: true,
+                                                        lengthChange: false,
+                                                        autoWidth: false,
+                                                        ajax: "{{ route('delivery-note.index') }}",
+                                                        columns: [
+                                                            { data: 'delivery_note_number', name: 'delivery_note_number' },
+                                                            { data: 'customer_po_number', name: 'customer_po_number' },
+                                                            { data: 'order_number', name: 'order_number' },
+                                                            { data: 'customer_number', name: 'customer_number' },
+                                                            { data: 'driver_license', name: 'driver_license' },
+                                                            { data: 'destination', name: 'destination' },
+                                                            { data: 'date', name: 'date' },
+                                                            { data: 'transportation', name: 'transportation' },
+                                                            { data: 'actions', name: 'actions', orderable: false, searchable: false },
+                                                        ],
+                                                    });
+                                                });
+                                            </script>
+
                                         </div>
                                     </div>
                                 </div>
@@ -250,39 +235,5 @@
         </div>
     </div>
 </main>
-@foreach ($item as $data)
-<!-- Delete Modal -->
-<div class="modal fade" id="modal-delete{{ $data->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $data->id }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel{{ $data->id }}">Delete Confirmation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the delivery note <strong>{{ $data->delivery_note_number }}</strong>?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form action="{{ route('delivery-note.destroy', $data->id) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-@endforeach
 
-<!-- For Datatables -->
-<script>
-    $(document).ready(function() {
-        var table = $("#tableProduct").DataTable({
-            "responsive": true,
-            "lengthChange": false,
-            "autoWidth": false,
-        });
-    });
-</script>
 @endsection
