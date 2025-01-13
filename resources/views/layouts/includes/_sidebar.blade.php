@@ -52,6 +52,10 @@
                         <a class="nav-link" href="{{url('/delivery/manual')}}">Free Entry</a>
                      </nav>
                  </div>
+                 <a class="nav-link" href="{{ url('/scan/delivery') }}">
+                    <div class="nav-link-icon" style="margin-left: -2px"><i class="fas fa-qrcode"></i></div>
+                    Scan Devliery Note
+                </a>
 
                 @if(\Auth::user()->role === 'Super Admin' || \Auth::user()->role === 'IT')
                  <!-- Sidenav Menu Heading (Master)-->

@@ -7,6 +7,7 @@ use App\Models\DeliveryNoteDetail;
 use Illuminate\Support\Facades\Http;
 use PDF; // Ensure you import the PDF facade
 use Yajra\DataTables\Facades\DataTables;
+use App\Models\DeliveryNoteJourney;
 
 use Illuminate\Http\Request;
 
@@ -336,6 +337,27 @@ public function destroy($id)
     } catch (ModelNotFoundException $e) {
         return redirect()->route('delivery-note.index')->with('failed', 'Delivery note not found.');
     }
+}
+
+public function scan()
+{
+    return view('delivery.scan');
+}
+public function action(Request $request)
+{
+    $getDeliveryNote = DeliveryNote::where('delivery_note_number', $request->delivery_note)->first();
+     // Fetch the delivery note header and details
+     $getHeader = DeliveryNote::find($getDeliveryNote->id);
+     $getDetails = DeliveryNoteDetail::where('dn_id', $getDeliveryNote->id)->get();
+
+     // Check if the delivery note exists
+     if (!$getHeader) {
+         return redirect()->route('delivery-note.index')->with('error', 'Delivery Note not found.');
+     }
+     $getJournal = DeliveryNoteJourney::where('delivery_note_id', $getDeliveryNote->id)->get();
+     // Pass the data to the view
+     return view('delivery.scan.index', compact('getHeader', 'getDetails'));
+
 }
 
 

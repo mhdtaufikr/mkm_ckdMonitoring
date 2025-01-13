@@ -95,5 +95,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/delivery-note/create/manual/{id}', [DeliveryNoteController::class, 'manualCreate'])->name('delivery-note.create.manual');
     Route::get('/delivery-note/detail/{id}', [DeliveryNoteController::class, 'show'])->name('delivery-note.detail');
     Route::delete('/delivery-note/{id}', [DeliveryNoteController::class, 'destroy'])->name('delivery-note.destroy');
+    Route::get('/scan/delivery', [DeliveryNoteController::class, 'scan']);
+    Route::post('/delivery/action', [DeliveryNoteController::class, 'action']);
 
 });

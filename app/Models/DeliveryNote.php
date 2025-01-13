@@ -38,4 +38,8 @@ class DeliveryNote extends Model
     {
         return $this->hasMany(DeliveryNoteDetail::class, 'dn_id', 'id');
     }
+    public function journeys()
+    {
+        return $this->hasMany(DeliveryNoteJourney::class, 'delivery_note_id');
+    }
 }
