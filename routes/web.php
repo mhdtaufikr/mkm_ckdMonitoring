@@ -97,5 +97,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/delivery-note/{id}', [DeliveryNoteController::class, 'destroy'])->name('delivery-note.destroy');
     Route::get('/scan/delivery', [DeliveryNoteController::class, 'scan']);
     Route::post('/delivery/action', [DeliveryNoteController::class, 'action']);
+    Route::get('/delivery/action/{id}', [DeliveryNoteController::class, 'actionID'])->name('delivery.action');
+    Route::post('/delivery-note/approve/{id}', [DeliveryNoteController::class, 'approve'])->name('delivery-note.approve');
+
 
 });

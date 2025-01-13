@@ -41,7 +41,7 @@
                                         <div id="qr-reader-results"></div>
                                     </div>
                                     <div class="d-flex justify-content-center mt-3">
-                                        <input readonly type="text" name="delivery_note" id="qr-value" class="form-control" placeholder="Scan Delivery Note">
+                                        <input type="text" name="delivery_note" id="qr-value" class="form-control" placeholder="Scan Delivery Note">
                                     </div>
 
                                 </div>

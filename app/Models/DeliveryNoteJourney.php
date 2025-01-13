@@ -11,13 +11,7 @@ class DeliveryNoteJourney extends Model
 
     protected $table = 'delivery_note_journeys'; // Table name
 
-    protected $fillable = [
-        'delivery_note_id',
-        'status',
-        'scanned_at',
-        'location',
-        'remarks',
-    ];
+    protected $guarded = ['id'];
 
     // Define relationship with the DeliveryNote model
     public function deliveryNote()

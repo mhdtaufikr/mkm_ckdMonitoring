@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 use PDF; // Ensure you import the PDF facade
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\DeliveryNoteJourney;
+use Auth;
+use DB;
 
 use Illuminate\Http\Request;
 
@@ -345,20 +347,119 @@ public function scan()
 }
 public function action(Request $request)
 {
+
+
+    // Find the DeliveryNote by delivery_note_number
     $getDeliveryNote = DeliveryNote::where('delivery_note_number', $request->delivery_note)->first();
+
+    // Check if the DeliveryNote exists
+    if (!$getDeliveryNote) {
+        return redirect()->back()->with('error', 'Delivery Note not found.');
+    }
+
+    // Redirect to the actionID route with the DeliveryNote ID
+    return redirect()->route('delivery.action', ['id' => $getDeliveryNote->id]);
+}
+
+
+public function actionID($id)
+{
+    $getDeliveryNote = DeliveryNote::where('id', $id)->first();
      // Fetch the delivery note header and details
-     $getHeader = DeliveryNote::find($getDeliveryNote->id);
-     $getDetails = DeliveryNoteDetail::where('dn_id', $getDeliveryNote->id)->get();
+     $getHeader = DeliveryNote::find($id);
+     $getDetails = DeliveryNoteDetail::where('dn_id', $id)->get();
 
      // Check if the delivery note exists
      if (!$getHeader) {
          return redirect()->route('delivery-note.index')->with('error', 'Delivery Note not found.');
      }
-     $getJournal = DeliveryNoteJourney::where('delivery_note_id', $getDeliveryNote->id)->get();
+     $getJournal = DeliveryNoteJourney::where('delivery_note_id', $id)->get();
      // Pass the data to the view
-     return view('delivery.scan.index', compact('getHeader', 'getDetails'));
+     return view('delivery.scan.index', compact('getHeader', 'getDetails','getJournal','getDeliveryNote'));
 
 }
+public function approve(Request $request, $id)
+{
+    $request->validate([
+        'signature' => 'required',
+    ]);
+
+    // Start a database transaction
+    DB::beginTransaction();
+
+    try {
+        // Retrieve the DeliveryNote by ID
+        $deliveryNote = DeliveryNote::find($id);
+
+        if (!$deliveryNote) {
+            return redirect()->back()->with('failed', 'Delivery Note not found.');
+        }
+
+        // Check current journey log for this delivery note
+        $currentLog = DeliveryNoteJourney::where('delivery_note_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Check if the current user has already submitted a log for this status
+        $authUser = auth()->user();
+        $userLogExists = DeliveryNoteJourney::where('delivery_note_id', $id)
+            ->where('status', $currentLog ? $currentLog->status : null)
+            ->where('remarks', 'like', '%' . $authUser->name . '%')
+            ->exists();
+
+        if ($userLogExists) {
+            return redirect()->back()->with('failed', 'You have already submitted this log.');
+        }
+
+        // Define the next status based on the authenticated user's role
+        if ($authUser->name === 'warehouse') {
+            // Ensure the journey starts with warehouse
+            if (!$currentLog && $authUser->name !== 'warehouse') {
+                return redirect()->back()->with('failed', 'The journey must start with "Item Dispatched" from the warehouse.');
+            }
+
+            $nextStatus = 'Item Dispatched';
+            $nextRemarks = 'Dispatched from warehouse';
+        } elseif ($authUser->name === 'security') {
+            if (!$currentLog || $currentLog->status !== 'Item Dispatched') {
+                return redirect()->back()->with('failed', 'The delivery must first be dispatched from the warehouse.');
+            }
+
+            $nextStatus = 'On Delivery';
+            $nextRemarks = 'Security confirmed on delivery';
+        } else {
+            if (!$currentLog || $currentLog->status !== 'On Delivery') {
+                return redirect()->back()->with('failed', 'The delivery must first be marked as on delivery.');
+            }
+
+            $nextStatus = 'Delivered';
+            $nextRemarks = 'Delivered to recipient';
+        }
+
+        // Insert the new log
+        DeliveryNoteJourney::create([
+            'delivery_note_id' => $id,
+            'status' => $nextStatus,
+            'scanned_at' => now(),
+            'location' => $request->input('location', null), // Optional location field
+            'remarks' => $nextRemarks . ' by ' . $authUser->name,
+            'signature' => $request->input('signature'),
+        ]);
+
+        // Commit the transaction
+        DB::commit();
+
+        return redirect()->back()->with('success', "Delivery status updated to '{$nextStatus}'.");
+    } catch (\Exception $e) {
+        // Rollback the transaction if an error occurs
+        DB::rollBack();
+
+        return redirect()->back()->with('failed', 'An error occurred: ' . $e->getMessage());
+    }
+}
+
+
+
 
 
 }
