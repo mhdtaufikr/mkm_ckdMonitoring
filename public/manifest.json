@@ -1,7 +1,7 @@
 {
     "name": "CKD Monitoring",
     "short_name": "CKD",
-    "start_url": "https://apps.ptmkm.co.id/mkm_ckdMonitoring/public/",
+    "start_url": "/",
     "background_color": "#6777ef",
     "description": "CKD Monitoring",
     "display": "fullscreen",
