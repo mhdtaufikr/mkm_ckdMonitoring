@@ -19,7 +19,7 @@ class DeliveryNoteController extends Controller
     public function ckdStamping(Request $request)
 {
     if ($request->ajax()) {
-        $data = DeliveryNote::query()->orderBy('date', 'desc');
+        $data = DeliveryNote::query()->orderBy('created_at', 'desc');
 
         return DataTables::of($data)
             ->addColumn('actions', function ($row) {
@@ -106,6 +106,7 @@ class DeliveryNoteController extends Controller
 
     public function ckdStampingCreate($id)
     {
+        set_time_limit(300); // Menambah batas waktu eksekusi menjadi 5 menit
         $id = decrypt($id);
         $getHeader = DeliveryNote::where('id', $id)->first();
 
