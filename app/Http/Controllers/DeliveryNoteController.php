@@ -10,6 +10,7 @@ use Yajra\DataTables\Facades\DataTables;
 use App\Models\DeliveryNoteJourney;
 use Auth;
 use DB;
+use carbon\Carbon;
 
 use Illuminate\Http\Request;
 
@@ -104,72 +105,82 @@ class DeliveryNoteController extends Controller
 
 
     public function ckdStampingCreate($id)
-{
-    $id = decrypt($id);
-    $getHeader = DeliveryNote::where('id', $id)->first();
-    $location = MstLocation::where('name', $getHeader->destination)->first(); // Here, 'destination' contains the location ID
-    // Fetch data from the API
-    $response = Http::withHeaders([
-        'x-api-key' => '315f9f6eb55fd6db9f87c0c0862007e0615ea467'
-    ])->get('https://api.mile.app/public/v1/warehouse/inventory-item', [
-        'location_id' => $location->_id,
-        'limit' => -1,
-        'page' => 1,
-        'serial_number' => '',
-        'rack' => '',
-        'rack_type' => '',
-        'start_date' => '',
-        'end_date' => ''
-    ]);
+    {
+        $id = decrypt($id);
+        $getHeader = DeliveryNote::where('id', $id)->first();
 
-    // Check API response and filter data by date
-    if ($response->successful()) {
-        $inventoryItems = collect($response->json()['data']);
+        // Optimize location query by using ID instead of name
+        $location = MstLocation::where('name', $getHeader->destination)->first();
 
-        // Filter inventory items to match the date in the delivery_notes table
-        $filteredInventoryItems = $inventoryItems->filter(function ($item) use ($getHeader) {
-            return \Carbon\Carbon::parse($item['updated_at'])->toDateString() === $getHeader->date;
-        });
+        // Set up date parameters
+        $targetDate = $getHeader->date;
+        $startDate = Carbon::parse($targetDate)->startOfDay()->format('Y-m-d H:i:s');
+        $endDate = Carbon::parse($targetDate)->endOfDay()->format('Y-m-d H:i:s');
 
-        // Process inventory items, grouping by part_no and extracted result
-        $accumulatedItems = $filteredInventoryItems->map(function ($item) {
-            // Extract "AAG" or similar from the serial_number, e.g., "ACL-452"
-            if (preg_match('/([A-Z]{3}-\d{3})(?=-\d+$)/', $item['serial_number'], $matches)) {
-                $result = $matches[0];
-            } elseif (preg_match('/([A-Z]{3}-\d{2})(?=-\d+$)/', $item['serial_number'], $matches)) {
-                $result = $matches[0];
-            } else {
-                $result = 'Unknown';
+        $accumulatedItems = collect();
+        $page = 1;
+        $stop = false;
+
+        do {
+            $response = Http::withHeaders([
+                'x-api-key' => '315f9f6eb55fd6db9f87c0c0862007e0615ea467'
+            ])->get('https://api.mile.app/public/v1/warehouse/inventory-item', [
+                'location_id' => $location->_id,
+                'limit' => 10,
+                'page' => $page,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'serial_number' => '',
+                'rack' => '',
+                'rack_type' => ''
+            ]);
+
+            if (!$response->successful()) break;
+
+            $data = $response->json();
+            $currentItems = collect($data['data']);
+
+            foreach ($currentItems as $item) {
+                $itemDate = Carbon::parse($item['updated_at'])->toDateString();
+
+                if ($itemDate === $targetDate) {
+                    $accumulatedItems->push($item);
+                } else {
+                    // Found older item - stop pagination
+                    $stop = true;
+                    break;
+                }
             }
 
-            // Ensure lot_no exists or set a default value
-            $item['lot_no'] = $item['lot_no'] ?? $result;
+            // Check if we should continue
+            if ($stop || !isset($data['next_page_url'])) break;
+            $page++;
 
-            // Add extracted result as a property
-            $item['extracted_result'] = $result;
+        } while (true);
 
-            return $item;
-        })->groupBy(function ($item) {
-            return $item['code'] . '-' . $item['extracted_result']; // Group by part_no and extracted result
-        })->map(function ($groupedItems) {
-            $firstItem = $groupedItems->first();
+        // Process the accumulated items
+        $processedItems = $accumulatedItems->map(function ($item) {
+            // Optimized regex pattern
+            preg_match('/([A-Z]{3}-\d{2,3})(?=-\d+$)/', $item['serial_number'], $matches);
+            $result = $matches[1] ?? 'Unknown';
 
-            // Sum quantities for items with the same part_no and extracted result
-            $totalQty = $groupedItems->sum('qty');
-            $firstItem['qty'] = $totalQty;
+            return array_merge($item, [
+                'lot_no' => $item['lot_no'] ?? $result,
+                'extracted_result' => $result
+            ]);
+        })->groupBy(fn($item) => $item['code'].'-'.$item['extracted_result'])
+          ->map(function ($group) {
+              $first = $group->first();
+              $first['qty'] = $group->sum('qty');
+              $first['unique_id'] = uniqid();
+              return $first;
+          })->values();
 
-            // Generate a unique ID for each item
-            $firstItem['unique_id'] = uniqid();
-
-            return $firstItem;
-        })->values();
- // Reset keys after accumulation
-    } else {
-        $accumulatedItems = collect(); // Empty collection if API fails
+        return view('delivery.ckdStamping.detail', [
+            'getHeader' => $getHeader,
+            'accumulatedItems' => $processedItems
+        ]);
     }
-
-    return view('delivery.ckdStamping.detail', compact('getHeader', 'accumulatedItems'));
-}
 
 
 
