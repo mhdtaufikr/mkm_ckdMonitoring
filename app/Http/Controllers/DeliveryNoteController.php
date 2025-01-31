@@ -159,23 +159,23 @@ class DeliveryNoteController extends Controller
 
         } while (true);
 
-        // Process the accumulated items
+      // Process the accumulated items
         $processedItems = $accumulatedItems->map(function ($item) {
-            // Optimized regex pattern
-            preg_match('/([A-Z]{3}-\d{2,3})(?=-\d+$)/', $item['serial_number'], $matches);
-            $result = $matches[1] ?? 'Unknown';
+            // Extract pattern from refNumber (e.g., "ACR-133" from "407-KTB-PDM-I-2025-ACR-133--")
+            preg_match_all('/[A-Z]{3}-\d{2,3}/', $item['refNumber'], $matches);
+            $result = !empty($matches[0]) ? end($matches[0]) : 'Unknown';
 
             return array_merge($item, [
                 'lot_no' => $item['lot_no'] ?? $result,
                 'extracted_result' => $result
             ]);
         })->groupBy(fn($item) => $item['code'].'-'.$item['extracted_result'])
-          ->map(function ($group) {
-              $first = $group->first();
-              $first['qty'] = $group->sum('qty');
-              $first['unique_id'] = uniqid();
-              return $first;
-          })->values();
+        ->map(function ($group) {
+            $first = $group->first();
+            $first['qty'] = $group->sum('qty');
+            $first['unique_id'] = uniqid();
+            return $first;
+        })->values();
 
         return view('delivery.ckdStamping.detail', [
             'getHeader' => $getHeader,
