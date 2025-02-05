@@ -100,5 +100,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/delivery/action/{id}', [DeliveryNoteController::class, 'actionID'])->name('delivery.action');
     Route::post('/delivery-note/approve/{id}', [DeliveryNoteController::class, 'approve'])->name('delivery-note.approve');
 
-
+/* trial */
 });
